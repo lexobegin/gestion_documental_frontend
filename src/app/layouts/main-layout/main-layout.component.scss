@@ -1,6 +1,5 @@
-@use '../styles' as v;
+@use '../../../styles' as v;
 
-/* Contenedor principal */
 .app-container {
     display: flex;
     flex-direction: column;
@@ -20,7 +19,6 @@ app-topbar {
     z-index: 1000;
 }
 
-/* Contenedor de la sidebar y el contenido */
 .content-wrapper {
     display: flex;
     flex-grow: 1;
@@ -28,7 +26,6 @@ app-topbar {
     height: calc(100vh - v.$topbar-height);
 }
 
-/* Barra lateral fija */
 app-sidebar {
     width: v.$sidebar-width;
     background-color: v.$sidebar-bg;
@@ -38,15 +35,13 @@ app-sidebar {
     left: 0;
     height: calc(100vh - v.$topbar-height);
     z-index: 900;
-    transition: transform 0.3s ease-in-out; /* Cambié la transición a transform */
+    transition: transform 0.3s ease-in-out;
 }
 
-/* Cuando la sidebar está oculta, desplazarse fuera de la pantalla hacia la izquierda */
 .sidebar-hidden {
-    transform: translateX(-100%); /* Mueve la sidebar completamente hacia la izquierda */
+    transform: translateX(-100%);
 }
 
-/* Contenido principal */
 .main-content {
     flex-grow: 1;
     margin-left: v.$sidebar-width;
@@ -57,12 +52,10 @@ app-sidebar {
     transition: margin-left 0.3s ease-in-out;
 }
 
-/* Cuando la sidebar está oculta, desplazar el contenido principal */
 .main-content.shifted {
     margin-left: 0;
 }
 
-/* Botón para mostrar/ocultar la sidebar */
 .toggle-sidebar-btn {
     position: fixed;
     bottom: 20px;

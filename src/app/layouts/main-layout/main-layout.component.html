@@ -1,0 +1,19 @@
+<div class="app-container">
+  <app-topbar></app-topbar>
+
+  <div class="content-wrapper">
+    <app-sidebar
+      [ngClass]="{ 'sidebar-hidden': !sidebarVisible }"
+    ></app-sidebar>
+
+    <div class="main-content" [ngClass]="{ shifted: !sidebarVisible }">
+      <section class="content">
+        <div class="container-fluid">
+          <router-outlet></router-outlet>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <button class="toggle-sidebar-btn" (click)="toggleSidebar()">☰</button>
+</div>

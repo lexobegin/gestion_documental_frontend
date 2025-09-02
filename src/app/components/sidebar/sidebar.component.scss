@@ -1,0 +1,70 @@
+@use '../../../styles.scss' as v;
+
+.sidebar {
+  position: fixed;
+  top: v.$topbar-height;
+  left: 0;
+  width: v.$sidebar-width;
+  height: calc(100vh - v.$topbar-height);
+  background-color: v.$sidebar-bg;
+  color: v.$text-white;
+  padding-top: 20px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+
+    li {
+      margin: 15px 0;
+      
+      a, .menu-toggle {
+        color: v.$text-white;
+        text-decoration: none;
+        padding: 10px 20px;
+        display: block;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        
+        &:hover {
+          background-color: darken(v.$sidebar-bg, 10%);
+        }
+      }
+
+      .menu-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+      }
+
+      .submenu {
+        list-style: none;
+        padding-left: 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+
+        li {
+          margin: 5px 0;
+        }
+      }
+
+      .submenu.open {
+        max-height: 500px; // Ajusta según la cantidad de elementos
+      }
+
+      .menu-toggle span {
+        transition: transform 0.3s ease;
+      }
+
+      .menu-toggle .expanded {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}

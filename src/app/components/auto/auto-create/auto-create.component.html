@@ -1,0 +1,79 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <!-- CABECERA -->
+    <div class="mb-3">
+      <h5 class="mb-0">Crear Auto</h5>
+    </div>
+
+    <!-- ALERTA -->
+    <div
+      *ngIf="mostrarAlerta"
+      class="alert alert-success alert-dismissible fade show"
+      role="alert"
+    >
+      {{ mensajeExito }}
+      <button
+        type="button"
+        class="btn-close"
+        (click)="mostrarAlerta = false"
+      ></button>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form (ngSubmit)="crearAuto()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="marca" class="form-label">Marca</label>
+          <input
+            [(ngModel)]="auto.marca"
+            name="marca"
+            id="marca"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="modelo" class="form-label">Modelo</label>
+          <input
+            [(ngModel)]="auto.modelo"
+            name="modelo"
+            id="modelo"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="anio" class="form-label">Año</label>
+          <input
+            type="number"
+            [(ngModel)]="auto.anio"
+            name="anio"
+            id="anio"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="color" class="form-label">Color</label>
+          <input
+            [(ngModel)]="auto.color"
+            name="color"
+            id="color"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- BOTONES: Guardar + Volver -->
+      <div class="d-flex justify-content-end gap-2">
+        <button routerLink="/autos" type="button" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </button>
+        <button type="submit" class="btn btn-success">
+          <i class="fas fa-save me-1"></i> Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

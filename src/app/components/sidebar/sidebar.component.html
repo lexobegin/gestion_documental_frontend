@@ -1,0 +1,23 @@
+<div class="sidebar">
+  <ul class="sidebar-menu">
+    <li *ngFor="let menu of menus">
+      <!-- Elemento sin submenús -->
+      <ng-container *ngIf="!menu.children?.length; else hasChildren">
+        <a [routerLink]="menu.route">{{ menu.title }}</a>
+      </ng-container>
+
+      <!-- Elemento con submenús -->
+      <ng-template #hasChildren>
+        <div class="menu-toggle" (click)="toggleMenu(menu)">
+          {{ menu.title }}
+          <span [ngClass]="{ expanded: menu.expanded }">▼</span>
+        </div>
+        <ul class="submenu" [ngClass]="{ open: menu.expanded }">
+          <li *ngFor="let child of menu.children">
+            <a [routerLink]="child.route">{{ child.title }}</a>
+          </li>
+        </ul>
+      </ng-template>
+    </li>
+  </ul>
+</div>

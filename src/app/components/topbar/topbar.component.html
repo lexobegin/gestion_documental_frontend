@@ -1,0 +1,19 @@
+<div class="topbar-container">
+  <div class="topbar-logo">
+    <span>{{ title }}</span>
+    <!-- Título de la app -->
+  </div>
+
+  <!-- Icono de tres líneas (hamburger) -->
+  <div class="menu-toggle" (click)="toggleMenu()">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+
+  <!-- Menú desplegable -->
+  <div class="topbar-menu" [class.show]="menuOpen">
+    <!-- Cambié routerLink por un click que llame al método logout() -->
+    <a (click)="logout()" class="menu-item">Salir</a>
+  </div>
+</div>
