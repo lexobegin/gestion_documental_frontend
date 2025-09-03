@@ -29,7 +29,12 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              {
+    "glob": "404.html",
+    "input": "src",
+    "output": "."
+  }
             ],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
