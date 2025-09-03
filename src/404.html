@@ -3,22 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <title>Redirecting...</title>
-    <script type="text/javascript">
-      // Redirect to index.html with the route
-      var path = window.location.pathname;
-      var search = window.location.search;
-      var hash = window.location.hash;
-
-      if (path !== "/") {
-        var newPath =
-          "/gestion_documental_frontend/index.html#!/" + path.slice(1);
-        if (search) newPath += search;
-        if (hash) newPath += hash;
-        window.location.href = newPath;
+    <script>
+      // Redirect to main application with hash routing
+      const path = window.location.pathname;
+      if (path !== "/gestion_documental_frontend/") {
+        const newUrl = "/gestion_documental_frontend/#" + path;
+        window.location.href = newUrl;
       }
     </script>
   </head>
   <body>
-    <p>Redirecting...</p>
+    <p>Redirecting to application...</p>
   </body>
 </html>

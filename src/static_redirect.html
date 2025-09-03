@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script>
+      // Redirect all routes to index.html with hash
+      const basePath = "/gestion_documental_frontend/";
+      const currentPath = window.location.pathname;
+
+      // Remove base path and clean the route
+      let hashPath = currentPath
+        .replace(basePath, "")
+        .replace("/index.html", "");
+      hashPath = hashPath.replace(/^\//, "").replace(/\/$/, "");
+
+      if (hashPath && hashPath !== "index.html" && !hashPath.includes(".")) {
+        window.location.href = basePath + "index.html#/" + hashPath;
+      } else {
+        window.location.href = basePath + "index.html";
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to application...</p>
+  </body>
+</html>
