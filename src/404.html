@@ -1,13 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Gestión documental - Historial Clínico Digital</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+      // Redirect to index.html with the route
+      var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
+
+      if (path !== "/") {
+        var newPath =
+          "/gestion_documental_frontend/index.html#!/" + path.slice(1);
+        if (search) newPath += search;
+        if (hash) newPath += hash;
+        window.location.href = newPath;
+      }
+    </script>
   </head>
   <body>
-    <app-root></app-root>
+    <p>Redirecting...</p>
   </body>
 </html>
