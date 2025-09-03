@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:prod": "ng build --configuration production",
-    "deploy": "npm run build:prod && rm -rf docs && mkdir docs && cp -r dist/gestion_documental_frontend/browser/* docs/ && cp -r dist/gestion_documental_frontend/browser/.* docs/ 2>/dev/null || true && git add docs && git commit -m \"Deploy to GitHub Pages\" && git push origin master"
+    "deploy": "ng build --configuration production && rm -rf docs && mkdir docs && cp -r dist/gestion_documental_frontend/browser/* docs/ && cp -r dist/gestion_documental_frontend/browser/.* docs/ 2>/dev/null || true && git add docs && git commit -m \"Deploy final\" && git push origin master"
   },
   "private": true,
   "dependencies": {
