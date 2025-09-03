@@ -4,11 +4,9 @@
     <meta charset="utf-8" />
     <title>Redirecting...</title>
     <script>
-      // Redirect to main application with hash routing
-      const path = window.location.pathname;
-      if (path !== "/gestion_documental_frontend/") {
-        const newUrl = "/gestion_documental_frontend/#" + path;
-        window.location.href = newUrl;
+      // Redirect simple a la página principal
+      if (window.location.pathname !== "/gestion_documental_frontend/") {
+        window.location.href = "/gestion_documental_frontend/";
       }
     </script>
   </head>
