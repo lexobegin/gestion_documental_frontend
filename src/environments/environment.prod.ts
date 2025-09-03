@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://proyectosi2.duckdns.org:8443',
+  apiUrl: 'https://alex-orellana-dev-xyz.duckdns.org/api',
 };
