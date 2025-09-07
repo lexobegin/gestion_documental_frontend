@@ -1,91 +1,172 @@
-$primary-color: #4caf50;
-$error-color: #f44336;
-$background-color: #d3d3d3; /* Gris suave */
+/* ===== Variables del tema (dentro del componente) ===== */
+:host{
+  --primary: #3b82f6;   /* azul claro */
+  --accent: #0f766e;    /* azul petróleo */
+  --error: #ef4444;     /* rojo para alertas */
+  --text: #1f2937;      /* gris oscuro */
+  --muted: #6b7280;     /* gris medio */
 
+  --card: #ffffff;      /* tarjeta blanca */
+  --bg-start: #e0f2fe;  /* azul pastel */
+  --bg-end: #f0fdf4;    /* verde pastel */
+  --ring: #93c5fd;      /* azul claro resplandor */
 
-$input-border-color: #ccc;
-$input-focus-border-color: $primary-color;
-
-.full-page-container {
-    position: absolute; /* Ocupa toda la pantalla sin restricciones */
-    top: 0; /* Empuja el contenedor al principio de la página */
-    left: 0; /* Empuja el contenedor a la izquierda */
-    width: 100%; /* Ocupa todo el ancho de la página */
-    height: 100%; /* Ocupa toda la altura de la página */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: $background-color;
-  }
-
-.login-container {
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-  margin-top: -100px;
-
-  h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-  }
-
-  form {
-    .form-group {
-      margin-bottom: 15px;
-
-      label {
-        display: block;
-        font-size: 1rem;
-        margin-bottom: 5px;
-        color: #333;
-      }
-
-      input {
-        width: 100%;
-        padding: 10px;
-        font-size: 1rem;
-        border: 1px solid $input-border-color;
-        border-radius: 4px;
-        box-sizing: border-box;
-
-        &:focus {
-          border-color: $input-focus-border-color;
-          outline: none;
-        }
-      }
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: $primary-color;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: darken($primary-color, 10%);
-      }
-
-      &:disabled {
-        background-color: #dcdcdc;
-        cursor: not-allowed;
-      }
-    }
-
-    .error-message {
-      color: $error-color;
-      font-size: 0.875rem;
-      margin-top: 10px;
-      text-align: center;
-    }
-  }
+  --input-bg: #f9fafb;  /* inputs */
+  --input-bd: #d1d5db;
 }
+
+*{ box-sizing: border-box; }
+
+/* Por si librerías externas alteran tipografía/espaciado */
+.page, .card, .field, .submit {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+.page{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg, var(--bg-start, #e8f5f2), var(--bg-end, #f1f7fa)) !important;
+  position:relative;
+  padding:24px;
+}
+
+.bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(43, 182, 115, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.card{
+width: 100%;
+  max-width: 520px;
+  background: #ffffff !important;
+  border: 2px solid rgba(0, 0, 0, 0.06) !important; /* borde gris suave en todo alrededor */
+  border-radius: 16px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+  padding: 32px 28px !important;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Efecto al pasar el mouse (opcional) */
+.card:hover {
+  border-color: var(--primary) !important; /* se pone verde */
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+/* Marca */
+.brand{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.logo{ fill:var(--primary, #2bb673); flex:0 0 auto; } /* el width/height viene del HTML */
+.title h1{ margin:0; font-weight:700; font-size:1.6rem; color:var(--text, #1f2937); }
+.title p{ margin:.25rem 0 0; color:var(--muted, #6b7280); font-size:.95rem; }
+
+/* Sección */
+h2{ margin:14px 0; font-size:1.35rem; color:var(--text, #1f2937); font-weight:700; }
+
+/* ===== Campo con label flotante ===== */
+.field{
+  position:relative;
+  margin-bottom:16px;
+}
+
+.field .icon{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  font-size:18px; opacity:.75; pointer-events:none;
+}
+
+.field input{
+  width:100%;
+  padding:14px 44px 14px 40px !important;
+  border:1.5px solid var(--input-bd, #d1d5db) !important;
+  border-radius:12px !important;
+  font-size:1rem !important;
+  color:var(--text, #1f2937) !important;
+  background:var(--input-bg, #f3f4f6) !important;
+  transition:border-color .15s ease, box-shadow .15s ease;
+  appearance:none;
+}
+
+.field input:focus{
+  outline: none;
+  border-color: var(--accent, #1aa3a3) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring, #7dd3fc) 45%, transparent) !important;
+}
+
+/* Label flotante */
+.field label{
+  position:absolute !important;
+  left:40px; top:50%; transform:translateY(-50%);
+  transition: all .15s ease;
+  color:var(--muted, #6b7280); font-size:.95rem;
+  background:transparent; padding:0 4px;
+  pointer-events:none;
+}
+
+.field input:not(:placeholder-shown) + label,
+.field input:focus + label{
+  top:0 !important;
+  transform: translateY(-50%) scale(.85) !important;
+  background: var(--input-bg, #f3f4f6) !important;
+  color: var(--accent, #1aa3a3) !important;
+  left:36px !important;
+}
+
+/* Botón mostrar/ocultar contraseña */
+.ghost-toggle{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  border:none !important; background:transparent !important;
+  cursor:pointer; font-size:.9rem; color:var(--accent, #1aa3a3);
+  padding:4px 6px; border-radius:8px;
+}
+
+/* Errores */
+.field.invalid input{
+  border-color: var(--error, #e53935) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--error, #e53935) 18%, transparent) !important;
+}
+.error{ display:block; margin-top:6px; font-size:.85rem; color:var(--error, #e53935); }
+
+/* Fila links / checkbox */
+.row{ display:flex; align-items:center; justify-content:space-between; margin:6px 0 16px; }
+.checkbox{ display:inline-flex; align-items:center; gap:8px; user-select:none; }
+.checkbox input{ width:16px; height:16px; accent-color: var(--primary, #2bb673); }
+.link{ color:var(--accent, #1aa3a3) !important; text-decoration:none; font-size:.95rem; }
+.link:hover{ text-decoration:underline; }
+
+/* ===== Botón principal ===== */
+.submit{
+  width:100% !important;
+  padding:12px 14px !important;
+  border:none !important;
+  border-radius:12px !important;
+  background: linear-gradient(135deg, var(--primary, #2bb673), var(--accent, #1aa3a3)) !important;
+  color:#fff !important;
+  font-weight:700 !important;
+  font-size:1rem !important;
+  cursor:pointer !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  appearance:none !important;
+}
+.submit:disabled{ opacity:.7 !important; cursor:not-allowed !important; }
+
+.spinner{ position:relative; padding-left:24px; }
+.spinner::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:16px; height:16px; border-radius:50%;
+  border:2px solid #fff; border-right-color:transparent;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin{ to{ transform: translateY(-50%) rotate(360deg);} }
+
+.server-error{
+  margin-top:12px; color:var(--error, #e53935); text-align:center; font-weight:600;
+}
+
+/* Para que .page no quede “encapsulada” si hay estilos de layout padres */
+:host{ display: contents; }
