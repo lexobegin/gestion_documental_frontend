@@ -3,12 +3,18 @@
 
   <div class="card">
     <div class="brand">
-      <svg class="logo" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+      <svg
+        class="logo"
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        aria-hidden="true"
+      >
         <path d="M11 2h2v6h6v2h-6v6h-2v-6H5V8h6z"></path>
       </svg>
       <div class="title">
         <h1>Historial Médico</h1>
-        <p>Ingreso seguro para profesionales y pacientes</p>
+        <p>Ingreso seguro.</p>
       </div>
     </div>
 
@@ -28,8 +34,12 @@
           (blur)="markTouched('email')"
         />
         <label for="email">Correo electrónico</label>
-        <small class="error" *ngIf="showError('email','email')">Ingresa un correo válido</small>
-        <small class="error" *ngIf="showError('email','required')">El correo es obligatorio</small>
+        <small class="error" *ngIf="showError('email', 'email')"
+          >Ingresa un correo válido</small
+        >
+        <small class="error" *ngIf="showError('email', 'required')"
+          >El correo es obligatorio</small
+        >
       </div>
 
       <!-- Password -->
@@ -53,10 +63,12 @@
           [attr.aria-pressed]="showPassword"
           aria-label="Mostrar u ocultar contraseña"
         >
-          {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+          {{ showPassword ? "Ocultar" : "Mostrar" }}
         </button>
 
-        <small class="error" *ngIf="showError('password','required')">La contraseña es obligatoria</small>
+        <small class="error" *ngIf="showError('password', 'required')"
+          >La contraseña es obligatoria</small
+        >
       </div>
 
       <div class="row">
@@ -64,19 +76,31 @@
           <input type="checkbox" formControlName="remember" />
           <span>Recordarme</span>
         </label>
-        <a class="link" routerLink="/recuperar">¿Olvidaste tu contraseña?</a>
+        <a hidden class="link" routerLink="/recuperar"
+          >¿Olvidaste tu contraseña?</a
+        >
       </div>
 
-      <button class="submit" type="submit" [disabled]="loading || !loginForm.valid">
+      <button
+        class="submit"
+        type="submit"
+        [disabled]="loading || !loginForm.valid"
+      >
         <span *ngIf="!loading">Iniciar sesión</span>
-        <span *ngIf="loading" class="spinner" aria-live="polite">Ingresando…</span>
+        <span *ngIf="loading" class="spinner" aria-live="polite"
+          >Ingresando…</span
+        >
       </button>
 
-      <p *ngIf="errorMessage" class="server-error" role="alert">{{ errorMessage }}</p>
+      <p *ngIf="errorMessage" class="server-error" role="alert">
+        {{ errorMessage }}
+      </p>
     </form>
 
-    <div class="meta">
-      <p>¿No tienes cuenta? <a class="link" routerLink="/registro">Crear una</a></p>
+    <div hidden class="meta">
+      <p>
+        ¿No tienes cuenta? <a class="link" routerLink="/registro">Crear una</a>
+      </p>
     </div>
   </div>
 </div>
