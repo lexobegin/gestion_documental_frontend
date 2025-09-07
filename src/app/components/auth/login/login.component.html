@@ -1,35 +1,82 @@
-<div class="full-page-container">
-  <div class="login-container">
-    <h2>Iniciar Sesión</h2>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">Correo Electrónico</label>
-        <input type="email" id="email" formControlName="email" required />
-        <div
-          *ngIf="loginForm.get('email')?.errors?.['email'] && loginForm.get('email')?.touched"
-          class="error-message"
-        >
-          Por favor ingresa un correo electrónico válido
-        </div>
+<div class="page">
+  <div class="bg-pattern" aria-hidden="true"></div>
+
+  <div class="card">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+        <path d="M11 2h2v6h6v2h-6v6h-2v-6H5V8h6z"></path>
+      </svg>
+      <div class="title">
+        <h1>Historial Médico</h1>
+        <p>Ingreso seguro para profesionales y pacientes</p>
+      </div>
+    </div>
+
+    <h2>Iniciar sesión</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Email -->
+      <div class="field" [class.invalid]="isInvalid('email')">
+        <span class="icon" aria-hidden="true">📧</span>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          required
+          placeholder=" "
+          autocomplete="username"
+          (blur)="markTouched('email')"
+        />
+        <label for="email">Correo electrónico</label>
+        <small class="error" *ngIf="showError('email','email')">Ingresa un correo válido</small>
+        <small class="error" *ngIf="showError('email','required')">El correo es obligatorio</small>
       </div>
 
-      <div class="form-group">
-        <label for="password">Contraseña</label>
+      <!-- Password -->
+      <div class="field" [class.invalid]="isInvalid('password')">
+        <span class="icon" aria-hidden="true">🔒</span>
         <input
-          type="password"
+          [type]="showPassword ? 'text' : 'password'"
           id="password"
           formControlName="password"
           required
+          placeholder=" "
+          autocomplete="current-password"
+          (blur)="markTouched('password')"
         />
+        <label for="password">Contraseña</label>
+
+        <button
+          type="button"
+          class="ghost-toggle"
+          (click)="togglePassword()"
+          [attr.aria-pressed]="showPassword"
+          aria-label="Mostrar u ocultar contraseña"
+        >
+          {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+        </button>
+
+        <small class="error" *ngIf="showError('password','required')">La contraseña es obligatoria</small>
       </div>
 
-      <button type="submit" [disabled]="!loginForm.valid">
-        Iniciar Sesión
+      <div class="row">
+        <label class="checkbox">
+          <input type="checkbox" formControlName="remember" />
+          <span>Recordarme</span>
+        </label>
+        <a class="link" routerLink="/recuperar">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button class="submit" type="submit" [disabled]="loading || !loginForm.valid">
+        <span *ngIf="!loading">Iniciar sesión</span>
+        <span *ngIf="loading" class="spinner" aria-live="polite">Ingresando…</span>
       </button>
 
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
+      <p *ngIf="errorMessage" class="server-error" role="alert">{{ errorMessage }}</p>
     </form>
+
+    <div class="meta">
+      <p>¿No tienes cuenta? <a class="link" routerLink="/registro">Crear una</a></p>
+    </div>
   </div>
 </div>
