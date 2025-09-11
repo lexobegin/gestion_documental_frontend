@@ -21,18 +21,28 @@
 
     li {
       margin: 15px 0;
-      
-      a, .menu-toggle {
+
+      a,
+      .menu-toggle {
         color: v.$text-white;
         text-decoration: none;
         padding: 10px 20px;
         display: block;
         cursor: pointer;
         transition: background-color 0.3s;
-        
-        &:hover {
+        outline: none;
+
+        &:hover,
+        &:focus-visible {
           background-color: darken(v.$sidebar-bg, 10%);
         }
+      }
+
+      /* Enlace activo — usa el color del texto actual */
+      a.active {
+        font-weight: 600;
+        border-left: 3px solid currentColor;
+        background-color: darken(v.$sidebar-bg, 6%);
       }
 
       .menu-toggle {
@@ -40,6 +50,10 @@
         justify-content: space-between;
         align-items: center;
         font-weight: bold;
+        background: transparent;
+        border: 0;
+        width: 100%;
+        text-align: left;
       }
 
       .submenu {
@@ -51,11 +65,16 @@
 
         li {
           margin: 5px 0;
+
+          /* Activo dentro del submenú */
+          a.active {
+            border-left: 3px solid currentColor;
+          }
         }
       }
 
       .submenu.open {
-        max-height: 500px; // Ajusta según la cantidad de elementos
+        max-height: 500px; // ajusta según cantidad
       }
 
       .menu-toggle span {
