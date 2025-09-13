@@ -29,13 +29,13 @@ export class SidebarComponent implements OnInit {
       title: 'Usuarios',
       expanded: false,
       children: [
-        { title: 'Lista de usuarios', route: '/usuarios' },
-        { title: 'Crear usuario',     route: '/usuarios/crear' },
+        { title: 'Usuario', route: '/usuarios' },
+        /*{ title: 'Crear usuario',     route: '/usuarios/crear' },
         { title: 'Roles',             route: '/rol' },
-        { title: 'Permisos',          route: '/permiso' },
+        { title: 'Permisos',          route: '/permiso' },*/
       ],
     },
-    {
+    /*{
       title: 'Módulo',
       expanded: false,
       children: [
@@ -43,7 +43,7 @@ export class SidebarComponent implements OnInit {
         { title: 'CU2', route: '/tarea' },
         { title: 'CU3', route: '/estimacion' },
       ],
-    },
+    },*/
   ];
 
   constructor(private router: Router) {}
@@ -51,7 +51,7 @@ export class SidebarComponent implements OnInit {
   ngOnInit(): void {
     this.syncExpandedWithUrl();
     this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
+      .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe(() => this.syncExpandedWithUrl());
   }
 
@@ -61,9 +61,9 @@ export class SidebarComponent implements OnInit {
 
   private syncExpandedWithUrl() {
     const url = this.router.url;
-    this.menus.forEach(m => {
+    this.menus.forEach((m) => {
       if (m.children?.length) {
-        m.expanded = m.children.some(c => url.startsWith(c.route));
+        m.expanded = m.children.some((c) => url.startsWith(c.route));
       }
     });
   }
