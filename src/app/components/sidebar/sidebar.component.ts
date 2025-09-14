@@ -35,6 +35,15 @@ export class SidebarComponent implements OnInit {
         { title: 'Permisos',          route: '/permiso' },*/
       ],
     },
+
+     {
+      title: 'Especialidades',
+      expanded: false,
+      children: [
+        { title: 'Especialidad', route: '/especialidades' } 
+      ]
+    }
+  ];
     /*{
       title: 'Módulo',
       expanded: false,
@@ -44,7 +53,7 @@ export class SidebarComponent implements OnInit {
         { title: 'CU3', route: '/estimacion' },
       ],
     },*/
-  ];
+  ;
 
   constructor(private router: Router) {}
 

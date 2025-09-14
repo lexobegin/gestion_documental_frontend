@@ -9,7 +9,10 @@ import { AutoUpdateComponent } from './components/auto/auto-update/auto-update.c
 import { UsuarioListComponent } from './components/usuario/usuario-list/usuario-list.component';
 import { UsuarioCreateComponent } from './components/usuario/usuario-create/usuario-create.component';
 import { UsuarioUpdateComponent } from './components/usuario/usuario-update/usuario-update.component';
-
+// Especialidades Alison
+import { EspecialidadListComponent } from './components/especialidades_Alison/list/especialidad-list.component';
+import { EspecialidadCreateComponent } from './components/especialidades_Alison/create/especialidad-create.component';
+import { EspecialidadUpdateComponent } from './components/especialidades_Alison/update-especialiadad/especialidad-update.component';
 
 export const routes: Routes = [
   {
@@ -30,6 +33,12 @@ export const routes: Routes = [
       { path: 'usuarios/crear', component: UsuarioCreateComponent },
       { path: 'usuarios/editar/:id', component: UsuarioUpdateComponent },
 
+      // Especialidades Alison
+      { path: 'especialidades', component: EspecialidadListComponent },
+      { path: 'especialidades/crear', component: EspecialidadCreateComponent },
+      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
+
+    
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

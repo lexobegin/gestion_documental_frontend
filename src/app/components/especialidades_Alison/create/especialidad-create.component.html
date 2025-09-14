@@ -1,0 +1,31 @@
+<div class="container py-4">
+  <h3>Nueva especialidad</h3>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Código</label>
+        <input class="form-control" name="codigo" [(ngModel)]="model.codigo" required maxlength="20" />
+        <div class="invalid-feedback d-block" *ngIf="f.submitted && !model.codigo">Requerido</div>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Nombre</label>
+        <input class="form-control" name="nombre" [(ngModel)]="model.nombre" required maxlength="100" />
+        <div class="invalid-feedback d-block" *ngIf="f.submitted && !model.nombre">Requerido</div>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-control" rows="3" name="descripcion" [(ngModel)]="model.descripcion"></textarea>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      <a class="btn btn-outline-secondary" [routerLink]="['/especialidades']">Cancelar</a>
+      <button class="btn btn-primary" [disabled]="saving">
+        <i class="fa fa-save me-1"></i> Guardar
+      </button>
+    </div>
+  </form>
+</div>
