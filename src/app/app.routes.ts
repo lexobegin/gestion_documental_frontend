@@ -10,6 +10,11 @@ import { UsuarioListComponent } from './components/usuario/usuario-list/usuario-
 import { UsuarioCreateComponent } from './components/usuario/usuario-create/usuario-create.component';
 import { UsuarioUpdateComponent } from './components/usuario/usuario-update/usuario-update.component';
 
+import { RolesListComponent } from './components/roles/roles-list/roles-list.component';
+import { RolesCreateComponent } from './components/roles/roles-create/roles-create.component';
+import { RolesEditComponent } from './components/roles/roles-edit/roles-edit.component';
+import { PermisosCreateComponent } from './components/permisos/permisos-create/permisos-create.component';
+
 
 export const routes: Routes = [
   {
@@ -29,6 +34,14 @@ export const routes: Routes = [
       { path: 'usuarios', component: UsuarioListComponent },
       { path: 'usuarios/crear', component: UsuarioCreateComponent },
       { path: 'usuarios/editar/:id', component: UsuarioUpdateComponent },
+
+      // Roles
+      { path: 'roles', component: RolesListComponent },
+      { path: 'roles/crear', component: RolesCreateComponent },
+      { path: 'roles/editar/:id', component: RolesEditComponent },
+
+      // Permisos
+      { path: 'permisos/crear', component: PermisosCreateComponent },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

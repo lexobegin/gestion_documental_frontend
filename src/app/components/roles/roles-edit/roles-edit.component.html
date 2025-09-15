@@ -1,0 +1,18 @@
+<div class="roles-edit">
+    <h2>Editar Rol</h2>
+    <form>
+        <div>
+            <label for="nombre">Nombre del rol:</label>
+            <input id="nombre" name="nombre" [(ngModel)]="nombre" />
+        </div>
+        <div style="margin-top:1em;">
+            <label>Permisos:</label>
+            <div *ngFor="let permiso of permisos">
+                <input type="checkbox" [checked]="permiso.seleccionado" (change)="togglePermiso(permiso)" />
+                {{ permiso.nombre }}
+            </div>
+        </div>
+        <button type="button" (click)="guardar()" style="margin-top:1em;">Guardar cambios</button>
+    </form>
+    <div *ngIf="mensaje" style="color:green; margin-top:1em;">{{ mensaje }}</div>
+</div>

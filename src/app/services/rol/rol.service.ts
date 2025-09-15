@@ -1,3 +1,5 @@
+// ...existing code...
+// ...existing code...
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -13,7 +15,7 @@ export interface Rol {
 export class RolService {
   private baseUrl = `${environment.apiUrl}/roles/`; // p.ej: http://localhost:8000/api/roles/
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   list(): Observable<Rol[]> {
     const token = localStorage.getItem('token');
@@ -49,5 +51,39 @@ export class RolService {
         return roles.filter(x => typeof x.id === 'number' && !!x.nombre);
       })
     );
+  }
+
+  create(data: { nombre_rol: string; descripcion?: string }): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+    return this.http.post(this.baseUrl, data, { headers });
+  }
+
+  delete(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+    return this.http.delete(this.baseUrl + id + '/', { headers });
+  }
+
+  getRolConPermisos(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+    // Suponiendo que la API responde con { rol: {...}, permisos: [...] }
+    return this.http.get(this.baseUrl + id + '/permisos/', { headers });
+  }
+
+  updatePermisosRol(id: number, permisos: number[]): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+    // Ajusta el método y payload según tu backend (PUT/PATCH/POST)
+    return this.http.put(this.baseUrl + id + '/permisos/', { permisos }, { headers });
   }
 }

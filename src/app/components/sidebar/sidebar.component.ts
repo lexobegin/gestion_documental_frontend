@@ -30,11 +30,15 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         { title: 'Usuario', route: '/usuarios' },
+        { title: 'Roles y Permisos', route: '/roles' },
+
         /*{ title: 'Crear usuario',     route: '/usuarios/crear' },
         { title: 'Roles',             route: '/rol' },
         { title: 'Permisos',          route: '/permiso' },*/
       ],
     },
+
+
     /*{
       title: 'Módulo',
       expanded: false,
@@ -46,7 +50,7 @@ export class SidebarComponent implements OnInit {
     },*/
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     this.syncExpandedWithUrl();
