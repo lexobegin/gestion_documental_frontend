@@ -14,6 +14,8 @@ import { EspecialidadListComponent } from './components/especialidades_Alison/li
 import { EspecialidadCreateComponent } from './components/especialidades_Alison/create/especialidad-create.component';
 import { EspecialidadUpdateComponent } from './components/especialidades_Alison/update-especialiadad/especialidad-update.component';
 
+
+
 export const routes: Routes = [
   {
     path: '',
@@ -38,7 +40,9 @@ export const routes: Routes = [
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
       { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
 
-    
+      
+
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
