@@ -1,0 +1,39 @@
+<div class="roles-list">
+    <div style="text-align: right; margin-bottom: 1em; display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" (click)="irCrearRol()"
+            style="background:#1976d2; color:#fff; border:none; padding:6px 18px; border-radius:4px; font-weight:bold; font-size:16px; box-shadow:0 2px 8px #eee; cursor:pointer;">
+            + Nuevo rol
+        </button>
+        <button type="button" (click)="irCrearPermiso()"
+            style="background:#388e3c; color:#fff; border:none; padding:6px 18px; border-radius:4px; font-weight:bold; font-size:16px; box-shadow:0 2px 8px #eee; cursor:pointer;">
+            + Nuevo permiso
+        </button>
+    </div>
+    <h2>Lista de Roles</h2>
+    <div *ngIf="loading">Cargando roles...</div>
+    <div *ngIf="error">{{ error }}</div>
+    <table *ngIf="!loading && !error" style="width:100%; border-collapse:collapse; box-shadow:0 2px 8px #eee;">
+        <thead style="background:#f5f5f5;">
+            <tr>
+                <th style="padding:8px; border-bottom:1px solid #ddd;">ID</th>
+                <th style="padding:8px; border-bottom:1px solid #ddd;">Nombre</th>
+                <th style="padding:8px; border-bottom:1px solid #ddd;">Descripción</th>
+                <th style="padding:8px; border-bottom:1px solid #ddd;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let rol of roles">
+                <td style="padding:8px; border-bottom:1px solid #eee;">{{ rol.id }}</td>
+                <td style="padding:8px; border-bottom:1px solid #eee;">{{ rol.nombre }}</td>
+                <td style="padding:8px; border-bottom:1px solid #eee;">{{ rol.descripcion || '-' }}</td>
+                <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">
+                    <button (click)="editarRol(rol.id)"
+                        style="margin-right:8px; background:#1976d2; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">Editar</button>
+                    <button (click)="eliminarRol(rol.id)" [disabled]="eliminandoId === rol.id"
+                        style="background:#d32f2f; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div *ngIf="mensaje" style="margin-top:1em; color:green;">{{ mensaje }}</div>
+</div>
