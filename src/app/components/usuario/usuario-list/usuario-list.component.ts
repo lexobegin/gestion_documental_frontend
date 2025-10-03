@@ -80,6 +80,77 @@ export class UsuarioListComponent implements OnInit {
     return u.id;
   }
 
+  /** ===================== Helpers de Rol (mejorados) ===================== */
+
+  /** Normaliza cualquier valor de rol (string | number | object | array) a string en minúsculas */
+  private normalizeRoleValue(v: any): string {
+    if (!v) return '';
+
+    if (typeof v === 'string') return v.toLowerCase().trim();
+
+    if (typeof v === 'number') {
+      const mapNum: Record<number, string> = { 1: 'admin', 2: 'medico', 3: 'paciente' };
+      return mapNum[v] || '';
+    }
+
+    if (Array.isArray(v) && v.length > 0) {
+      return this.normalizeRoleValue(v[0]);
+    }
+
+    if (typeof v === 'object') {
+      // intenta campos comunes de objetos de rol
+      const candidates = [
+        v.name, v.nombre, v.label, v.value, v.slug, v.key,
+        v.role, v.rol, v.tipo, v.code, v.descripcion, v.description
+      ];
+      for (const c of candidates) {
+        const n = this.normalizeRoleValue(c);
+        if (n) return n;
+      }
+      // si solo hay id, intenta mapear
+      if (typeof v.id === 'number') return this.normalizeRoleValue(v.id);
+    }
+
+    return '';
+  }
+
+  /** Devuelve el rol normalizado: 'admin' | 'medico' | 'paciente' | otro */
+  getRole(u: any): string {
+    // 1) Campos directos
+    let r =
+      this.normalizeRoleValue(u?.rol)  ||
+      this.normalizeRoleValue(u?.role) ||
+      this.normalizeRoleValue(u?.tipo);
+
+    // 2) Perfil anidado
+    if (!r) r = this.normalizeRoleValue(u?.profile?.role);
+
+    // 3) Grupos (Django Groups)
+    if (!r) r = this.normalizeRoleValue(u?.groups);
+
+    // 4) Flags
+    if (!r && (u?.is_superuser || u?.is_staff)) r = 'admin';
+
+    // 5) Código numérico directo
+    if (!r && typeof u?.role_id !== 'undefined') r = this.normalizeRoleValue(u.role_id);
+
+    // 6) Default
+    return r || 'paciente';
+  }
+
+  /** Etiqueta amigable para el badge */
+  labelRole(role: string | null | undefined): string {
+    switch ((role || '').toLowerCase()) {
+      case 'admin':    return 'Admin';
+      case 'médico':
+      case 'medico':   return 'Médico';
+      case 'paciente': return 'Paciente';
+      default:         return role ? role : 'Paciente';
+    }
+  }
+
+  /** ===================================================================== */
+
   private extraerError(err: any): string {
     const e = err?.error;
     if (!e) return '';

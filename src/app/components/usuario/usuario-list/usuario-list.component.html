@@ -26,6 +26,7 @@
               <th>Nombre</th>
               <th>Apellido</th>
               <th>Email</th>
+              <th>Tipo</th> <!-- 👈 agregado -->
               <th>Teléfono</th>
               <th>Activo</th>
               <th class="text-end">Acciones</th>
@@ -37,6 +38,19 @@
               <td>{{ u.nombre }}</td>
               <td>{{ u.apellido }}</td>
               <td>{{ u.email }}</td>
+
+              <!-- Columna Tipo usando helpers del .ts -->
+              <td>
+                <span class="badge"
+                      [ngClass]="{
+                        'bg-danger'  : getRole(u) === 'admin',
+                        'bg-primary' : getRole(u) === 'medico',
+                        'bg-secondary': getRole(u) === 'paciente' || !getRole(u)
+                      }">
+                  {{ labelRole(getRole(u)) }}
+                </span>
+              </td>
+
               <td>{{ u.telefono || '—' }}</td>
               <td>
                 <span class="badge" [ngClass]="u.activo ? 'bg-success' : 'bg-secondary'">
