@@ -10,16 +10,14 @@ import { UsuarioListComponent } from './components/usuario/usuario-list/usuario-
 import { UsuarioCreateComponent } from './components/usuario/usuario-create/usuario-create.component';
 import { UsuarioUpdateComponent } from './components/usuario/usuario-update/usuario-update.component';
 // Especialidades Alison
-import { EspecialidadListComponent } from './components/especialidades_Alison/list/especialidad-list.component';
-import { EspecialidadCreateComponent } from './components/especialidades_Alison/create/especialidad-create.component';
-import { EspecialidadUpdateComponent } from './components/especialidades_Alison/update-especialiadad/especialidad-update.component';
-
+import { EspecialidadListComponent } from './components/especialidad/especialidad-list/especialidad-list.component';
+import { EspecialidadCreateComponent } from './components/especialidad/especialidad-create/especialidad-create.component';
+import { EspecialidadUpdateComponent } from './components/especialidad/especialidad-update/especialidad-update.component';
 
 import { RolesListComponent } from './components/roles/roles-list/roles-list.component';
 import { RolesCreateComponent } from './components/roles/roles-create/roles-create.component';
 import { RolesEditComponent } from './components/roles/roles-edit/roles-edit.component';
 import { PermisosCreateComponent } from './components/permisos/permisos-create/permisos-create.component';
-
 
 export const routes: Routes = [
   {
@@ -51,7 +49,10 @@ export const routes: Routes = [
       // Especialidades Alison
       { path: 'especialidades', component: EspecialidadListComponent },
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
-      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
+      {
+        path: 'especialidades/editar/:id',
+        component: EspecialidadUpdateComponent,
+      },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

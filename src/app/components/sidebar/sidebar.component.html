@@ -1,37 +1,20 @@
-<div class="sidebar" role="navigation" aria-label="Menú lateral">
+<div class="sidebar">
   <ul class="sidebar-menu">
     <li *ngFor="let menu of menus">
       <!-- Elemento sin submenús -->
       <ng-container *ngIf="!menu.children?.length; else hasChildren">
-        <a
-          [routerLink]="menu.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
-          {{ menu.title }}
-        </a>
+        <a [routerLink]="menu.route">{{ menu.title }}</a>
       </ng-container>
 
       <!-- Elemento con submenús -->
       <ng-template #hasChildren>
-        <button
-          class="menu-toggle"
-          type="button"
-          (click)="toggleMenu(menu)"
-          [attr.aria-expanded]="menu.expanded"
-        >
+        <div class="menu-toggle" (click)="toggleMenu(menu)">
           {{ menu.title }}
           <span [ngClass]="{ expanded: menu.expanded }">▼</span>
-        </button>
-
+        </div>
         <ul class="submenu" [ngClass]="{ open: menu.expanded }">
           <li *ngFor="let child of menu.children">
-            <a
-              [routerLink]="child.route"
-              routerLinkActive="active"
-            >
-              {{ child.title }}
-            </a>
+            <a [routerLink]="child.route">{{ child.title }}</a>
           </li>
         </ul>
       </ng-template>
