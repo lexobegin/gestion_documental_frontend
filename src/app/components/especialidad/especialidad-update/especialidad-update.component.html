@@ -1,0 +1,163 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-edit me-2"></i>Editar Especialidad
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Estados -->
+          <div *ngIf="cargando && !especialidad" class="text-center mb-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando especialidad...</p>
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button
+              type="button"
+              class="btn-close float-end"
+              (click)="error = undefined"
+            ></button>
+          </div>
+
+          <!-- Formulario -->
+          <form
+            (ngSubmit)="guardar()"
+            #especialidadForm="ngForm"
+            *ngIf="especialidad && !cargando"
+          >
+            <div class="row">
+              <!-- Código -->
+              <div class="col-md-6 mb-3">
+                <label for="codigo" class="form-label">
+                  Código <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="codigo"
+                  name="codigo"
+                  [(ngModel)]="especialidad.codigo"
+                  #codigo="ngModel"
+                  required
+                  maxlength="20"
+                  pattern="[A-Z0-9]+"
+                  [class.is-invalid]="
+                    codigo.invalid && (codigo.dirty || codigo.touched)
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="codigo.errors?.['required']"
+                >
+                  El código es obligatorio
+                </div>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="codigo.errors?.['pattern']"
+                >
+                  Solo se permiten letras mayúsculas y números
+                </div>
+                <div class="form-text">
+                  Código único para identificar la especialidad
+                </div>
+              </div>
+
+              <!-- Nombre -->
+              <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">
+                  Nombre <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombre"
+                  name="nombre"
+                  [(ngModel)]="especialidad.nombre"
+                  #nombre="ngModel"
+                  required
+                  maxlength="100"
+                  [class.is-invalid]="
+                    nombre.invalid && (nombre.dirty || nombre.touched)
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="nombre.errors?.['required']"
+                >
+                  El nombre es obligatorio
+                </div>
+                <div class="form-text">
+                  Nombre completo de la especialidad médica
+                </div>
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-4">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <textarea
+                class="form-control"
+                id="descripcion"
+                name="descripcion"
+                [(ngModel)]="especialidad.descripcion"
+                #descripcion="ngModel"
+                rows="4"
+                maxlength="500"
+                placeholder="Descripción detallada de la especialidad médica..."
+              ></textarea>
+              <div class="form-text">
+                {{ especialidad.descripcion.length || 0 }}/500 caracteres
+              </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="alert alert-info">
+              <h6 class="alert-heading">
+                <i class="fas fa-info-circle me-2"></i>Información
+              </h6>
+              <p class="mb-0 small">
+                ID: <strong>{{ especialidad.id }}</strong> | Creado:
+                <strong>{{ fechaCreacion | date : "medium" }}</strong>
+              </p>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelar()"
+              >
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <div>
+                <button
+                  type="submit"
+                  class="btn btn-primary me-2"
+                  [disabled]="especialidadForm.invalid || enviando"
+                >
+                  <i class="fas fa-save me-1" *ngIf="!enviando"></i>
+                  <i class="fas fa-spinner fa-spin me-1" *ngIf="enviando"></i>
+                  {{ enviando ? "Guardando..." : "Guardar Cambios" }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  (click)="volverALista()"
+                >
+                  <i class="fas fa-list me-1"></i> Volver a la lista
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,18 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { filter } from 'rxjs/operators';
-
-interface ChildItem {
-  title: string;
-  route: string;
-}
-interface MenuItem {
-  title: string;
-  route?: string;
-  expanded?: boolean;
-  children?: ChildItem[];
-}
 
 @Component({
   selector: 'app-sidebar',
@@ -21,8 +9,8 @@ interface MenuItem {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'], // ojo: plural
 })
-export class SidebarComponent implements OnInit {
-  menus: MenuItem[] = [
+export class SidebarComponent {
+  menus = [
     { title: 'Home', route: '/dashboard', expanded: false, children: [] },
 
     {
@@ -32,44 +20,35 @@ export class SidebarComponent implements OnInit {
         { title: 'Usuario', route: '/usuarios' },
         { title: 'Roles y Permisos', route: '/roles' },
         { title: 'Especialidades', route: '/especialidades' },
-        
-        /*{ title: 'Crear usuario',     route: '/usuarios/crear' },
-        { title: 'Roles',             route: '/rol' },
-        { title: 'Permisos',          route: '/permiso' },*/
       ],
     },
-
-  ];
-    /*{
-      title: 'Módulo',
+    {
+      title: 'Agenda Medica',
       expanded: false,
       children: [
-        { title: 'CU1', route: '/autos' },
-        { title: 'CU2', route: '/tarea' },
-        { title: 'CU3', route: '/estimacion' },
+        { title: 'Horario', route: '/dashboard' },
+        { title: 'Paciente', route: '/dashboard' },
       ],
-    },*/
-  ;
+    },
+    {
+      title: 'Historia Clinica',
+      expanded: false,
+      children: [
+        { title: 'Consulta', route: '/dashboard' },
+        { title: 'Citas Medicas', route: '/dashboard' },
+      ],
+    },
+    {
+      title: 'Sistema',
+      expanded: false,
+      children: [
+        { title: 'Bitacora', route: '/dashboard' },
+        { title: 'Backup/Restore', route: '/dashboard' },
+      ],
+    },
+  ];
 
-  constructor(private router: Router) { }
-
-  ngOnInit(): void {
-    this.syncExpandedWithUrl();
-    this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe(() => this.syncExpandedWithUrl());
-  }
-
-  toggleMenu(menu: MenuItem) {
+  toggleMenu(menu: any) {
     menu.expanded = !menu.expanded;
-  }
-
-  private syncExpandedWithUrl() {
-    const url = this.router.url;
-    this.menus.forEach((m) => {
-      if (m.children?.length) {
-        m.expanded = m.children.some((c) => url.startsWith(c.route));
-      }
-    });
   }
 }

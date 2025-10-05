@@ -30,7 +30,7 @@ export class UsuarioCreateComponent implements OnInit {
     email: '',
     telefono: '',
     activo: true,
-    id_rol: null,          // se enviará como number
+    id_rol: null,
     password: '',
     confirmPassword: '',
   };
@@ -39,6 +39,7 @@ export class UsuarioCreateComponent implements OnInit {
   guardando = false;
   error?: string;
   mensaje?: string;
+  submitted = false;
 
   constructor(
     private srv: UsuarioService,
@@ -55,31 +56,60 @@ export class UsuarioCreateComponent implements OnInit {
     this.rolSrv.list().subscribe({
       next: (rs) => {
         this.roles = rs ?? [];
-        // Debug útil
         console.log('Roles cargados:', this.roles);
+
+        // Si solo hay un rol, seleccionarlo automáticamente
+        if (this.roles.length === 1) {
+          this.usuario.id_rol = this.roles[0].id;
+        }
       },
       error: (e) => {
-        console.error(e);
-        this.error = 'No se pudieron cargar los roles';
+        console.error('Error cargando roles:', e);
+        this.error = 'No se pudieron cargar los roles. Intente nuevamente.';
       },
     });
   }
 
   guardar(f: NgForm): void {
+    this.submitted = true;
     this.error = undefined;
     this.mensaje = undefined;
 
-    if (this.guardando) return;          // evita doble envío
-    if (f.invalid) { this.error = 'Revisa los campos requeridos.'; return; }
-    if (!this.usuario.id_rol) { this.error = 'Selecciona un rol.'; return; }
+    // Evita doble envío
+    if (this.guardando) return;
 
-    // Validación de contraseña (mínimo 6 para coincidir con backend)
-    if (!this.usuario.password || this.usuario.password.length < 6) {
-      this.error = 'La contraseña debe tener al menos 6 caracteres.';
+    // Validación básica del formulario
+    if (f.invalid) {
+      this.error =
+        'Por favor, complete todos los campos requeridos correctamente.';
+      this.scrollToError();
       return;
     }
+
+    // Validación de rol
+    if (!this.usuario.id_rol) {
+      this.error = 'Debe seleccionar un rol para el usuario.';
+      this.scrollToError();
+      return;
+    }
+
+    // Validación de contraseña
+    if (!this.usuario.password || this.usuario.password.length < 6) {
+      this.error = 'La contraseña debe tener al menos 6 caracteres.';
+      this.scrollToError();
+      return;
+    }
+
     if (this.usuario.password !== this.usuario.confirmPassword) {
-      this.error = 'Las contraseñas no coinciden';
+      this.error = 'Las contraseñas no coinciden. Por favor, verifique.';
+      this.scrollToError();
+      return;
+    }
+
+    // Validación de email básica
+    if (!this.isValidEmail(this.usuario.email)) {
+      this.error = 'Por favor, ingrese un email válido.';
+      this.scrollToError();
       return;
     }
 
@@ -87,17 +117,22 @@ export class UsuarioCreateComponent implements OnInit {
 
     this.guardando = true;
     this.srv.crear(dto).subscribe({
-      next: () => {
+      next: (usuarioCreado) => {
         this.guardando = false;
-        this.mensaje = 'Usuario creado';
-        // Limpia el formulario y redirige (ajusta a tu preferencia)
-        f.resetForm({ activo: true });
-        this.router.navigate(['/usuarios']);
+        this.mensaje = `Usuario "${usuarioCreado.nombre} ${usuarioCreado.apellido}" creado exitosamente.`;
+
+        // Redirigir después de 2 segundos
+        setTimeout(() => {
+          this.router.navigate(['/usuarios']);
+        }, 2000);
       },
       error: (err) => {
         console.error('Error al crear usuario:', err);
-        this.error = this.extractBackendError(err) || 'No se pudo crear';
+        this.error =
+          this.extractBackendError(err) ||
+          'No se pudo crear el usuario. Por favor, intente nuevamente.';
         this.guardando = false;
+        this.scrollToError();
       },
     });
   }
@@ -111,32 +146,90 @@ export class UsuarioCreateComponent implements OnInit {
       telefono: u.telefono?.trim() || undefined,
       activo: !!u.activo,
       id_rol: Number(u.id_rol),
-      password: u.password
-      // Si agregas más campos (direccion, fecha_nacimiento, genero), inclúyelos aquí.
+      password: u.password,
     };
-    // Elimina claves vacías/undefined para no ensuciar el body
+
+    // Elimina campos vacíos/undefined
     Object.keys(dto).forEach((k) => {
       const v = dto[k];
-      if (v === undefined || v === '') delete dto[k];
+      if (v === undefined || v === '' || v === null) delete dto[k];
     });
+
+    console.log('DTO a enviar:', dto);
     return dto;
   }
 
-  /** Intenta mostrar un mensaje útil desde DRF (detail o errores por campo) */
+  /** Valida formato de email */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /** Scroll al primer error */
+  private scrollToError(): void {
+    setTimeout(() => {
+      const firstError = document.querySelector('.is-invalid');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  /** Intenta mostrar un mensaje útil desde DRF */
   private extractBackendError(err: any): string {
     const e = err?.error;
-    if (!e) return '';
+    if (!e) return 'Error de conexión. Verifique su internet.';
+
     if (typeof e === 'string') return e;
+
     if (e.detail) return e.detail;
+
     if (typeof e === 'object') {
       const msgs: string[] = [];
+
+      // Mapeo de campos comunes
+      const fieldMap: { [key: string]: string } = {
+        email: 'Email',
+        nombre: 'Nombre',
+        apellido: 'Apellido',
+        password: 'Contraseña',
+        id_rol: 'Rol',
+      };
+
       for (const k of Object.keys(e)) {
         const val = e[k];
-        if (Array.isArray(val)) msgs.push(`${k}: ${val.join(', ')}`);
-        else if (typeof val === 'string') msgs.push(`${k}: ${val}`);
+        const fieldName = fieldMap[k] || k;
+
+        if (Array.isArray(val)) {
+          msgs.push(`${fieldName}: ${val.join(', ')}`);
+        } else if (typeof val === 'string') {
+          msgs.push(`${fieldName}: ${val}`);
+        }
       }
-      return msgs.join(' | ');
+
+      return msgs.length > 0
+        ? msgs.join(' | ')
+        : 'Error desconocido del servidor.';
     }
-    return '';
+
+    return 'Error inesperado. Por favor, contacte al administrador.';
+  }
+
+  // Helper para verificar si las contraseñas coinciden (para uso en template)
+  get passwordsMatch(): boolean {
+    return this.usuario.password === this.usuario.confirmPassword;
+  }
+
+  // Helper para verificar si el formulario es válido
+  get formValid(): boolean {
+    return (
+      !this.guardando &&
+      this.usuario.nombre.length >= 2 &&
+      this.usuario.apellido.length >= 2 &&
+      this.isValidEmail(this.usuario.email) &&
+      this.usuario.id_rol !== null &&
+      this.usuario.password.length >= 6 &&
+      this.passwordsMatch
+    );
   }
 }

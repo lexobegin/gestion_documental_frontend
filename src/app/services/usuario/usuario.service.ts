@@ -1,49 +1,56 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs'; // <-- AGREGAR map aquí
 import { environment } from '../../../environments/environment';
-import { Usuario } from '../../models/usuario/usuario.model';
-
-/** Payload para crear (el back exige id_rol y password) */
-export interface CreateUsuarioDto {
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono?: string;
-  activo: boolean;
-  id_rol: number;
-  password: string; // requerido para crear
-}
-
-/** Payload para actualizar; password es opcional (si viene, se setea) */
-export interface UpdateUsuarioDto {
-  nombre?: string;
-  apellido?: string;
-  email?: string;
-  telefono?: string;
-  activo?: boolean;
-  id_rol?: number;
-  password?: string; // opcional para update
-}
-
-/** (Opcional) Helper solo para cambiar contraseña */
-export interface ChangePasswordDto {
-  password: string;
-}
+import {
+  Usuario,
+  CreateUsuarioDto,
+  UpdateUsuarioDto,
+  ChangePasswordDto,
+  UsuarioFiltros,
+  Page,
+} from '../../models/usuario/usuario.model';
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
-  private baseUrl = `${environment.apiUrl}/usuarios/`; // ej: http://localhost:8000/api/usuarios/
+  private baseUrl = `${environment.apiUrl}/usuarios/`;
 
   constructor(private http: HttpClient) {}
 
-  /** Listado; acepta params opcionales (paginación, búsqueda, etc.) */
-  listar(params?: { page?: number; page_size?: number; search?: string }): Observable<any> {
+  /** Listado con paginación y filtros */
+  listar(params?: {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    rol?: string;
+    activo?: string;
+  }): Observable<Page<Usuario>> {
     let httpParams = new HttpParams();
+
     if (params?.page) httpParams = httpParams.set('page', params.page);
-    if (params?.page_size) httpParams = httpParams.set('page_size', params.page_size);
+    if (params?.page_size)
+      httpParams = httpParams.set('page_size', params.page_size);
     if (params?.search) httpParams = httpParams.set('search', params.search);
-    return this.http.get<any>(this.baseUrl, { params: httpParams });
+    if (params?.rol) httpParams = httpParams.set('rol', params.rol);
+    if (params?.activo) httpParams = httpParams.set('activo', params.activo);
+
+    return this.http.get<Page<Usuario>>(this.baseUrl, { params: httpParams });
+  }
+
+  /** Obtener todos los usuarios sin paginación (para exportar) */
+  listarTodos(filtros?: UsuarioFiltros): Observable<Usuario[]> {
+    let httpParams = new HttpParams();
+
+    // Usar page_size grande para obtener todos los registros
+    httpParams = httpParams.set('page_size', '1000');
+
+    if (filtros?.search) httpParams = httpParams.set('search', filtros.search);
+    if (filtros?.rol) httpParams = httpParams.set('rol', filtros.rol);
+    if (filtros?.activo) httpParams = httpParams.set('activo', filtros.activo);
+
+    return this.http
+      .get<Page<Usuario>>(this.baseUrl, { params: httpParams })
+      .pipe(map((response: Page<Usuario>) => response.results || []));
   }
 
   /** Obtener detalle */
@@ -51,17 +58,17 @@ export class UsuarioService {
     return this.http.get<Usuario>(`${this.baseUrl}${id}/`);
   }
 
-  /** Crear usuario (con password) */
+  /** Crear usuario */
   crear(dto: CreateUsuarioDto): Observable<Usuario> {
     return this.http.post<Usuario>(this.baseUrl, dto);
   }
 
-  /** Reemplazo completo (PUT). Usa UpdateUsuarioDto por si no quieres enviar todos los campos del modelo */
+  /** Actualización completa */
   actualizar(id: number, dto: UpdateUsuarioDto): Observable<Usuario> {
     return this.http.put<Usuario>(`${this.baseUrl}${id}/`, dto);
   }
 
-  /** Actualización parcial (PATCH) — útil para editar pocos campos o cambiar solo el rol/estado */
+  /** Actualización parcial */
   actualizarParcial(id: number, dto: UpdateUsuarioDto): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.baseUrl}${id}/`, dto);
   }
@@ -71,10 +78,8 @@ export class UsuarioService {
     return this.http.delete<void>(`${this.baseUrl}${id}/`);
   }
 
-  /** (Opcional) Cambiar solo la contraseña del usuario */
+  /** Cambiar contraseña */
   cambiarPassword(id: number, dto: ChangePasswordDto): Observable<Usuario> {
-    // Si tu backend no tiene un endpoint dedicado (p.ej. /usuarios/{id}/password/),
-    // puedes reutilizar PATCH y enviar solo { password: '...' }:
     return this.http.patch<Usuario>(`${this.baseUrl}${id}/`, dto);
   }
 }
