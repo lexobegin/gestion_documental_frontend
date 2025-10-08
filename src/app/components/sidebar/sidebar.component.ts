@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'], // ojo: plural
+  styleUrls: ['./sidebar.component.scss'],
 })
 export class SidebarComponent {
   menus = [
@@ -42,7 +42,7 @@ export class SidebarComponent {
       title: 'Sistema',
       expanded: false,
       children: [
-        { title: 'Bitacora', route: '/dashboard' },
+        { title: 'Bitacora', route: '/bitacora' },  // ✅ RUTA CORREGIDA
         { title: 'Backup/Restore', route: '/dashboard' },
       ],
     },
@@ -50,5 +50,31 @@ export class SidebarComponent {
 
   toggleMenu(menu: any) {
     menu.expanded = !menu.expanded;
+  }
+
+  getMenuIcon(menuTitle: string): string {
+    const icons: { [key: string]: string } = {
+      'Home': 'fas fa-home',
+      'Usuarios': 'fas fa-users',
+      'Agenda Medica': 'fas fa-calendar-alt',
+      'Historia Clinica': 'fas fa-file-medical',
+      'Sistema': 'fas fa-cogs'
+    };
+    return icons[menuTitle] || 'fas fa-circle';
+  }
+
+  getChildIcon(childTitle: string): string {
+    const icons: { [key: string]: string } = {
+      'Usuario': 'fas fa-user',
+      'Roles y Permisos': 'fas fa-user-shield',
+      'Especialidades': 'fas fa-stethoscope',
+      'Horario': 'fas fa-clock',
+      'Paciente': 'fas fa-user-injured',
+      'Consulta': 'fas fa-notes-medical',
+      'Citas Medicas': 'fas fa-calendar-check',
+      'Bitacora': 'fas fa-clipboard-list',
+      'Backup/Restore': 'fas fa-database'
+    };
+    return icons[childTitle] || 'fas fa-circle';
   }
 }

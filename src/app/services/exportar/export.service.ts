@@ -17,6 +17,20 @@ export class ExportService {
     window.URL.revokeObjectURL(url);
   }
 
+  // ✅ NUEVO: Método para preparar datos de bitácora
+  prepararDatosBitacora(registros: any[]): any[] {
+    return registros.map(registro => ({
+      'ID': registro.id,
+      'Fecha y Hora': new Date(registro.fecha_hora).toLocaleString('es-ES'),
+      'Usuario': registro.usuario?.email || 'N/A',
+      'Nombre Completo': `${registro.usuario?.nombre || ''} ${registro.usuario?.apellido || ''}`.trim() || 'N/A',
+      'Acción': registro.accion_realizada,
+      'Módulo': registro.modulo_afectado,
+      'IP': registro.ip_address,
+      'Detalles': registro.detalles || 'Sin detalles'
+    }));
+  }
+
   /** Exportar a Excel */
   exportToExcel(data: any[], filename: string): void {
     try {
@@ -264,6 +278,18 @@ export class ExportService {
       Fecha: 25,
       dirección: 35,
       Dirección: 35,
+      'fecha y hora': 30,
+      'Fecha y Hora': 30,
+      'nombre completo': 35,
+      'Nombre Completo': 35,
+      acción: 40,
+      Acción: 40,
+      módulo: 25,
+      Módulo: 25,
+      ip: 20,
+      IP: 20,
+      detalles: 50,
+      Detalles: 50,
     };
 
     // Asignar anchos específicos o usar ancho por defecto

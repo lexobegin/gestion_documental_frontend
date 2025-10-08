@@ -19,6 +19,9 @@ import { RolesCreateComponent } from './components/roles/roles-create/roles-crea
 import { RolesEditComponent } from './components/roles/roles-edit/roles-edit.component';
 import { PermisosCreateComponent } from './components/permisos/permisos-create/permisos-create.component';
 
+// Bitácora - NUEVA IMPORTACIÓN CON LA ESTRUCTURA CORRECTA
+import { BitacoraListComponent } from './components/bitacora/bitacora-list/bitacora-list.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -53,6 +56,9 @@ export const routes: Routes = [
         path: 'especialidades/editar/:id',
         component: EspecialidadUpdateComponent,
       },
+
+      // Bitácora - NUEVA RUTA
+      { path: 'bitacora', component: BitacoraListComponent },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
