@@ -35,7 +35,7 @@ export class SidebarComponent {
       expanded: false,
       children: [
         { title: 'Consulta', route: '/dashboard' },
-        { title: 'Citas Medicas', route: '/dashboard' },
+        { title: 'Citas Medicas', route: '/citas' },
       ],
     },
     {
@@ -43,7 +43,7 @@ export class SidebarComponent {
       expanded: false,
       children: [
         { title: 'Bitacora', route: '/dashboard' },
-        { title: 'Backup/Restore', route: '/dashboard' },
+        { title: 'Backup/Restore', route: '/backups' },
       ],
     },
   ];

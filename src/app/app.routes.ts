@@ -18,6 +18,10 @@ import { RolesListComponent } from './components/roles/roles-list/roles-list.com
 import { RolesCreateComponent } from './components/roles/roles-create/roles-create.component';
 import { RolesEditComponent } from './components/roles/roles-edit/roles-edit.component';
 import { PermisosCreateComponent } from './components/permisos/permisos-create/permisos-create.component';
+import { CitaListComponent } from './components/cita/cita-list/cita-list.component';
+import { CitaCreateComponent } from './components/cita/cita-create/cita-create.component';
+import { CitaUpdateComponent } from './components/cita/cita-update/cita-update.component';
+import { BackupListComponent } from './components/backup/backup-list/backup-list.component';
 
 export const routes: Routes = [
   {
@@ -27,6 +31,14 @@ export const routes: Routes = [
     children: [
       //Dashboard
       { path: 'dashboard', component: DashboardComponent },
+
+      //Citas
+      { path: 'citas', component: CitaListComponent },
+      { path: 'citas/crear', component: CitaCreateComponent },
+      { path: 'citas/editar/:id', component: CitaUpdateComponent },
+
+      //Backup/Restore
+      { path: 'backups', component: BackupListComponent },
 
       //Auto
       { path: 'autos', component: AutoListComponent },
