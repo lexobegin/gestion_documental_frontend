@@ -48,15 +48,22 @@ export class LoginComponent {
       this.loginForm.markAllAsTouched();
       return;
     }
-    this.loading = true; this.errorMessage = null;
+    this.loading = true; 
+    this.errorMessage = null;
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
+      },
       error: (err) => {
         this.errorMessage = 'Credenciales incorrectas';
         console.error(err);
         this.loading = false;
+        
+        // ✅ REGISTRAR INTENTO FALLIDO EN BITÁCORA
+        this.authService.registrarIntentoFallido(email);
       },
       complete: () => this.loading = false
     });

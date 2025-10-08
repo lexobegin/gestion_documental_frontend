@@ -1,0 +1,246 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-plus-circle me-2"></i>Programar Nueva Cita
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Estados -->
+          <div *ngIf="cargando" class="text-center mb-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando datos...</p>
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button
+              type="button"
+              class="btn-close float-end"
+              (click)="error = undefined"
+            ></button>
+          </div>
+
+          <!-- Formulario -->
+          <form (ngSubmit)="guardar()" #citaForm="ngForm" *ngIf="!cargando">
+            <div class="row">
+              <!-- Paciente -->
+              <div class="col-md-6 mb-3">
+                <label for="paciente" class="form-label">
+                  Paciente <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="paciente"
+                  name="paciente"
+                  [(ngModel)]="cita.paciente"
+                  #paciente="ngModel"
+                  required
+                  [class.is-invalid]="
+                    paciente.invalid && (paciente.dirty || paciente.touched)
+                  "
+                >
+                  <option value="">Seleccionar paciente...</option>
+                  <option *ngFor="let p of pacientes" [value]="p.id">
+                    {{ p.nombre }} {{ p.apellido }} - {{ p.email }}
+                  </option>
+                </select>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="paciente.errors?.['required']"
+                >
+                  Selecciona un paciente
+                </div>
+              </div>
+
+              <!-- Cambiar el selector de médico por médico-especialidad -->
+              <div class="col-md-6 mb-3">
+                <label for="medico_especialidad" class="form-label">
+                  Médico y Especialidad <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="medico_especialidad"
+                  name="medico_especialidad"
+                  [(ngModel)]="cita.medico_especialidad"
+                  #medico_especialidad="ngModel"
+                  required
+                  [class.is-invalid]="
+                    medico_especialidad.invalid &&
+                    (medico_especialidad.dirty || medico_especialidad.touched)
+                  "
+                >
+                  <option value="">Seleccionar médico y especialidad...</option>
+                  <option
+                    *ngFor="let me of medicosEspecialidades"
+                    [value]="me.id"
+                  >
+                    Dr. {{ me.medico_nombre }} {{ me.medico_apellido }} -
+                    {{ me.especialidad_nombre }}
+                  </option>
+                </select>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="medico_especialidad.errors?.['required']"
+                >
+                  Selecciona un médico y especialidad
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Fecha -->
+              <div class="col-md-6 mb-3">
+                <label for="fecha_cita" class="form-label">
+                  Fecha de la cita <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fecha_cita"
+                  name="fecha_cita"
+                  [(ngModel)]="cita.fecha_cita"
+                  #fecha_cita="ngModel"
+                  required
+                  [min]="fechaMinima"
+                  [class.is-invalid]="
+                    fecha_cita.invalid &&
+                    (fecha_cita.dirty || fecha_cita.touched)
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="fecha_cita.errors?.['required']"
+                >
+                  La fecha es obligatoria
+                </div>
+                <div class="form-text">
+                  La fecha debe ser hoy o en el futuro
+                </div>
+              </div>
+
+              <!-- Hora -->
+              <div class="col-md-6 mb-3">
+                <label for="hora_cita" class="form-label">
+                  Hora de la cita <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="time"
+                  class="form-control"
+                  id="hora_cita"
+                  name="hora_cita"
+                  [(ngModel)]="cita.hora_cita"
+                  #hora_cita="ngModel"
+                  required
+                  [class.is-invalid]="
+                    hora_cita.invalid && (hora_cita.dirty || hora_cita.touched)
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="hora_cita.errors?.['required']"
+                >
+                  La hora es obligatoria
+                </div>
+                <div class="form-text">Horario de atención: 08:00 - 18:00</div>
+              </div>
+            </div>
+
+            <!-- Motivo -->
+            <div class="mb-3">
+              <label for="motivo" class="form-label">
+                Motivo de la consulta <span class="text-danger">*</span>
+              </label>
+              <textarea
+                class="form-control"
+                id="motivo"
+                name="motivo"
+                [(ngModel)]="cita.motivo"
+                #motivo="ngModel"
+                rows="3"
+                required
+                maxlength="500"
+                placeholder="Describa el motivo de la consulta..."
+                [class.is-invalid]="
+                  motivo.invalid && (motivo.dirty || motivo.touched)
+                "
+              ></textarea>
+              <div class="invalid-feedback" *ngIf="motivo.errors?.['required']">
+                El motivo es obligatorio
+              </div>
+              <div class="form-text">
+                {{ (cita.motivo || "").length }}/500 caracteres
+              </div>
+            </div>
+
+            <!-- Notas -->
+            <div class="mb-4">
+              <label for="notas" class="form-label">Notas adicionales</label>
+              <textarea
+                class="form-control"
+                id="notas"
+                name="notas"
+                [(ngModel)]="cita.notas"
+                #notas="ngModel"
+                rows="2"
+                maxlength="300"
+                placeholder="Notas adicionales u observaciones..."
+              ></textarea>
+              <div class="form-text">
+                {{ (cita.notas || "").length }}/300 caracteres
+              </div>
+            </div>
+
+            <!-- Resumen -->
+            <div
+              class="alert alert-info"
+              *ngIf="
+                cita.medico_especialidad && cita.fecha_cita && cita.hora_cita
+              "
+            >
+              <h6 class="alert-heading">
+                <i class="fas fa-info-circle me-2"></i>Resumen de la cita
+              </h6>
+              <p class="mb-1">
+                <strong>Paciente:</strong>
+                {{ getPacienteNombre(cita.paciente) || "Por seleccionar" }}
+              </p>
+              <p class="mb-1">
+                <strong>Médico:</strong>
+                {{ cita.medico_especialidad || "Por seleccionar" }}
+              </p>
+              <p class="mb-0">
+                <strong>Fecha y hora:</strong>
+                {{ formatearFecha(cita.fecha_cita) }} a las {{ cita.hora_cita }}
+              </p>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelar()"
+              >
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="citaForm.invalid || enviando"
+              >
+                <i class="fas fa-save me-1" *ngIf="!enviando"></i>
+                <i class="fas fa-spinner fa-spin me-1" *ngIf="enviando"></i>
+                {{ enviando ? "Programando..." : "Programar Cita" }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

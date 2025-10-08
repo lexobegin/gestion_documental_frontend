@@ -1,0 +1,301 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-clipboard-list me-2"></i>Bitácora del Sistema
+        </h5>
+        <div>
+          <button class="btn btn-outline-secondary me-2" (click)="cargarBitacora()" [disabled]="cargando">
+            <i class="fas fa-sync-alt me-1" [class.fa-spin]="cargando"></i> Actualizar
+          </button>
+          <!-- Botones de Exportación -->
+          <div class="btn-group" role="group">
+            <button
+              class="btn btn-outline-danger btn-sm"
+              (click)="generarReportePDF()"
+              [disabled]="generandoReporte || todosRegistros.length === 0"
+              title="Exportar a PDF"
+            >
+              <i class="fas fa-file-pdf me-1" *ngIf="!generandoReporte"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+              PDF
+            </button>
+            <button
+              class="btn btn-outline-success btn-sm"
+              (click)="generarReporteExcel()"
+              [disabled]="generandoReporte || todosRegistros.length === 0"
+              title="Exportar a Excel"
+            >
+              <i class="fas fa-file-excel me-1" *ngIf="!generandoReporte"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+              Excel
+            </button>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="generarReporteHTML()"
+              [disabled]="generandoReporte || todosRegistros.length === 0"
+              title="Exportar a HTML"
+            >
+              <i class="fas fa-file-code me-1" *ngIf="!generandoReporte"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+              HTML
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Exportación -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="alert alert-info py-2 mb-0" *ngIf="todosRegistros.length > 0">
+            <small>
+              <i class="fas fa-info-circle me-1"></i>
+              Los reportes incluirán <strong>{{ todosRegistros.length }} registros</strong> con la búsqueda actual
+            </small>
+          </div>
+          <div class="alert alert-warning py-2 mb-0" *ngIf="todosRegistros.length === 0 && !cargando">
+            <small>
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              No hay datos para generar reportes
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <app-bitacora-filter 
+        (filtrosCambiados)="aplicarFiltros($event)">
+      </app-bitacora-filter>
+
+      <!-- Búsqueda -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por acción, módulo o usuario..."
+              [(ngModel)]="terminoBusqueda"
+              (keyup.enter)="buscar()"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limpiarFiltros()"
+              title="Limpiar búsqueda"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6 text-end">
+          <span class="text-muted">
+            Total: {{ totalRegistros }} registros
+          </span>
+        </div>
+      </div>
+
+      <!-- Estados -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando bitácora...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando && bitacora.length">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Módulo</th>
+              <th>IP</th>
+              <th>Fecha/Hora</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let registro of bitacora; trackBy: trackById">
+              <td class="fw-bold">{{ registro.id }}</td>
+              <td>
+                <div>
+<strong>{{ registro.usuario_nombre }}</strong>
+<br>
+<small class="text-muted">{{ registro.usuario_email || 'N/A' }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="text-primary">{{ registro.accion_realizada }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getModuloClass(registro.modulo_afectado)">
+                  {{ registro.modulo_afectado }}
+                </span>
+              </td>
+              <td>
+                <code class="text-muted">{{ registro.ip_address }}</code>
+              </td>
+              <td>
+                <small>{{ formatearFecha(registro.fecha_hora) }}</small>
+              </td>
+              <td class="text-center">
+                <button 
+                  class="btn btn-outline-info btn-sm"
+                  (click)="verDetalle(registro)"
+                  title="Ver detalles completos"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="!cargando && bitacora.length" class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ bitacora.length }} de {{ totalRegistros }} registros
+        </div>
+        <nav *ngIf="totalPaginas > 1">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="paginaActual === 1">
+              <a class="page-link" (click)="cambiarPagina(paginaActual - 1)" href="javascript:void(0)">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+
+            <li *ngFor="let pagina of [].constructor(totalPaginas); let i = index" class="page-item" [class.active]="paginaActual === i + 1">
+              <a class="page-link" (click)="cambiarPagina(i + 1)" href="javascript:void(0)">
+                {{ i + 1 }}
+              </a>
+            </li>
+
+            <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+              <a class="page-link" (click)="cambiarPagina(paginaActual + 1)" href="javascript:void(0)">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!cargando && !bitacora.length" class="text-center py-5">
+        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No se encontraron registros</h5>
+        <p class="text-muted">
+          No hay registros en la bitácora con los filtros actuales.
+        </p>
+        <button class="btn btn-primary" (click)="limpiarFiltros()">
+          <i class="fas fa-times me-1"></i> Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalles de Bitácora -->
+<div class="modal fade show" [class.d-block]="mostrarModalDetalle" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-clipboard-list me-2"></i>Detalles del Registro
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetalle()"></button>
+      </div>
+      <div class="modal-body" *ngIf="registroSeleccionado">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Registro</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">ID:</td>
+                <td>{{ registroSeleccionado.id }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Fecha y Hora:</td>
+                <td>{{ formatearFecha(registroSeleccionado.fecha_hora) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Acción:</td>
+                <td>{{ registroSeleccionado.accion_realizada }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Módulo:</td>
+                <td>
+                  <span class="badge" [ngClass]="getModuloClass(registroSeleccionado.modulo_afectado)">
+                    {{ registroSeleccionado.modulo_afectado }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">IP:</td>
+                <td>{{ registroSeleccionado.ip_address }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Usuario</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Usuario:</td>
+                <td>{{ registroSeleccionado.usuario?.email || 'N/A' }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Nombre:</td>
+                <td>{{ registroSeleccionado.usuario?.nombre_completo || 'N/A' }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Rol:</td>
+                <td>{{ registroSeleccionado.usuario?.rol || 'N/A' }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Ubicación:</td>
+                <td>{{ registroSeleccionado.ubicacion_aproximada }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Navegador:</td>
+                <td>{{ registroSeleccionado.navegador_info }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="row mt-3" *ngIf="registroSeleccionado.detalles">
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Detalles Adicionales</h6>
+            <div class="card">
+              <div class="card-body">
+                <p class="mb-0">{{ registroSeleccionado.detalles }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">
+          <i class="fas fa-times me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalDetalle"></div>
