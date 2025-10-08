@@ -18,7 +18,7 @@ import { RolesListComponent } from './components/roles/roles-list/roles-list.com
 import { RolesCreateComponent } from './components/roles/roles-create/roles-create.component';
 import { RolesEditComponent } from './components/roles/roles-edit/roles-edit.component';
 import { PermisosCreateComponent } from './components/permisos/permisos-create/permisos-create.component';
-
+import { ConsultaComponent } from './components/consulta/consulta.component';
 export const routes: Routes = [
   {
     path: '',
@@ -55,6 +55,8 @@ export const routes: Routes = [
       },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      // Consultas
+      { path: 'consultas', component: ConsultaComponent },
     ],
   },
 
