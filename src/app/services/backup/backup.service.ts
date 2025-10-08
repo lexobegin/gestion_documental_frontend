@@ -70,7 +70,7 @@ export class BackupService {
 
   // Descargar backup (si la API lo permite)
   downloadBackup(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}${id}/download/`, {
+    return this.http.get(`${this.apiUrl}${id}/descargar/`, {
       responseType: 'blob',
     });
   }
@@ -78,5 +78,22 @@ export class BackupService {
   // Agregar este método en el servicio
   restoreBackup(id: number, notas?: string): Observable<any> {
     return this.http.post(`${this.apiUrl}${id}/restore/`, { notas });
+  }
+
+  // Restaurar desde backup existente
+  restoreBackupp(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}${id}/restore/`, {});
+  }
+
+  // Restaurar desde archivo
+  restoreFromFile(archivo: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('backup_file', archivo);
+    return this.http.post(`${this.apiUrl}restore-from-file/`, formData);
+  }
+
+  // Verificar backup
+  verificarBackup(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}${id}/verificar/`);
   }
 }

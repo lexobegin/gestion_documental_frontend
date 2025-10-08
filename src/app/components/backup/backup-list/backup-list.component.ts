@@ -46,6 +46,15 @@ export class BackupListComponent implements OnInit {
   notasRestore: string = '';
   restoreEnProgreso: boolean = false;
 
+  // Agregar estas propiedades en la clase
+  mostrarModalRestoreArchivo: boolean = false;
+  archivoSeleccionado: File | null = null;
+  confirmacionRestoreArchivo: boolean = false;
+  archivoInvalido: boolean = false;
+  restoreArchivoEnProgreso: boolean = false;
+  mensajeRestore: string = '';
+  restoreExitoso: boolean = false;
+
   // Agregar en backup.service.ts el método para restore
   /*
 restoreBackup(id: number, notas?: string): Observable<any> {
@@ -307,45 +316,124 @@ restoreBackup(id: number, notas?: string): Observable<any> {
 
     this.restoreEnProgreso = true;
 
-    // Simular proceso de restore (en producción llamarías al servicio)
-    setTimeout(() => {
-      this.restoreEnProgreso = false;
-      this.mostrarModalRestore = false;
-      this.backupARestorear = null;
-      this.confirmacionRestore = false;
-      this.notasRestore = '';
+    this.backupService.restoreBackup(this.backupARestorear.id).subscribe({
+      next: (response: any) => {
+        this.restoreEnProgreso = false;
+        this.mostrarModalRestore = false;
+        this.backupARestorear = null;
+        this.confirmacionRestore = false;
+        this.notasRestore = '';
 
-      // Mostrar mensaje de éxito
-      alert('Base de datos restaurada exitosamente');
+        // Mostrar mensaje de éxito
+        const mensaje =
+          response.detail || 'Base de datos restaurada exitosamente';
+        alert(mensaje);
 
-      // En producción, podrías redirigir al login o recargar la aplicación
-      // this.router.navigate(['/login']);
-    }, 3000); // Simular 3 segundos de proceso
+        // En producción, redirigir al login
+        // this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.restoreEnProgreso = false;
+        this.error = err.error?.detail || 'Error al restaurar la base de datos';
+        console.error('Error restoring backup:', err);
+      },
+    });
+  }
 
-    /*
-  // Código para producción:
-  this.backupService.restoreBackup(this.backupARestorear.id, this.notasRestore).subscribe({
-    next: (response) => {
-      this.restoreEnProgreso = false;
-      this.mostrarModalRestore = false;
-      this.backupARestorear = null;
-      this.confirmacionRestore = false;
-      this.notasRestore = '';
-      
-      // Redirigir al login o mostrar mensaje de éxito
-      this.router.navigate(['/login'], {
-        queryParams: { 
-          mensaje: 'Base de datos restaurada exitosamente. Por favor inicie sesión nuevamente.',
-          tipo: 'success'
-        }
-      });
-    },
-    error: (err) => {
-      this.restoreEnProgreso = false;
-      this.error = 'Error al restaurar la base de datos';
-      console.error('Error restoring backup:', err);
+  // Métodos para restore desde archivo
+  mostrarModalRestoreArchivoo(): void {
+    this.mostrarModalRestoreArchivo = true;
+    this.resetearEstadoRestoreArchivo();
+  }
+
+  cancelarRestoreArchivo(): void {
+    this.mostrarModalRestoreArchivo = false;
+    this.resetearEstadoRestoreArchivo();
+  }
+
+  resetearEstadoRestoreArchivo(): void {
+    this.archivoSeleccionado = null;
+    this.confirmacionRestoreArchivo = false;
+    this.archivoInvalido = false;
+    this.restoreArchivoEnProgreso = false;
+    this.mensajeRestore = '';
+    this.restoreExitoso = false;
+  }
+
+  onArchivoSeleccionado(event: any): void {
+    const archivo: File = event.target.files[0];
+
+    if (archivo) {
+      // Validar tamaño máximo (100MB)
+      const tamanoMaximo = 100 * 1024 * 1024; // 100MB en bytes
+      if (archivo.size > tamanoMaximo) {
+        this.archivoInvalido = true;
+        this.mensajeRestore =
+          'El archivo es demasiado grande. Tamaño máximo: 100MB';
+        this.restoreExitoso = false;
+        return;
+      }
+
+      // Validar extensión
+      const extensionesPermitidas = ['.sql', '.backup', '.db'];
+      const extension = archivo.name
+        .toLowerCase()
+        .substring(archivo.name.lastIndexOf('.'));
+      if (!extensionesPermitidas.includes(extension)) {
+        this.archivoInvalido = true;
+        this.mensajeRestore =
+          'Formato de archivo no válido. Use: .sql, .backup, .db';
+        this.restoreExitoso = false;
+        return;
+      }
+
+      this.archivoSeleccionado = archivo;
+      this.archivoInvalido = false;
+      this.mensajeRestore = '';
     }
-  });
-  */
+  }
+
+  ejecutarRestoreArchivo(): void {
+    if (!this.archivoSeleccionado || !this.confirmacionRestoreArchivo) return;
+
+    this.restoreArchivoEnProgreso = true;
+    this.mensajeRestore = '';
+
+    this.backupService.restoreFromFile(this.archivoSeleccionado).subscribe({
+      next: (response: any) => {
+        this.restoreArchivoEnProgreso = false;
+        this.restoreExitoso = true;
+        this.mensajeRestore =
+          response.detail || 'Base de datos restaurada exitosamente';
+
+        if (response.archivo_utilizado) {
+          this.mensajeRestore += `. Archivo utilizado: ${response.archivo_utilizado}`;
+        }
+
+        // Auto-cerrar después de 3 segundos
+        setTimeout(() => {
+          this.mostrarModalRestoreArchivo = false;
+          this.resetearEstadoRestoreArchivo();
+
+          // En producción, podrías redirigir al login
+          // this.router.navigate(['/login']);
+        }, 3000);
+      },
+      error: (err) => {
+        this.restoreArchivoEnProgreso = false;
+        this.restoreExitoso = false;
+
+        if (err.status === 400) {
+          this.mensajeRestore =
+            err.error?.detail || 'Error en el archivo de backup';
+        } else if (err.status === 413) {
+          this.mensajeRestore = 'El archivo es demasiado grande';
+        } else {
+          this.mensajeRestore = 'Error al restaurar la base de datos';
+        }
+
+        console.error('Error restoring from file:', err);
+      },
+    });
   }
 }
