@@ -34,7 +34,7 @@ export class SidebarComponent {
       title: 'Historia Clinica',
       expanded: false,
       children: [
-        { title: 'Consulta', route: '/dashboard' },
+        { title: 'Consulta', route: '/consultas' },
         { title: 'Citas Medicas', route: '/citas' },
       ],
     },
@@ -42,8 +42,8 @@ export class SidebarComponent {
       title: 'Sistema',
       expanded: false,
       children: [
-        { title: 'Bitacora', route: '/bitacora' },  // ✅ Tu corrección
-        { title: 'Backup/Restore', route: '/backups' }, // ✅ Cambio de tu compañero
+        { title: 'Bitacora', route: '/bitacora' },
+        { title: 'Backup/Restore', route: '/backups' },
       ],
     },
   ];
