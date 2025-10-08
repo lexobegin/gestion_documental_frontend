@@ -13,12 +13,12 @@
           >
             <i class="fas fa-plus me-1"></i> Backup Completo
           </button>
+          <!-- CAMBIO: Botón de Restore desde Archivo -->
           <button
-            hidden
-            class="btn btn-info"
-            (click)="realizarBackup('Incremental')"
+            class="btn btn-warning"
+            (click)="mostrarModalRestoreArchivoo()"
           >
-            <i class="fas fa-sync-alt me-1"></i> Backup Incremental
+            <i class="fas fa-upload me-1"></i> Restore desde Archivo
           </button>
         </div>
       </div>
@@ -641,3 +641,154 @@
   </div>
 </div>
 <div class="modal-backdrop fade show" *ngIf="mostrarModalRestore"></div>
+
+<!-- Modal de Restore desde Archivo -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalRestoreArchivo"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">
+          <i class="fas fa-upload me-2"></i>Restaurar desde Archivo
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="cancelarRestoreArchivo()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <h6 class="alert-heading">
+            <i class="fas fa-exclamation-triangle me-2"></i>¡Precaución!
+          </h6>
+          <p class="mb-0">
+            Estás a punto de restaurar la base de datos desde un archivo de
+            backup.
+          </p>
+          <p class="mb-0">
+            <strong
+              >Esta acción reemplazará todos los datos actuales y no se puede
+              deshacer.</strong
+            >
+          </p>
+        </div>
+
+        <!-- Selector de archivo -->
+        <div class="mb-3">
+          <label for="archivoBackup" class="form-label fw-bold">
+            Seleccionar archivo de backup <span class="text-danger">*</span>
+          </label>
+          <input
+            type="file"
+            class="form-control"
+            id="archivoBackup"
+            (change)="onArchivoSeleccionado($event)"
+            accept=".sql,.backup,.db"
+            [class.is-invalid]="archivoInvalido"
+          />
+          <div class="invalid-feedback" *ngIf="archivoInvalido">
+            Por favor selecciona un archivo de backup válido
+          </div>
+          <div class="form-text">
+            Formatos aceptados: .sql, .backup, .db (Tamaño máximo: 100MB)
+          </div>
+        </div>
+
+        <!-- Información del archivo -->
+        <div class="card mb-3" *ngIf="archivoSeleccionado">
+          <div class="card-body">
+            <h6 class="card-title">Información del archivo</h6>
+            <table class="table table-sm table-borderless mb-0">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Nombre:</td>
+                <td>
+                  <code>{{ archivoSeleccionado.name }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tamaño:</td>
+                <td>{{ formatearTamanio(archivoSeleccionado.size) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tipo:</td>
+                <td>{{ archivoSeleccionado.type || "No especificado" }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Confirmación de seguridad -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Confirmación de seguridad</label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="confirmarRestoreArchivo"
+              [(ngModel)]="confirmacionRestoreArchivo"
+            />
+            <label class="form-check-label" for="confirmarRestoreArchivo">
+              Entiendo que esta acción reemplazará todos los datos actuales y no
+              se puede deshacer
+            </label>
+          </div>
+        </div>
+
+        <!-- Progreso del restore -->
+        <div *ngIf="restoreArchivoEnProgreso" class="alert alert-info">
+          <div class="d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <strong>Restaurando base de datos desde archivo...</strong>
+          </div>
+          <p class="mb-0 mt-2 small">
+            Este proceso puede tomar varios minutos. No cierre esta ventana.
+          </p>
+        </div>
+
+        <!-- Mensaje de éxito/error -->
+        <div
+          *ngIf="mensajeRestore"
+          class="alert"
+          [ngClass]="restoreExitoso ? 'alert-success' : 'alert-danger'"
+        >
+          {{ mensajeRestore }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarRestoreArchivo()"
+          [disabled]="restoreArchivoEnProgreso"
+        >
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning"
+          (click)="ejecutarRestoreArchivo()"
+          [disabled]="
+            !archivoSeleccionado ||
+            !confirmacionRestoreArchivo ||
+            restoreArchivoEnProgreso
+          "
+        >
+          <i class="fas fa-upload me-1" *ngIf="!restoreArchivoEnProgreso"></i>
+          <i
+            class="fas fa-spinner fa-spin me-1"
+            *ngIf="restoreArchivoEnProgreso"
+          ></i>
+          {{ restoreArchivoEnProgreso ? "Restaurando..." : "Ejecutar Restore" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalRestoreArchivo"></div>
