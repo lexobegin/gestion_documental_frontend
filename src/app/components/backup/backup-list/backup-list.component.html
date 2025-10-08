@@ -1,0 +1,643 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-database me-2"></i>Gestión de Backups/Restore
+        </h5>
+        <div>
+          <button
+            class="btn btn-success me-2"
+            (click)="realizarBackup('Completo')"
+          >
+            <i class="fas fa-plus me-1"></i> Backup Completo
+          </button>
+          <button
+            hidden
+            class="btn btn-info"
+            (click)="realizarBackup('Incremental')"
+          >
+            <i class="fas fa-sync-alt me-1"></i> Backup Incremental
+          </button>
+        </div>
+      </div>
+
+      <!-- Búsqueda y Botones de Exportación -->
+      <div class="row mb-3">
+        <!-- Buscador -->
+        <div class="col-md-5 mb-3">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre de archivo..."
+              [(ngModel)]="terminoBusqueda"
+              (keyup)="buscar()"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limpiarFiltros()"
+              title="Limpiar búsqueda"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="col-md-3 mb-3">
+          <select
+            class="form-select"
+            [(ngModel)]="filtroTipo"
+            (change)="aplicarFiltros()"
+          >
+            <option value="">Todos los tipos</option>
+            <option value="Completo">Completo</option>
+            <option value="Incremental">Incremental</option>
+            <option value="Diferencial">Diferencial</option>
+          </select>
+        </div>
+
+        <!-- Botones de Exportación -->
+        <div class="col-md-4 mb-3">
+          <div class="d-flex justify-content-end align-items-center h-100">
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-outline-danger btn-sm"
+                (click)="generarReportePDF()"
+                [disabled]="generandoReporte || todosBackups.length === 0"
+                title="Exportar a PDF"
+              >
+                <i class="fas fa-file-pdf me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                PDF
+              </button>
+              <button
+                class="btn btn-outline-success btn-sm"
+                (click)="generarReporteExcel()"
+                [disabled]="generandoReporte || todosBackups.length === 0"
+                title="Exportar a Excel"
+              >
+                <i class="fas fa-file-excel me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                Excel
+              </button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                (click)="generarReporteHTML()"
+                [disabled]="generandoReporte || todosBackups.length === 0"
+                title="Exportar a HTML"
+              >
+                <i class="fas fa-file-code me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                HTML
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Exportación -->
+      <div hidden class="row mb-3">
+        <div class="col-12">
+          <div
+            class="alert alert-info py-2 mb-0"
+            *ngIf="todosBackups.length > 0"
+          >
+            <small>
+              <i class="fas fa-info-circle me-1"></i>
+              Los reportes incluirán
+              <strong>{{ todosBackups.length }} backups</strong> con la búsqueda
+              actual
+            </small>
+          </div>
+          <div
+            class="alert alert-warning py-2 mb-0"
+            *ngIf="todosBackups.length === 0 && !cargando"
+          >
+            <small>
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              No hay datos para generar reportes
+            </small>
+          </div>
+          <div class="alert alert-secondary py-2 mb-0" *ngIf="cargando">
+            <small>
+              <i class="fas fa-spinner fa-spin me-1"></i>
+              Cargando datos para exportación...
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando backups...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando && backups.length">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Archivo</th>
+              <th>Tamaño</th>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Usuario</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let backup of backups; trackBy: trackById">
+              <td class="fw-bold">{{ backup.id }}</td>
+              <td>
+                <code class="text-primary">{{ backup.nombre_archivo }}</code>
+              </td>
+              <td>
+                <span class="fw-bold">{{
+                  formatearTamanio(backup.tamano_bytes)
+                }}</span>
+              </td>
+              <td>
+                <span class="text-muted">{{
+                  formatearFechaHora(backup.fecha_backup)
+                }}</span>
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="getTipoBadgeClass(backup.tipo_backup)"
+                >
+                  {{ backup.tipo_backup }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="getEstadoBadgeClass(backup.estado)"
+                >
+                  {{ backup.estado }}
+                </span>
+              </td>
+              <td>
+                <small>
+                  {{ backup.usuario_responsable_nombre }}<br />
+                  <span class="text-muted">{{
+                    backup.usuario_responsable_email
+                  }}</span>
+                </small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button
+                    class="btn btn-outline-info"
+                    (click)="verDetalle(backup)"
+                    title="Ver detalles"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-success"
+                    (click)="descargarBackup(backup)"
+                    title="Descargar backup"
+                    *ngIf="backup.estado === 'Exitoso'"
+                  >
+                    <i class="fas fa-download"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-warning"
+                    (click)="confirmarRestore(backup)"
+                    title="Restaurar desde este backup"
+                    *ngIf="backup.estado === 'Exitoso'"
+                  >
+                    <i class="fas fa-undo"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger"
+                    (click)="confirmarEliminar(backup)"
+                    title="Eliminar backup"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div
+        *ngIf="!cargando && backups.length"
+        class="d-flex justify-content-between align-items-center mt-4"
+      >
+        <div class="text-muted">
+          Mostrando {{ backups.length }} de {{ totalBackups }} backups
+        </div>
+        <nav *ngIf="totalPaginas > 1">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="paginaActual === 1">
+              <a
+                class="page-link"
+                (click)="cambiarPagina(paginaActual - 1)"
+                href="javascript:void(0)"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+
+            <li
+              *ngFor="let pagina of [].constructor(totalPaginas); let i = index"
+              class="page-item"
+              [class.active]="paginaActual === i + 1"
+            >
+              <a
+                class="page-link"
+                (click)="cambiarPagina(i + 1)"
+                href="javascript:void(0)"
+              >
+                {{ i + 1 }}
+              </a>
+            </li>
+
+            <li
+              class="page-item"
+              [class.disabled]="paginaActual === totalPaginas"
+            >
+              <a
+                class="page-link"
+                (click)="cambiarPagina(paginaActual + 1)"
+                href="javascript:void(0)"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!cargando && !backups.length" class="text-center py-5">
+        <i class="fas fa-database fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No se encontraron backups</h5>
+        <p class="text-muted">
+          Realiza tu primer backup o ajusta los filtros de búsqueda.
+        </p>
+        <div>
+          <button
+            class="btn btn-success me-2"
+            (click)="realizarBackup('Completo')"
+          >
+            <i class="fas fa-plus me-1"></i> Backup Completo
+          </button>
+          <button class="btn btn-info" (click)="realizarBackup('Incremental')">
+            <i class="fas fa-sync-alt me-1"></i> Backup Incremental
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalEliminar"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+        </h5>
+      </div>
+      <div class="modal-body" *ngIf="backupAEliminar">
+        <p>¿Estás seguro de que deseas eliminar este backup?</p>
+        <div class="alert alert-warning">
+          <strong>{{ backupAEliminar.nombre_archivo }}</strong
+          ><br />
+          <small class="text-muted">
+            {{ formatearFechaHora(backupAEliminar.fecha_backup) }} -
+            {{ formatearTamanio(backupAEliminar.tamano_bytes) }}
+          </small>
+        </div>
+        <p class="text-danger small">
+          <i class="fas fa-info-circle me-1"></i>
+          Esta acción no se puede deshacer y el archivo de backup será eliminado
+          permanentemente.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarEliminar()"
+        >
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="eliminar()">
+          <i class="fas fa-trash me-1"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalEliminar"></div>
+
+<!-- Modal de Detalles del Backup -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalDetalle"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-database me-2"></i>Detalles del Backup
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="cerrarModalDetalle()"
+        ></button>
+      </div>
+      <div class="modal-body" *ngIf="backupSeleccionado">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Archivo</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">ID:</td>
+                <td>{{ backupSeleccionado.id }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Archivo:</td>
+                <td>
+                  <code>{{ backupSeleccionado.nombre_archivo }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tamaño:</td>
+                <td>
+                  <strong>{{
+                    formatearTamanio(backupSeleccionado.tamano_bytes)
+                  }}</strong>
+                  <small class="text-muted ms-1"
+                    >({{
+                      backupSeleccionado.tamano_bytes | number
+                    }}
+                    bytes)</small
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Ubicación:</td>
+                <td>
+                  <code>{{ backupSeleccionado.ubicacion_almacenamiento }}</code>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Proceso</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Tipo:</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="
+                      getTipoBadgeClass(backupSeleccionado.tipo_backup)
+                    "
+                  >
+                    {{ backupSeleccionado.tipo_backup }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Estado:</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getEstadoBadgeClass(backupSeleccionado.estado)"
+                  >
+                    {{ backupSeleccionado.estado }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Fecha:</td>
+                <td>
+                  {{ formatearFechaHora(backupSeleccionado.fecha_backup) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Usuario:</td>
+                <td>
+                  {{ backupSeleccionado.usuario_responsable_nombre }}<br />
+                  <small class="text-muted">{{
+                    backupSeleccionado.usuario_responsable_email
+                  }}</small>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Notas</h6>
+            <p class="mb-0" [class.text-muted]="!backupSeleccionado.notas">
+              {{ backupSeleccionado.notas || "No hay notas adicionales" }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModalDetalle()"
+        >
+          <i class="fas fa-times me-1"></i> Cerrar
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="descargarBackup(backupSeleccionado!)"
+          *ngIf="backupSeleccionado?.estado === 'Exitoso'"
+        >
+          <i class="fas fa-download me-1"></i> Descargar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalDetalle"></div>
+
+<!-- Modal de Restaurar Backup -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalRestore"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">
+          <i class="fas fa-undo me-2"></i>Restaurar Base de Datos
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="cancelarRestore()"
+        ></button>
+      </div>
+      <div class="modal-body" *ngIf="backupARestorear">
+        <div hidden class="alert alert-warning">
+          <h6 class="alert-heading">
+            <i class="fas fa-exclamation-triangle me-2"></i>¡Precaución!
+          </h6>
+          <p class="mb-2">
+            Estás a punto de restaurar la base de datos desde un backup.
+          </p>
+          <p class="mb-0"><strong>Esta acción:</strong></p>
+          <ul class="mb-2">
+            <li>Reemplazará todos los datos actuales</li>
+            <li>No se puede deshacer</li>
+            <li>Puede tomar varios minutos</li>
+            <li>El sistema estará inaccesible durante el proceso</li>
+          </ul>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6 class="card-title">Información del Backup</h6>
+            <table class="table table-sm table-borderless mb-0">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Archivo:</td>
+                <td>
+                  <code>{{ backupARestorear.nombre_archivo }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Fecha:</td>
+                <td>{{ formatearFechaHora(backupARestorear.fecha_backup) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tamaño:</td>
+                <td>{{ formatearTamanio(backupARestorear.tamano_bytes) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tipo:</td>
+                <td>{{ backupARestorear.tipo_backup }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Confirmación de seguridad -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Confirmación de seguridad</label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="confirmarRestore"
+              [(ngModel)]="confirmacionRestore"
+            />
+            <label class="form-check-label" for="confirmarRestore">
+              Entiendo que esta acción reemplazará todos los datos actuales y no
+              se puede deshacer
+            </label>
+          </div>
+        </div>
+
+        <!-- Notas adicionales -->
+        <div class="mb-3">
+          <label for="notasRestore" class="form-label"
+            >Notas del restore (opcional)</label
+          >
+          <textarea
+            class="form-control"
+            id="notasRestore"
+            rows="2"
+            placeholder="Motivo del restore, observaciones..."
+            [(ngModel)]="notasRestore"
+            maxlength="200"
+          ></textarea>
+          <div class="form-text">
+            {{ (notasRestore || "").length }}/200 caracteres
+          </div>
+        </div>
+
+        <!-- Progreso del restore -->
+        <div *ngIf="restoreEnProgreso" class="alert alert-info">
+          <div class="d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <strong>Restaurando base de datos...</strong>
+          </div>
+          <p class="mb-0 mt-2 small">
+            Este proceso puede tomar varios minutos. No cierre esta ventana.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarRestore()"
+          [disabled]="restoreEnProgreso"
+        >
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning"
+          (click)="ejecutarRestore()"
+          [disabled]="!confirmacionRestore || restoreEnProgreso"
+        >
+          <i class="fas fa-undo me-1" *ngIf="!restoreEnProgreso"></i>
+          <i class="fas fa-spinner fa-spin me-1" *ngIf="restoreEnProgreso"></i>
+          {{ restoreEnProgreso ? "Restaurando..." : "Ejecutar Restore" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalRestore"></div>
