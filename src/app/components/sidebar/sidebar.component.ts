@@ -35,15 +35,15 @@ export class SidebarComponent {
       expanded: false,
       children: [
         { title: 'Consulta', route: '/dashboard' },
-        { title: 'Citas Medicas', route: '/dashboard' },
+        { title: 'Citas Medicas', route: '/citas' },
       ],
     },
     {
       title: 'Sistema',
       expanded: false,
       children: [
-        { title: 'Bitacora', route: '/bitacora' },  // ✅ RUTA CORREGIDA
-        { title: 'Backup/Restore', route: '/dashboard' },
+        { title: 'Bitacora', route: '/bitacora' },  // ✅ Tu corrección
+        { title: 'Backup/Restore', route: '/backups' }, // ✅ Cambio de tu compañero
       ],
     },
   ];
