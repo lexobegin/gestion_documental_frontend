@@ -1,0 +1,122 @@
+.color-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.calendar-container {
+  .fc {
+    font-family: inherit;
+  }
+
+  .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .fc-button {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    
+    &:hover {
+      background-color: #5a6268;
+      border-color: #545b62;
+    }
+    
+    &.fc-button-active {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+  }
+
+  .fc-event {
+    cursor: grab;
+    border: none;
+    font-size: 0.85em;
+    padding: 2px 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    &:active {
+      cursor: grabbing;
+    }
+    
+    // Eventos no editables
+    &.fc-event-mirror,
+    &.fc-event-dragging {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+    
+    // Estados no editables
+    &[style*="background-color: #dc3545"], // Cancelada
+    &[style*="background-color: #6c757d"] { // Realizada
+      cursor: not-allowed;
+      opacity: 0.7;
+      
+      &:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .fc-day-today {
+    background-color: #e7f3ff !important;
+  }
+
+  // Mejorar visualización durante drag
+  .fc-highlight {
+    background: rgba(0, 123, 255, 0.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fc-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .fc-toolbar-chunk {
+    margin-bottom: 0.5rem;
+  }
+  
+  .fc-event {
+    font-size: 0.75em;
+    padding: 1px 2px;
+  }
+}
+
+// Estilos para el modal de horas disponibles
+.horas-disponibles-container {
+  max-height: 300px;
+  overflow-y: auto;
+  
+  .btn {
+    font-size: 0.85em;
+    padding: 0.5rem 0.25rem;
+    
+    &:hover {
+      background-color: #007bff;
+      color: white;
+    }
+  }
+}
+
+// Asegurar que el modal se vea por encima del calendario
+.modal {
+  z-index: 9999;
+}
+
+// Responsive para botones de horas
+@media (max-width: 576px) {
+  .horas-disponibles-container .col-4 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}

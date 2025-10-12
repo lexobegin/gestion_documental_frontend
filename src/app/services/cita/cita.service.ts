@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   Cita,
@@ -76,6 +76,33 @@ export class CitaService {
     return this.http.post<Cita>(`${this.apiUrl}${id}/cambiar-estado/`, {
       estado,
     });
+  }
+
+  // En el método updateCita, podrías agregar manejo específico para conflictos de horario
+  updateCitaCalendar(id: number, cita: CitaUpdate): Observable<Cita> {
+    console.log('cita-service: ', cita);
+
+    return this.http.put<Cita>(`${this.apiUrl}${id}/`, cita).pipe(
+      catchError((error) => {
+        if (error.status === 400 && error.error?.non_field_errors) {
+          // Manejar errores de validación del backend
+          throw new Error(
+            'Conflicto de horario: ' + error.error.non_field_errors.join(', ')
+          );
+        }
+        throw error;
+      })
+    );
+  }
+
+  // En cita.service.ts
+  getHorasDisponibles(
+    medicoEspecialidadId: number,
+    fecha: string
+  ): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}horas-disponibles/?medico_especialidad=${medicoEspecialidadId}&fecha=${fecha}`
+    );
   }
 
   // Eliminar cita

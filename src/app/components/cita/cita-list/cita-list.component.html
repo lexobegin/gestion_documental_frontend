@@ -14,7 +14,7 @@
       <!-- Filtros y Búsqueda -->
       <div class="row mb-2">
         <!-- Buscador -->
-        <div class="col-md-12 mb-3">
+        <div class="col-md-8 mb-3">
           <div class="input-group">
             <span class="input-group-text">
               <i class="fas fa-search"></i>
@@ -33,6 +33,21 @@
               title="Limpiar búsqueda"
             >
               <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <div
+            class="d-flex justify-content-end align-items-center h-100 gap-2"
+          >
+            <!-- Botón de Calendario -->
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="irACalendario()"
+              title="Ver en calendario"
+            >
+              <i class="fas fa-calendar-alt me-1"></i> Vista Calendario
             </button>
           </div>
         </div>

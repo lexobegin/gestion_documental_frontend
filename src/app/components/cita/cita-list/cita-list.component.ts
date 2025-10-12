@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Cita, ApiResponse } from '../../../models/cita/cita.model';
 import { CitaService } from '../../../services/cita/cita.service';
+import { ExportCitaService } from '../../../services/reporte/export-cita.service';
 
 @Component({
   selector: 'app-cita-list',
@@ -36,10 +37,14 @@ export class CitaListComponent implements OnInit {
   limitePorPagina: number = 10;
 
   // Agregar estas propiedades en la clase
-  todasCitas: Cita[] = [];
+  todasCitas: Cita[] = []; // Para exportar
   generandoReporte: boolean = false;
 
-  constructor(private citaService: CitaService, private router: Router) {}
+  constructor(
+    private citaService: CitaService,
+    private exportCitaService: ExportCitaService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarCitas();
@@ -65,8 +70,22 @@ export class CitaListComponent implements OnInit {
     }
 
     if (this.filtroFecha) {
+      console.log('filtrofecha: ', this.filtroFecha);
       params.fecha_cita = this.filtroFecha;
     }
+
+    /*if (this.filtroFecha) {
+      // Suponiendo que this.filtroFecha tiene formato 'dd-mm-aaaa'
+      console.log('filtrofecha: ', this.filtroFecha);
+
+      const partes = this.filtroFecha.split('-');
+      if (partes.length === 3) {
+        const fechaConvertida = `${partes[2]}-${partes[1]}-${partes[0]}`;
+        console.log('FECHA: ', fechaConvertida);
+
+        params.fecha_cita = fechaConvertida;
+      }
+    }*/
 
     this.citaService.getCitas(params).subscribe({
       next: (response: ApiResponse<Cita>) => {
@@ -105,30 +124,57 @@ export class CitaListComponent implements OnInit {
 
   // Métodos de exportación
   generarReportePDF(): void {
-    this.generandoReporte = true;
-    // Implementar lógica de PDF con jspdf
-    setTimeout(() => {
-      this.generandoReporte = false;
-      alert('PDF de citas generado (funcionalidad por implementar)');
-    }, 1000);
+    this.generarReporte('pdf');
   }
 
   generarReporteExcel(): void {
-    this.generandoReporte = true;
-    // Implementar lógica de Excel con xlsx
-    setTimeout(() => {
-      this.generandoReporte = false;
-      alert('Excel de citas generado (funcionalidad por implementar)');
-    }, 1000);
+    this.generarReporte('excel');
   }
 
   generarReporteHTML(): void {
+    this.generarReporte('html');
+  }
+
+  private generarReporte(formato: 'pdf' | 'excel' | 'html'): void {
+    if (this.todasCitas.length === 0) {
+      this.error = 'No hay datos para generar el reporte';
+      return;
+    }
+
     this.generandoReporte = true;
-    // Implementar lógica de HTML
-    setTimeout(() => {
+    this.error = undefined;
+
+    try {
+      const datosExportar = this.exportCitaService.prepararDatosCitas(
+        this.todasCitas
+      );
+      const fecha = new Date().toISOString().split('T')[0];
+      const filename = `reporte_citas_${fecha}`;
+      const title = `Reporte de Citas - ${new Date().toLocaleDateString(
+        'es-ES'
+      )}`;
+
+      switch (formato) {
+        case 'pdf':
+          this.exportCitaService.exportToPDFAsCards(
+            datosExportar,
+            filename,
+            title
+          );
+          break;
+        case 'excel':
+          this.exportCitaService.exportToExcel(datosExportar, filename);
+          break;
+        case 'html':
+          this.exportCitaService.exportToHTML(datosExportar, filename, title);
+          break;
+      }
+    } catch (error) {
+      console.error(`Error al generar reporte ${formato}:`, error);
+      this.error = `Error al generar el reporte ${formato.toUpperCase()}`;
+    } finally {
       this.generandoReporte = false;
-      alert('HTML de citas generado (funcionalidad por implementar)');
-    }, 1000);
+    }
   }
 
   // Búsqueda y filtros
@@ -260,5 +306,8 @@ export class CitaListComponent implements OnInit {
 
   formatearFechaHora(fechaHora: string): string {
     return new Date(fechaHora).toLocaleString('es-ES');
+  }
+  irACalendario(): void {
+    this.router.navigate(['/citas/calendario']);
   }
 }
