@@ -1,0 +1,170 @@
+/* 🎨 Estilos para Crear Horario Médico */
+
+.container {
+  max-width: 800px;
+}
+
+/* Card principal */
+.card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Título y encabezado */
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #141518;
+  display: flex;
+  align-items: center;
+}
+
+.card-title i {
+  font-size: 1.2rem;
+  color: #232425;
+}
+
+/* Etiquetas del formulario */
+.form-label {
+  color: #444;
+  font-weight: 500;
+}
+
+/* Selects e inputs */
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+}
+
+/* Check “Activo” */
+.form-check-label {
+  font-weight: 500;
+  color: #333;
+  user-select: none;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* Botones */
+.btn {
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-outline-secondary {
+  color: #555;
+  border-color: #bbb;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f1f1f1;
+}
+
+/* Espaciado y disposición */
+.d-flex.gap-2 > * {
+  min-width: 120px;
+}
+
+/* ===================== 🌙 MODO OSCURO ===================== */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+
+  .card {
+    background-color: #1e1e1e;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+  }
+
+  .card-title {
+    color: #66b2ff;
+  }
+
+  .form-label {
+    color: #ccc;
+  }
+
+  .form-control,
+  .form-select {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #eee;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #66b2ff;
+    box-shadow: 0 0 0 0.2rem rgba(102, 178, 255, 0.15);
+  }
+
+  .form-check-label {
+    color: #ccc;
+  }
+
+  .form-check-input {
+    background-color: #2a2a2a;
+    border-color: #555;
+  }
+
+  .form-check-input:checked {
+    background-color: #66b2ff;
+    border-color: #66b2ff;
+  }
+
+  .btn-primary {
+    background-color: #66b2ff;
+    border-color: #66b2ff;
+    color: #0d0d0d;
+  }
+
+  .btn-primary:hover {
+    background-color: #5aa8f0;
+  }
+
+  .btn-outline-secondary {
+    color: #ddd;
+    border-color: #666;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #333;
+  }
+
+  select option {
+    background-color: #2a2a2a;
+    color: #eee;
+  }
+}
+
+/* ===================== 📱 Responsive ===================== */
+@media (max-width: 576px) {
+  .card-body {
+    padding: 1rem;
+  }
+}

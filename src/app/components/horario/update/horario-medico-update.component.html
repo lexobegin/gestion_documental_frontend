@@ -1,0 +1,133 @@
+<div class="container mt-4" *ngIf="horario">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-edit me-2"></i>Editar Horario Médico
+        </h5>
+        <button class="btn btn-secondary" (click)="cancelar()">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form (ngSubmit)="actualizar()" #horarioForm="ngForm" novalidate>
+        <div class="row g-3">
+          <!-- Médico y Especialidad -->
+          <div class="col-md-6">
+            <label for="medico_especialidad" class="form-label fw-semibold">
+              <i class="fas fa-user-md me-1"></i> Médico y Especialidad
+            </label>
+            <select
+              id="medico_especialidad"
+              class="form-select"
+              [(ngModel)]="horario.medico_especialidad"
+              name="medico_especialidad"
+              required
+            >
+              <option value="">Seleccione...</option>
+              <option
+                *ngFor="let item of medicoEspecialidades"
+                [value]="item.id"
+              >
+                {{ item.medico_nombre }} {{ item.medico_apellido }} -
+                {{ item.especialidad_nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Día de la semana -->
+          <div class="col-md-6">
+            <label for="dia_semana" class="form-label fw-semibold">
+              <i class="fas fa-calendar-day me-1"></i> Día de la semana
+            </label>
+            <select
+              id="dia_semana"
+              class="form-select"
+              [(ngModel)]="horario.dia_semana"
+              name="dia_semana"
+              required
+            >
+              <option *ngFor="let dia of diasSemana" [value]="dia">
+                {{ dia }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Hora inicio -->
+          <div class="col-md-6">
+            <label for="hora_inicio" class="form-label fw-semibold">
+              <i class="fas fa-clock me-1"></i> Hora inicio
+            </label>
+            <input
+              id="hora_inicio"
+              type="time"
+              class="form-control"
+              [(ngModel)]="horario.hora_inicio"
+              name="hora_inicio"
+              required
+            />
+          </div>
+
+          <!-- Hora fin -->
+          <div class="col-md-6">
+            <label for="hora_fin" class="form-label fw-semibold">
+              <i class="fas fa-clock me-1"></i> Hora fin
+            </label>
+            <input
+              id="hora_fin"
+              type="time"
+              class="form-control"
+              [(ngModel)]="horario.hora_fin"
+              name="hora_fin"
+              required
+            />
+          </div>
+
+          <!-- Estado Activo -->
+          <div class="col-12 mt-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="activo"
+                [(ngModel)]="horario.activo"
+                name="activo"
+              />
+              <label class="form-check-label" for="activo">
+                <i class="fas fa-toggle-on me-1"></i> Activo
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="cancelar()"
+          >
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!horarioForm.form.valid"
+          >
+            <i class="fas fa-save me-1"></i> Actualizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Loader si aún no cargó -->
+<div class="text-center mt-5" *ngIf="!horario">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando horario...</span>
+  </div>
+  <p class="mt-2 text-muted">Cargando horario...</p>
+</div>

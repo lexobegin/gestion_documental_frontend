@@ -1,0 +1,304 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-clock me-2"></i>Gestión de Horarios Médicos
+        </h5>
+        <button class="btn btn-primary" (click)="nuevoHorario()">
+          <i class="fas fa-plus me-1"></i> Nuevo horario
+        </button>
+      </div>
+
+      <!-- Buscador y Exportación -->
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por médico, especialidad o día..."
+              [(ngModel)]="filtro"
+              (keyup)="filtrarHorarios()"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limpiarFiltro()"
+              title="Limpiar búsqueda"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex justify-content-end align-items-center h-100">
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-outline-danger btn-sm"
+                (click)="generarReportePDF()"
+                [disabled]="generandoReporte || horariosFiltrados.length === 0"
+                title="Exportar a PDF"
+              >
+                <i class="fas fa-file-pdf me-1" *ngIf="!generandoReporte"></i>
+                <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+                PDF
+              </button>
+              <button
+                class="btn btn-outline-success btn-sm"
+                (click)="generarReporteExcel()"
+                [disabled]="generandoReporte || horariosFiltrados.length === 0"
+                title="Exportar a Excel"
+              >
+                <i class="fas fa-file-excel me-1" *ngIf="!generandoReporte"></i>
+                <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+                Excel
+              </button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                (click)="generarReporteHTML()"
+                [disabled]="generandoReporte || horariosFiltrados.length === 0"
+                title="Exportar a HTML"
+              >
+                <i class="fas fa-file-code me-1" *ngIf="!generandoReporte"></i>
+                <i class="fas fa-spinner fa-spin me-1" *ngIf="generandoReporte"></i>
+                HTML
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando horarios...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando && horariosFiltrados.length">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Médico</th>
+              <th>Especialidad</th>
+              <th>Día</th>
+              <th>Hora Inicio</th>
+              <th>Hora Fin</th>
+              <th>Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of horariosFiltrados">
+              <td class="fw-bold">{{ h.id }}</td>
+              <td>{{ h.medico_nombre }} {{ h.medico_apellido }}</td>
+              <td>{{ h.especialidad_nombre }}</td>
+              <td>{{ h.dia_semana }}</td>
+              <td>{{ h.hora_inicio }}</td>
+              <td>{{ h.hora_fin }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="h.activo ? 'bg-success' : 'bg-warning'"
+                >
+                  {{ h.activo ? "Activo" : "Inactivo" }}
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button
+                    class="btn btn-outline-info"
+                    (click)="verDetalle(h)"
+                    title="Ver detalles"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-primary"
+                    (click)="editarHorario(h.id)"
+                    title="Editar horario"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger"
+                    (click)="confirmarEliminar(h)"
+                    title="Eliminar horario"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div
+        *ngIf="!cargando && horariosFiltrados.length"
+        class="d-flex justify-content-between align-items-center mt-4"
+      >
+        <div class="text-muted">
+          Mostrando {{ horariosFiltrados.length }} de {{ totalRegistros }} horarios
+        </div>
+        <nav *ngIf="paginas.length > 1">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="javascript:void(0)" (click)="paginaAnterior()">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+            <li
+              *ngFor="let pagina of paginas"
+              class="page-item"
+              [class.active]="currentPage === pagina"
+            >
+              <a class="page-link" href="javascript:void(0)" (click)="irAPagina(pagina)">
+                {{ pagina }}
+              </a>
+            </li>
+            <li class="page-item" [class.disabled]="!nextPageUrl">
+              <a class="page-link" href="javascript:void(0)" (click)="siguientePagina()">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!cargando && !horariosFiltrados.length" class="text-center py-5">
+        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No se encontraron horarios</h5>
+        <p class="text-muted">Intenta ajustar la búsqueda o crea un nuevo horario.</p>
+        <button class="btn btn-primary" (click)="nuevoHorario()">
+          <i class="fas fa-plus me-1"></i> Crear primer horario
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalEliminar"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este horario?</p>
+        <div class="alert alert-warning">
+          <strong>{{ horarioAEliminar?.medico_nombre }} {{ horarioAEliminar?.medico_apellido }}</strong><br />
+          <small class="text-muted">
+            {{ horarioAEliminar?.dia_semana }} -
+            {{ horarioAEliminar?.hora_inicio }} a {{ horarioAEliminar?.hora_fin }}
+          </small>
+        </div>
+        <p class="text-danger small">
+          <i class="fas fa-info-circle me-1"></i> Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelarEliminar()">
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="eliminarHorarioConfirmado()">
+          <i class="fas fa-trash me-1"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalEliminar"></div>
+
+<!-- Modal Detalles -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalDetalle"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-info-circle me-2"></i>Detalles del Horario
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="cerrarModalDetalle()"
+        ></button>
+      </div>
+      <div class="modal-body" *ngIf="horarioSeleccionado">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Médico</h6>
+            <table class="table table-sm table-borderless">
+              <tr><td class="fw-bold">ID:</td><td>{{ horarioSeleccionado.id }}</td></tr>
+              <tr><td class="fw-bold">Médico:</td><td>{{ horarioSeleccionado.medico_nombre }} {{ horarioSeleccionado.medico_apellido }}</td></tr>
+              <tr><td class="fw-bold">Especialidad:</td><td>{{ horarioSeleccionado.especialidad_nombre }}</td></tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Detalles del Horario</h6>
+            <table class="table table-sm table-borderless">
+              <tr><td class="fw-bold">Día:</td><td>{{ horarioSeleccionado.dia_semana }}</td></tr>
+              <tr><td class="fw-bold">Hora Inicio:</td><td>{{ horarioSeleccionado.hora_inicio }}</td></tr>
+              <tr><td class="fw-bold">Hora Fin:</td><td>{{ horarioSeleccionado.hora_fin }}</td></tr>
+              <tr>
+                <td class="fw-bold">Estado:</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="horarioSeleccionado.activo ? 'bg-success' : 'bg-warning'"
+                  >
+                    {{ horarioSeleccionado.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">
+          <i class="fas fa-times me-1"></i> Cerrar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="editarHorario(horarioSeleccionado?.id)"
+        >
+          <i class="fas fa-edit me-1"></i> Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalDetalle"></div>

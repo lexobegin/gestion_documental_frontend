@@ -26,7 +26,7 @@ export class SidebarComponent {
       title: 'Agenda Medica',
       expanded: false,
       children: [
-        { title: 'Horario', route: '/dashboard' },
+        { title: 'Horario', route: '/horarios' },
         { title: 'Paciente', route: '/dashboard' },
       ],
     },
