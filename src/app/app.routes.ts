@@ -28,6 +28,7 @@ import { BackupListComponent } from './components/backup/backup-list/backup-list
 
 // Bitácora - NUEVA IMPORTACIÓN CON LA ESTRUCTURA CORRECTA
 import { BitacoraListComponent } from './components/bitacora/bitacora-list/bitacora-list.component';
+import { CitaCalendarioComponent } from './components/cita/cita-calendario/cita-calendario.component';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,7 @@ export const routes: Routes = [
       { path: 'citas', component: CitaListComponent },
       { path: 'citas/crear', component: CitaCreateComponent },
       { path: 'citas/editar/:id', component: CitaUpdateComponent },
+      { path: 'citas/calendario', component: CitaCalendarioComponent },
 
       //Backup/Restore
       { path: 'backups', component: BackupListComponent },

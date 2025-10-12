@@ -7,6 +7,7 @@ import {
   BackupCreate,
 } from '../../../models/backup/backup.model';
 import { BackupService } from '../../../services/backup/backup.service';
+import { ExportBackupService } from '../../../services/reporte/export-backup.service';
 
 @Component({
   selector: 'app-backup-list',
@@ -18,7 +19,7 @@ import { BackupService } from '../../../services/backup/backup.service';
 export class BackupListComponent implements OnInit {
   // Datos y estado
   backups: Backup[] = [];
-  todosBackups: Backup[] = [];
+  todosBackups: Backup[] = []; // Para exportar
   backupSeleccionado: Backup | null = null;
   backupAEliminar: Backup | null = null;
 
@@ -61,7 +62,10 @@ restoreBackup(id: number, notas?: string): Observable<any> {
   return this.http.post(`${this.apiUrl}${id}/restore/`, { notas });
 }
 */
-  constructor(private backupService: BackupService) {}
+  constructor(
+    private backupService: BackupService,
+    private exportBackupService: ExportBackupService
+  ) {}
 
   ngOnInit(): void {
     this.cargarBackups();
@@ -272,27 +276,57 @@ restoreBackup(id: number, notas?: string): Observable<any> {
 
   // Exportación
   generarReportePDF(): void {
-    this.generandoReporte = true;
-    setTimeout(() => {
-      this.generandoReporte = false;
-      alert('PDF de backups generado (funcionalidad por implementar)');
-    }, 1000);
+    this.generarReporte('pdf');
   }
 
   generarReporteExcel(): void {
-    this.generandoReporte = true;
-    setTimeout(() => {
-      this.generandoReporte = false;
-      alert('Excel de backups generado (funcionalidad por implementar)');
-    }, 1000);
+    this.generarReporte('excel');
   }
 
   generarReporteHTML(): void {
+    this.generarReporte('html');
+  }
+
+  private generarReporte(formato: 'pdf' | 'excel' | 'html'): void {
+    if (this.todosBackups.length === 0) {
+      this.error = 'No hay datos para generar el reporte';
+      return;
+    }
+
     this.generandoReporte = true;
-    setTimeout(() => {
+    this.error = undefined;
+
+    try {
+      const datosExportar = this.exportBackupService.prepararDatosBackup(
+        this.todosBackups
+      );
+      const fecha = new Date().toISOString().split('T')[0];
+      const filename = `reporte_backup_${fecha}`;
+      const title = `Reporte de Backup - ${new Date().toLocaleDateString(
+        'es-ES'
+      )}`;
+
+      switch (formato) {
+        case 'pdf':
+          this.exportBackupService.exportToPDFAsCards(
+            datosExportar,
+            filename,
+            title
+          );
+          break;
+        case 'excel':
+          this.exportBackupService.exportToExcel(datosExportar, filename);
+          break;
+        case 'html':
+          this.exportBackupService.exportToHTML(datosExportar, filename, title);
+          break;
+      }
+    } catch (error) {
+      console.error(`Error al generar reporte ${formato}:`, error);
+      this.error = `Error al generar el reporte ${formato.toUpperCase()}`;
+    } finally {
       this.generandoReporte = false;
-      alert('HTML de backups generado (funcionalidad por implementar)');
-    }, 1000);
+    }
   }
 
   // Métodos para restore
