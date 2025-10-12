@@ -4,7 +4,6 @@
       <!-- Elemento sin submenús -->
       <ng-container *ngIf="!menu.children?.length; else hasChildren">
         <a [routerLink]="menu.route">
-          <i hidden [class]="getMenuIcon(menu.title)" class="menu-icon"></i>
           {{ menu.title }}
         </a>
       </ng-container>
@@ -12,18 +11,12 @@
       <!-- Elemento con submenús -->
       <ng-template #hasChildren>
         <div class="menu-toggle" (click)="toggleMenu(menu)">
-          <i hidden [class]="getMenuIcon(menu.title)" class="menu-icon"></i>
           {{ menu.title }}
           <span [ngClass]="{ expanded: menu.expanded }">▼</span>
         </div>
         <ul class="submenu" [ngClass]="{ open: menu.expanded }">
           <li *ngFor="let child of menu.children">
             <a [routerLink]="child.route">
-              <i
-                hidden
-                [class]="getChildIcon(child.title)"
-                class="menu-icon"
-              ></i>
               {{ child.title }}
             </a>
           </li>

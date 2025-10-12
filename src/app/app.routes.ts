@@ -29,6 +29,11 @@ import { BackupListComponent } from './components/backup/backup-list/backup-list
 // Bitácora - NUEVA IMPORTACIÓN CON LA ESTRUCTURA CORRECTA
 import { BitacoraListComponent } from './components/bitacora/bitacora-list/bitacora-list.component';
 
+// PACIENTES - NUEVAS IMPORTACIONES
+import { PacienteListComponent } from './components/paciente/paciente-list/paciente-list.component';
+import { PacienteCreateComponent } from './components/paciente/paciente-create/paciente-create.component';
+import { PacienteUpdateComponent } from './components/paciente/paciente-update/paciente-update.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -55,6 +60,11 @@ export const routes: Routes = [
       { path: 'usuarios', component: UsuarioListComponent },
       { path: 'usuarios/crear', component: UsuarioCreateComponent },
       { path: 'usuarios/editar/:id', component: UsuarioUpdateComponent },
+
+      // PACIENTES - NUEVAS RUTAS
+      { path: 'pacientes', component: PacienteListComponent },
+      { path: 'pacientes/crear', component: PacienteCreateComponent },
+      { path: 'pacientes/editar/:id', component: PacienteUpdateComponent },
 
       // Roles
       { path: 'roles', component: RolesListComponent },

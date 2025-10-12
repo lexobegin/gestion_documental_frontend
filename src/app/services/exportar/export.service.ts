@@ -17,7 +17,7 @@ export class ExportService {
     window.URL.revokeObjectURL(url);
   }
 
-  // ✅ NUEVO: Método para preparar datos de bitácora
+  // NUEVO: Método para preparar datos de bitácora
   prepararDatosBitacora(registros: any[]): any[] {
     return registros.map(registro => ({
       'ID': registro.id,
@@ -29,6 +29,91 @@ export class ExportService {
       'IP': registro.ip_address,
       'Detalles': registro.detalles || 'Sin detalles'
     }));
+  }
+
+  // NUEVO: Método para preparar datos de pacientes
+  prepararDatosPacientes(pacientes: any[]): any[] {
+    return pacientes.map((paciente) => ({
+      'ID': paciente.id,
+      'Nombre': paciente.nombre,
+      'Apellido': paciente.apellido,
+      'Email': paciente.email,
+      'Teléfono': paciente.telefono || 'No especificado',
+      'Fecha Nacimiento': paciente.fecha_nacimiento
+        ? new Date(paciente.fecha_nacimiento).toLocaleDateString('es-ES')
+        : 'No especificada',
+      'Edad': this.calcularEdad(paciente.fecha_nacimiento),
+      'Género': this.getGenderLabel(paciente.genero),
+      'Dirección': paciente.direccion || 'No especificada',
+      'Alergias': paciente.alergias || 'Ninguna registrada',
+      'Medicamentos Actuales': paciente.medicamentos_actuales || 'Ninguno registrado',
+      'Antecedentes Médicos': paciente.antecedentes_medicos || 'Ninguno registrado',
+      'Estado': paciente.activo ? 'Activo' : 'Inactivo',
+      'Fecha Creación': paciente.fecha_creacion
+        ? new Date(paciente.fecha_creacion).toLocaleDateString('es-ES')
+        : 'No disponible',
+    }));
+  }
+
+  /** Método auxiliar para calcular edad */
+  private calcularEdad(fechaNacimiento: string): string {
+    if (!fechaNacimiento) return 'N/A';
+    
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    
+    return `${edad} años`;
+  }
+
+  /** Convertir datos para exportación - USUARIOS */
+  prepararDatosUsuarios(usuarios: any[]): any[] {
+    return usuarios.map((usuario) => ({
+      ID: usuario.id,
+      Nombre: usuario.nombre,
+      Apellido: usuario.apellido,
+      Email: usuario.email,
+      Rol: this.getRoleLabel(usuario),
+      Teléfono: usuario.telefono || 'No especificado',
+      Estado: usuario.activo ? 'Activo' : 'Inactivo',
+      Género: this.getGenderLabel(usuario.genero),
+      'Fecha Nacimiento': usuario.fecha_nacimiento
+        ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-ES')
+        : 'No especificada',
+      Dirección: usuario.direccion || 'No especificada',
+    }));
+  }
+
+  private getRoleLabel(usuario: any): string {
+    const role = usuario.rol?.nombre_rol || '';
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return 'Administrador';
+      case 'medico':
+        return 'Médico';
+      case 'paciente':
+        return 'Paciente';
+      default:
+        return role || 'No especificado';
+    }
+  }
+
+  getGenderLabel(genero: string): string {
+    switch (genero) {
+      case 'M':
+        return 'Masculino';
+      case 'F':
+        return 'Femenino';
+      case 'O':
+        return 'Otro';
+      default:
+        return 'No especificado';
+    }
   }
 
   /** Exportar a Excel */
@@ -290,6 +375,14 @@ export class ExportService {
       IP: 20,
       detalles: 50,
       Detalles: 50,
+      alergias: 40,
+      Alergias: 40,
+      medicamentos: 40,
+      'Medicamentos Actuales': 40,
+      antecedentes: 50,
+      'Antecedentes Médicos': 50,
+      edad: 15,
+      Edad: 15,
     };
 
     // Asignar anchos específicos o usar ancho por defecto
@@ -485,49 +578,6 @@ export class ExportService {
     } catch (error) {
       console.error('Error al exportar a HTML:', error);
       throw error;
-    }
-  }
-
-  /** Convertir datos para exportación */
-  prepararDatosUsuarios(usuarios: any[]): any[] {
-    return usuarios.map((usuario) => ({
-      ID: usuario.id,
-      Nombre: usuario.nombre,
-      Apellido: usuario.apellido,
-      Email: usuario.email,
-      Rol: this.getRoleLabel(usuario),
-      Teléfono: usuario.telefono || 'No especificado',
-      Estado: usuario.activo ? 'Activo' : 'Inactivo',
-      Género: this.getGenderLabel(usuario.genero),
-      'Fecha Nacimiento': usuario.fecha_nacimiento
-        ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-ES')
-        : 'No especificada',
-      Dirección: usuario.direccion || 'No especificada',
-    }));
-  }
-
-  private getRoleLabel(usuario: any): string {
-    const role = usuario.rol?.nombre_rol || '';
-    switch (role.toLowerCase()) {
-      case 'admin':
-        return 'Administrador';
-      case 'medico':
-        return 'Médico';
-      case 'paciente':
-        return 'Paciente';
-      default:
-        return role || 'No especificado';
-    }
-  }
-
-  private getGenderLabel(genero: string): string {
-    switch (genero) {
-      case 'M':
-        return 'Masculino';
-      case 'F':
-        return 'Femenino';
-      default:
-        return 'No especificado';
     }
   }
 

@@ -1,0 +1,360 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user-injured me-2"></i>Gestión de Pacientes
+        </h5>
+        <button class="btn btn-primary" (click)="crear()">
+          <i class="fas fa-plus me-1"></i> Nuevo paciente
+        </button>
+      </div>
+
+      <!-- Búsqueda y Filtros -->
+      <div class="row mb-4">
+        <!-- Buscador -->
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre, apellido o email..."
+              [(ngModel)]="terminoBusqueda"
+              (keyup)="buscar()"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limpiarFiltros()"
+              title="Limpiar búsqueda"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros Adicionales -->
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="filtroGenero" (change)="aplicarFiltros()">
+            <option value="">Todos los géneros</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Otro</option>
+          </select>
+        </div>
+
+        <!-- Botones de Exportación -->
+        <div class="col-md-3">
+          <div class="d-flex justify-content-end">
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-outline-danger btn-sm"
+                (click)="generarReportePDF()"
+                [disabled]="generandoReporte || todosPacientes.length === 0"
+                title="Exportar a PDF"
+              >
+                <i class="fas fa-file-pdf me-1"></i> PDF
+              </button>
+              <button
+                class="btn btn-outline-success btn-sm"
+                (click)="generarReporteExcel()"
+                [disabled]="generandoReporte || todosPacientes.length === 0"
+                title="Exportar a Excel"
+              >
+                <i class="fas fa-file-excel me-1"></i> Excel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando pacientes...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button type="button" class="btn-close float-end" (click)="error = undefined"></button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando && pacientes.length">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre Completo</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Edad</th>
+              <th>Género</th>
+              <th>Tipo Sangre</th>
+              <th>Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pacientes; trackBy: trackById">
+              <td class="fw-bold">{{ p.usuario?.id || p.id }}</td>
+              <td>{{ p.nombre_completo }}</td>
+              <td>
+                <span class="text-primary">{{ p.email }}</span>
+              </td>
+              <td>
+                <span [class.text-muted]="!p.telefono">
+                  {{ p.telefono || "—" }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ calcularEdad(p.fecha_nacimiento) }} años</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-primary': p.genero === 'M',
+                  'bg-warning': p.genero === 'F',
+                  'bg-secondary': p.genero === 'O'
+                }">
+                  {{ formatearGenero(p.genero) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-dark">{{ p.tipo_sangre || "—" }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="p.estado === 'Activo' ? 'bg-success' : 'bg-secondary'">
+                  {{ p.estado }}
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button
+                    class="btn btn-outline-info"
+                    (click)="verDetalle(p)"
+                    title="Ver detalles"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-primary"
+                    (click)="editar(p.usuario.id)"
+                    title="Editar paciente"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger"
+                    (click)="confirmarEliminar(p)"
+                    title="Eliminar paciente"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!-- Paginación -->
+<div *ngIf="!cargando && pacientes.length" class="d-flex justify-content-between align-items-center mt-4">
+  <div class="text-muted">
+    Mostrando {{ pacientes.length }} de {{ totalPacientes }} pacientes
+  </div>
+
+  <nav *ngIf="totalPaginas > 1">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item" [class.disabled]="paginaActual === 1">
+        <a class="page-link" href="javascript:void(0)" (click)="cambiarPagina(paginaActual - 1)">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+
+      <li
+        *ngFor="let pagina of [].constructor(totalPaginas); let i = index"
+        class="page-item"
+        [class.active]="paginaActual === i + 1"
+      >
+        <a class="page-link" href="javascript:void(0)" (click)="cambiarPagina(i + 1)">
+          {{ i + 1 }}
+        </a>
+      </li>
+
+      <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+        <a class="page-link" href="javascript:void(0)" (click)="cambiarPagina(paginaActual + 1)">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+
+      <!-- Vacío -->
+      <div *ngIf="!cargando && !pacientes.length" class="text-center py-5">
+        <i class="fas fa-user-injured fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No se encontraron pacientes</h5>
+        <p class="text-muted">
+          Intenta ajustar la búsqueda o crea un nuevo paciente.
+        </p>
+        <button class="btn btn-primary" (click)="crear()">
+          <i class="fas fa-plus me-1"></i> Crear primer paciente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade show" [class.d-block]="mostrarModalEliminar" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar al paciente?</p>
+        <div class="alert alert-warning">
+          <strong>{{ pacienteAEliminar?.nombre_completo }}</strong><br />
+          <small class="text-muted">{{ pacienteAEliminar?.email }}</small>
+        </div>
+        <p class="text-danger small">
+          <i class="fas fa-info-circle me-1"></i>
+          El paciente se marcará como inactivo y no aparecerá en las búsquedas regulares.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelarEliminar()">
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="eliminar()" [disabled]="false">
+          <i class="fas fa-trash me-1"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalEliminar"></div>
+
+<!-- Modal de Detalles del Paciente -->
+<div class="modal fade show" [class.d-block]="mostrarModalDetalle" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-user-injured me-2"></i>Detalles del Paciente
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetalle()"></button>
+      </div>
+      <div class="modal-body" *ngIf="pacienteSeleccionado">
+        <div class="row">
+          <!-- Información Personal -->
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información Personal</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">ID:</td>
+                <td>{{ pacienteSeleccionado.usuario?.id || pacienteSeleccionado.id }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Nombre:</td>
+                <td>{{ pacienteSeleccionado.nombre_completo }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Email:</td>
+                <td>{{ pacienteSeleccionado.email }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Teléfono:</td>
+                <td>{{ pacienteSeleccionado.telefono || "—" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Género:</td>
+                <td>{{ formatearGenero(pacienteSeleccionado.genero) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Fecha Nacimiento:</td>
+                <td>{{ formatearFecha(pacienteSeleccionado.fecha_nacimiento) }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Edad:</td>
+                <td>{{ calcularEdad(pacienteSeleccionado.fecha_nacimiento) }} años</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Información Médica -->
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información Médica</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Estado:</td>
+                <td>
+                  <span class="badge" [ngClass]="pacienteSeleccionado.estado === 'Activo' ? 'bg-success' : 'bg-warning'">
+                    {{ pacienteSeleccionado.estado }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tipo de Sangre:</td>
+                <td>{{ pacienteSeleccionado.tipo_sangre || "—" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Alergias:</td>
+                <td>{{ pacienteSeleccionado.alergias || "Ninguna registrada" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Medicamentos:</td>
+                <td>{{ pacienteSeleccionado.medicamentos_actuales || "Ninguno registrado" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Enfermedades Crónicas:</td>
+                <td>{{ pacienteSeleccionado.enfermedades_cronicas || "Ninguna registrada" }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Contacto de Emergencia -->
+        <div class="row mt-3" *ngIf="pacienteSeleccionado.contacto_emergencia_nombre">
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Contacto de Emergencia</h6>
+            <p class="mb-1">
+              <strong>{{ pacienteSeleccionado.contacto_emergencia_nombre }}</strong> 
+              ({{ pacienteSeleccionado.contacto_emergencia_parentesco || "Contacto" }})
+            </p>
+            <p class="mb-0 text-muted">
+              Teléfono: {{ pacienteSeleccionado.contacto_emergencia_telefono }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="row mt-3" *ngIf="pacienteSeleccionado.direccion">
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Dirección</h6>
+            <p class="mb-0">{{ pacienteSeleccionado.direccion }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">
+          <i class="fas fa-times me-1"></i> Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="editar(pacienteSeleccionado?.id)">
+          <i class="fas fa-edit me-1"></i> Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalDetalle"></div>

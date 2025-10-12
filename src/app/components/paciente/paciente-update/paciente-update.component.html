@@ -1,0 +1,189 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-edit me-2"></i>Editar Paciente
+        </h5>
+        <a routerLink="/pacientes" class="btn btn-light btn-sm">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Cargando -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando información del paciente...</p>
+      </div>
+
+      <!-- Error de carga -->
+      <div *ngIf="!cargando && error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+      </div>
+
+      <!-- Formulario -->
+      <form *ngIf="!cargando && !error" #f="ngForm" (ngSubmit)="guardar(f)" novalidate>
+        <div class="row g-3">
+          <!-- Información Personal -->
+          <div class="col-md-6">
+            <label for="nombre_completo" class="form-label">Nombre Completo</label>
+            <input id="nombre_completo" class="form-control"
+                   name="nombre_completo" [(ngModel)]="paciente.nombre_completo"
+                   required minlength="2" autocomplete="off" 
+                   #nombreCompleto="ngModel"
+                   [class.is-invalid]="nombreCompleto.invalid && (nombreCompleto.dirty || nombreCompleto.touched)" />
+            <div class="invalid-feedback" *ngIf="nombreCompleto.invalid && (nombreCompleto.dirty || nombreCompleto.touched)">
+              <div *ngIf="nombreCompleto.errors?.['required']">El nombre completo es requerido.</div>
+              <div *ngIf="nombreCompleto.errors?.['minlength']">Debe tener al menos 2 caracteres.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" class="form-control"
+                   name="email" [(ngModel)]="paciente.email"
+                   required autocomplete="off"
+                   #emailField="ngModel"
+                   [class.is-invalid]="emailField.invalid && (emailField.dirty || emailField.touched)" />
+            <div class="invalid-feedback" *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">
+              <div *ngIf="emailField.errors?.['required']">El email es requerido.</div>
+              <div *ngIf="emailField.errors?.['email']">Por favor ingrese un email válido.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input id="telefono" class="form-control"
+                   name="telefono" [(ngModel)]="paciente.telefono"
+                   autocomplete="off" />
+          </div>
+
+          <div class="col-md-6">
+            <label for="fecha_nacimiento" class="form-label">Fecha Nacimiento</label>
+            <input id="fecha_nacimiento" type="date" class="form-control"
+                   name="fecha_nacimiento" [(ngModel)]="paciente.fecha_nacimiento"
+                   required [max]="fechaHoy"
+                   #fechaNacimiento="ngModel"
+                   [class.is-invalid]="fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)" />
+            <div class="invalid-feedback" *ngIf="fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)">
+              La fecha de nacimiento es requerida.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="genero" class="form-label">Género</label>
+            <select id="genero" class="form-select"
+                    name="genero" [(ngModel)]="paciente.genero" required
+                    #generoField="ngModel"
+                    [class.is-invalid]="generoField.invalid && (generoField.dirty || generoField.touched)">
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="O">Otro</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="generoField.invalid && (generoField.dirty || generoField.touched)">
+              Debe seleccionar un género.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="tipo_sangre" class="form-label">Tipo de Sangre</label>
+            <select id="tipo_sangre" class="form-select"
+                    name="tipo_sangre" [(ngModel)]="paciente.tipo_sangre">
+              <option value="">-- Selecciona tipo de sangre --</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label for="direccion" class="form-label">Dirección</label>
+            <textarea id="direccion" class="form-control"
+                      name="direccion" [(ngModel)]="paciente.direccion"
+                      rows="2" maxlength="255"></textarea>
+          </div>
+
+          <!-- Información Médica -->
+          <div class="col-12">
+            <label for="alergias" class="form-label">Alergias</label>
+            <textarea id="alergias" class="form-control"
+                      name="alergias" [(ngModel)]="paciente.alergias"
+                      rows="2" maxlength="500"
+                      placeholder="Lista de alergias conocidas"></textarea>
+          </div>
+
+          <div class="col-12">
+            <label for="enfermedades_cronicas" class="form-label">Enfermedades Crónicas</label>
+            <textarea id="enfermedades_cronicas" class="form-control"
+                      name="enfermedades_cronicas" [(ngModel)]="paciente.enfermedades_cronicas"
+                      rows="2" maxlength="500"
+                      placeholder="Enfermedades crónicas, condiciones médicas"></textarea>
+          </div>
+
+          <div class="col-12">
+            <label for="medicamentos_actuales" class="form-label">Medicamentos Actuales</label>
+            <textarea id="medicamentos_actuales" class="form-control"
+                      name="medicamentos_actuales" [(ngModel)]="paciente.medicamentos_actuales"
+                      rows="2" maxlength="500"
+                      placeholder="Medicamentos que toma actualmente"></textarea>
+          </div>
+
+          <!-- Contacto de Emergencia -->
+          <div class="col-md-6">
+            <label for="contacto_emergencia_nombre" class="form-label">Contacto Emergencia - Nombre</label>
+            <input id="contacto_emergencia_nombre" class="form-control"
+                   name="contacto_emergencia_nombre" [(ngModel)]="paciente.contacto_emergencia_nombre"
+                   maxlength="100" autocomplete="off"
+                   placeholder="Nombre completo del contacto" />
+          </div>
+
+          <div class="col-md-6">
+            <label for="contacto_emergencia_parentesco" class="form-label">Parentesco</label>
+            <input id="contacto_emergencia_parentesco" class="form-control"
+                   name="contacto_emergencia_parentesco" [(ngModel)]="paciente.contacto_emergencia_parentesco"
+                   maxlength="50" autocomplete="off"
+                   placeholder="Ej: Padre, Madre, Hermano" />
+          </div>
+
+          <div class="col-12">
+            <label for="contacto_emergencia_telefono" class="form-label">Contacto Emergencia - Teléfono</label>
+            <input id="contacto_emergencia_telefono" class="form-control"
+                   name="contacto_emergencia_telefono" [(ngModel)]="paciente.contacto_emergencia_telefono"
+                   maxlength="20" autocomplete="off"
+                   placeholder="Teléfono de emergencia" />
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input id="estado" class="form-check-input" type="checkbox"
+                     [checked]="paciente.estado === 'Activo'"
+                     (change)="paciente.estado = paciente.estado === 'Activo' ? 'Inactivo' : 'Activo'" />
+              <label class="form-check-label" for="estado">Paciente Activo</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+        <div *ngIf="mensaje" class="alert alert-success mt-3">{{ mensaje }}</div>
+
+        <!-- Acciones -->
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-primary" type="submit" [disabled]="guardando || f.invalid">
+            {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+          <a routerLink="/pacientes" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

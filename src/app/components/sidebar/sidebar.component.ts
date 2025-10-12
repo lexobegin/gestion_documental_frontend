@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -27,7 +27,7 @@ export class SidebarComponent {
       expanded: false,
       children: [
         { title: 'Horario', route: '/dashboard' },
-        { title: 'Paciente', route: '/dashboard' },
+        { title: 'Paciente', route: '/pacientes' },
       ],
     },
     {
@@ -50,31 +50,5 @@ export class SidebarComponent {
 
   toggleMenu(menu: any) {
     menu.expanded = !menu.expanded;
-  }
-
-  getMenuIcon(menuTitle: string): string {
-    const icons: { [key: string]: string } = {
-      'Home': 'fas fa-home',
-      'Usuarios': 'fas fa-users',
-      'Agenda Medica': 'fas fa-calendar-alt',
-      'Historia Clinica': 'fas fa-file-medical',
-      'Sistema': 'fas fa-cogs'
-    };
-    return icons[menuTitle] || 'fas fa-circle';
-  }
-
-  getChildIcon(childTitle: string): string {
-    const icons: { [key: string]: string } = {
-      'Usuario': 'fas fa-user',
-      'Roles y Permisos': 'fas fa-user-shield',
-      'Especialidades': 'fas fa-stethoscope',
-      'Horario': 'fas fa-clock',
-      'Paciente': 'fas fa-user-injured',
-      'Consulta': 'fas fa-notes-medical',
-      'Citas Medicas': 'fas fa-calendar-check',
-      'Bitacora': 'fas fa-clipboard-list',
-      'Backup/Restore': 'fas fa-database'
-    };
-    return icons[childTitle] || 'fas fa-circle';
   }
 }

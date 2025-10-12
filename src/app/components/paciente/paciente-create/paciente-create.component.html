@@ -1,0 +1,313 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user-plus me-2"></i>Crear Nuevo Paciente
+        </h5>
+        <a routerLink="/pacientes" class="btn btn-light btn-sm">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form #f="ngForm" (ngSubmit)="guardar(f)" novalidate>
+        <!-- Información Personal -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-user me-2"></i>Información Personal
+            </h6>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="nombre" class="form-label">Nombre *</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-control"
+              [(ngModel)]="paciente.nombre"
+              (input)="onNombreChange()"
+              name="nombre"
+              required
+              minlength="2"
+              maxlength="50"
+              placeholder="Ej: Juan"
+              #nombreField="ngModel"
+              [class.is-invalid]="(nombreField.invalid && (nombreField.dirty || nombreField.touched)) || (submitted && nombreField.invalid)"
+            />
+            <div class="invalid-feedback" *ngIf="(nombreField.invalid && (nombreField.dirty || nombreField.touched)) || (submitted && nombreField.invalid)">
+              <div *ngIf="nombreField.errors?.['required']">El nombre es requerido.</div>
+              <div *ngIf="nombreField.errors?.['minlength']">Debe tener al menos 2 caracteres.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="apellido" class="form-label">Apellido *</label>
+            <input
+              id="apellido"
+              type="text"
+              class="form-control"
+              [(ngModel)]="paciente.apellido"
+              (input)="onApellidoChange()"
+              name="apellido"
+              required
+              minlength="2"
+              maxlength="50"
+              placeholder="Ej: Pérez García"
+              #apellidoField="ngModel"
+              [class.is-invalid]="(apellidoField.invalid && (apellidoField.dirty || apellidoField.touched)) || (submitted && apellidoField.invalid)"
+            />
+            <div class="invalid-feedback" *ngIf="(apellidoField.invalid && (apellidoField.dirty || apellidoField.touched)) || (submitted && apellidoField.invalid)">
+              <div *ngIf="apellidoField.errors?.['required']">El apellido es requerido.</div>
+              <div *ngIf="apellidoField.errors?.['minlength']">Debe tener al menos 2 caracteres.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="email" class="form-label">Email *</label>
+            <input
+              id="email"
+              type="email"
+              class="form-control"
+              [(ngModel)]="paciente.email"
+              name="email"
+              required
+              placeholder="ejemplo@correo.com"
+              #emailField="ngModel"
+              [class.is-invalid]="(emailField.invalid && (emailField.dirty || emailField.touched)) || (submitted && emailField.invalid)"
+            />
+            <div class="invalid-feedback" *ngIf="(emailField.invalid && (emailField.dirty || emailField.touched)) || (submitted && emailField.invalid)">
+              <div *ngIf="emailField.errors?.['required']">El email es requerido.</div>
+              <div *ngIf="emailField.errors?.['email']">Ingrese un email válido.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="password" class="form-label">Contraseña Temporal *</label>
+            <div class="input-group">
+              <input
+                id="password"
+                [type]="mostrarPassword ? 'text' : 'password'"
+                class="form-control"
+                [(ngModel)]="paciente.password"
+                name="password"
+                required
+                minlength="6"
+                placeholder="Mínimo 6 caracteres"
+                #passwordField="ngModel"
+                [class.is-invalid]="(passwordField.invalid && (passwordField.dirty || passwordField.touched)) || (submitted && passwordField.invalid)"
+              />
+              <button type="button" class="btn btn-outline-secondary" (click)="toggleMostrarPassword()">
+                <i class="fas" [class.fa-eye]="!mostrarPassword" [class.fa-eye-slash]="mostrarPassword"></i>
+              </button>
+              <button type="button" class="btn btn-outline-primary" (click)="generarPassword()">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="(passwordField.invalid && (passwordField.dirty || passwordField.touched)) || (submitted && passwordField.invalid)">
+              <div *ngIf="passwordField.errors?.['required']">La contraseña es requerida.</div>
+              <div *ngIf="passwordField.errors?.['minlength']">Mínimo 6 caracteres.</div>
+            </div>
+            <div class="form-text">Contraseña temporal. El paciente podrá cambiarla después.</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input
+              id="telefono"
+              type="tel"
+              class="form-control"
+              [(ngModel)]="paciente.telefono"
+              name="telefono"
+              placeholder="+34 123 456 789"
+              maxlength="20"
+            />
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento *</label>
+            <input
+              id="fecha_nacimiento"
+              type="date"
+              class="form-control"
+              [(ngModel)]="paciente.fecha_nacimiento"
+              name="fecha_nacimiento"
+              required
+              [max]="fechaHoy"
+              #fechaNacimiento="ngModel"
+              [class.is-invalid]="(fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)) || (submitted && fechaNacimiento.invalid)"
+            />
+            <div class="invalid-feedback" *ngIf="(fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)) || (submitted && fechaNacimiento.invalid)">
+              La fecha de nacimiento es requerida.
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="genero" class="form-label">Género *</label>
+            <select
+              id="genero"
+              class="form-select"
+              [(ngModel)]="paciente.genero"
+              name="genero"
+              required
+              #generoField="ngModel"
+              [class.is-invalid]="(generoField.invalid && (generoField.dirty || generoField.touched)) || (submitted && generoField.invalid)"
+            >
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="O">Otro</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="(generoField.invalid && (generoField.dirty || generoField.touched)) || (submitted && generoField.invalid)">
+              Seleccione un género.
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="tipo_sangre" class="form-label">Tipo de Sangre</label>
+            <select
+              id="tipo_sangre"
+              class="form-select"
+              [(ngModel)]="paciente.tipo_sangre"
+              name="tipo_sangre"
+            >
+              <option value="">-- Seleccione --</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="col-12 mb-3">
+            <label for="direccion" class="form-label">Dirección</label>
+            <textarea
+              id="direccion"
+              class="form-control"
+              [(ngModel)]="paciente.direccion"
+              name="direccion"
+              rows="2"
+              placeholder="Dirección completa"
+              maxlength="255"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Información Médica -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3"><i class="fas fa-heartbeat me-2"></i>Información Médica</h6>
+          </div>
+          <div class="col-12 mb-3">
+            <label for="alergias" class="form-label">Alergias Conocidas</label>
+            <textarea
+              id="alergias"
+              class="form-control"
+              [(ngModel)]="paciente.alergias"
+              name="alergias"
+              rows="2"
+              placeholder="Lista de alergias"
+              maxlength="500"
+            ></textarea>
+          </div>
+          <div class="col-12 mb-3">
+            <label for="enfermedades_cronicas" class="form-label">Enfermedades Crónicas</label>
+            <textarea
+              id="enfermedades_cronicas"
+              class="form-control"
+              [(ngModel)]="paciente.enfermedades_cronicas"
+              name="enfermedades_cronicas"
+              rows="2"
+              placeholder="Enfermedades crónicas"
+              maxlength="500"
+            ></textarea>
+          </div>
+          <div class="col-12 mb-3">
+            <label for="medicamentos_actuales" class="form-label">Medicamentos Actuales</label>
+            <textarea
+              id="medicamentos_actuales"
+              class="form-control"
+              [(ngModel)]="paciente.medicamentos_actuales"
+              name="medicamentos_actuales"
+              rows="2"
+              placeholder="Medicamentos actuales"
+              maxlength="500"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Contacto de Emergencia -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3"><i class="fas fa-phone-alt me-2"></i>Contacto de Emergencia</h6>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="contacto_emergencia_nombre" class="form-label">Nombre del Contacto</label>
+            <input
+              id="contacto_emergencia_nombre"
+              type="text"
+              class="form-control"
+              [(ngModel)]="paciente.contacto_emergencia_nombre"
+              name="contacto_emergencia_nombre"
+              placeholder="Nombre completo"
+              maxlength="100"
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="contacto_emergencia_parentesco" class="form-label">Parentesco</label>
+            <input
+              id="contacto_emergencia_parentesco"
+              type="text"
+              class="form-control"
+              [(ngModel)]="paciente.contacto_emergencia_parentesco"
+              name="contacto_emergencia_parentesco"
+              placeholder="Ej: Padre, Madre, etc."
+              maxlength="50"
+            />
+          </div>
+          <div class="col-12 mb-3">
+            <label for="contacto_emergencia_telefono" class="form-label">Teléfono de Emergencia</label>
+            <input
+              id="contacto_emergencia_telefono"
+              type="tel"
+              class="form-control"
+              [(ngModel)]="paciente.contacto_emergencia_telefono"
+              name="contacto_emergencia_telefono"
+              placeholder="+34 123 456 789"
+              maxlength="20"
+            />
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> {{ error }}
+          <button type="button" class="btn-close" (click)="error = undefined"></button>
+        </div>
+
+        <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i><strong>Éxito:</strong> {{ mensaje }}
+          <button type="button" class="btn-close" (click)="mensaje = undefined"></button>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+          <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Campos marcados con * son obligatorios.</small>
+          <div class="d-flex gap-2">
+            <a routerLink="/pacientes" class="btn btn-outline-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
+              <i class="fas fa-save me-1" *ngIf="!guardando"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="guardando"></i>
+              {{ guardando ? "Guardando..." : "Guardar Paciente" }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
