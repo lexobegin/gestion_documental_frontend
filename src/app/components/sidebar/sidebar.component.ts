@@ -27,7 +27,7 @@ export class SidebarComponent {
       expanded: false,
       children: [
         { title: 'Horario', route: '/dashboard' },
-        { title: 'Paciente', route: '/pacientes' },
+        { title: 'Paciente', route: '/dashboard' },
       ],
     },
     {

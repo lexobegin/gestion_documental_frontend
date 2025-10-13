@@ -26,6 +26,12 @@ import { CitaCreateComponent } from './components/cita/cita-create/cita-create.c
 import { CitaUpdateComponent } from './components/cita/cita-update/cita-update.component';
 import { BackupListComponent } from './components/backup/backup-list/backup-list.component';
 
+// Gestionar Horario - Alison 
+import { HorarioMedicoListComponent } from './components/horario/list/horario-medico-list.component';
+import { HorarioMedicoCreateComponent } from './components/horario/create/horario-medico-create.component';
+import { HorarioMedicoUpdateComponent } from './components/horario/update/horario-medico-update.component';
+
+
 // Bitácora - NUEVA IMPORTACIÓN CON LA ESTRUCTURA CORRECTA
 import { BitacoraListComponent } from './components/bitacora/bitacora-list/bitacora-list.component';
 import { CitaCalendarioComponent } from './components/cita/cita-calendario/cita-calendario.component';
@@ -90,6 +96,11 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       // Consultas
       { path: 'consultas', component: ConsultaComponent },
+
+      // Gestionar Horario - Alison
+      { path: 'horarios', component: HorarioMedicoListComponent },
+      { path: 'horarios/create', component: HorarioMedicoCreateComponent },
+      { path: 'horarios/update/:id', component: HorarioMedicoUpdateComponent },
     ],
   },
 
