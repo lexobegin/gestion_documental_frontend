@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ExportService } from '../../../services/exportar/export.service';
+import { environment } from '../../../../environments/environment'; 
 
 @Component({
   selector: 'app-horario-medico-list',
@@ -18,25 +19,24 @@ export class HorarioMedicoListComponent implements OnInit {
   private router = inject(Router);
   private exportSrv = inject(ExportService);
 
-  baseUrl = 'http://localhost:8000/api/horarios-medico/';
+  //  URLs dinámicas según entorno
+  baseUrl = `${environment.apiUrl}/horarios-medico/`;
+
   horarios: any[] = [];
   horariosFiltrados: any[] = [];
   todosHorarios: any[] = [];
   filtro: string = '';
 
-  // Estado
   cargando = false;
   error?: string;
   generandoReporte = false;
 
-  // Paginación
   nextPageUrl: string | null = null;
   prevPageUrl: string | null = null;
   currentPage = 1;
   totalRegistros = 0;
   paginas: number[] = [];
 
-  // Modales
   mostrarModalEliminar = false;
   mostrarModalDetalle = false;
   horarioSeleccionado?: any;
@@ -45,7 +45,7 @@ export class HorarioMedicoListComponent implements OnInit {
   ngOnInit(): void {
     this.cargarHorarios(this.baseUrl);
 
-    // Refrescar cuando se vuelve a la ruta
+    // Refrescar al volver a la ruta
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
@@ -68,7 +68,7 @@ export class HorarioMedicoListComponent implements OnInit {
         this.totalRegistros = data.count || this.horarios.length;
         this.calcularPaginas(this.totalRegistros);
         this.cargando = false;
-        this.cargarTodosHorarios(); // Para exportación
+        this.cargarTodosHorarios();
       },
       error: (err) => {
         console.error('❌ Error cargando horarios:', err);
@@ -81,7 +81,7 @@ export class HorarioMedicoListComponent implements OnInit {
   cargarTodosHorarios() {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
-    const url = this.baseUrl + '?page_size=1000';
+    const url = `${this.baseUrl}?page_size=1000`;
     this.http.get<any>(url, { headers }).subscribe({
       next: (data) => {
         this.todosHorarios = data.results || [];
@@ -154,7 +154,7 @@ export class HorarioMedicoListComponent implements OnInit {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
 
-    this.http.delete(this.baseUrl + id + '/', { headers }).subscribe({
+    this.http.delete(`${this.baseUrl}${id}/`, { headers }).subscribe({
       next: () => {
         this.horarios = this.horarios.filter(h => h.id !== id);
         this.horariosFiltrados = this.horarios;

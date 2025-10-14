@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../../../environments/environment'; 
 
 @Component({
   selector: 'app-horario-medico-update',
@@ -16,10 +17,11 @@ export class HorarioMedicoUpdateComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  baseUrl = 'http://localhost:8000/api/horarios-medico/';
-  medicoEspecialidadesUrl = 'http://localhost:8000/api/select/medico-especialidades/';
-  diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  // ✅ URLs dinámicas según entorno
+  baseUrl = `${environment.apiUrl}/horarios-medico/`;
+  medicoEspecialidadesUrl = `${environment.apiUrl}/select/medico-especialidades/`;
 
+  diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   medicoEspecialidades: any[] = [];
   horario: any = null;
   id!: number;
@@ -33,6 +35,7 @@ export class HorarioMedicoUpdateComponent implements OnInit {
   cargarMedicoEspecialidades() {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
+
     this.http.get<any[]>(this.medicoEspecialidadesUrl, { headers }).subscribe({
       next: (data) => {
         this.medicoEspecialidades = data;
@@ -58,7 +61,10 @@ export class HorarioMedicoUpdateComponent implements OnInit {
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
 
     this.http.put(`${this.baseUrl}${this.id}/`, this.horario, { headers }).subscribe({
-      next: () => this.router.navigate(['/horarios']),
+      next: () => {
+        console.log('✅ Horario actualizado correctamente');
+        this.router.navigate(['/horarios']);
+      },
       error: (err) => console.error('❌ Error actualizando horario:', err)
     });
   }
