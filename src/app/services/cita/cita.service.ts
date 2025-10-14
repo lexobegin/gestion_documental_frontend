@@ -10,11 +10,39 @@ import {
   PaginationParams,
 } from '../../models/cita/cita.model';
 
+export interface PacienteSelect {
+  usuario: {
+    id: number;
+    email: string;
+    nombre: string;
+    apellido: string;
+    nombre_completo: string;
+  };
+  nombre_completo: string;
+  email: string;
+  estado: string;
+  tipo_sangre: string;
+}
+
+export interface MedicoEspecialidadSelect {
+  id: number;
+  medico: number;
+  medico_nombre_completo: string;
+  especialidad: number;
+  especialidad_nombre: string;
+  especialidad_codigo: string;
+}
+
+export interface HorariosDisponibles {
+  horas_disponibles: string[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class CitaService {
   private apiUrl = `${environment.apiUrl}/agenda-citas/`;
+  private selectUrl = `${environment.apiUrl}/select/`;
 
   constructor(private http: HttpClient) {}
 
@@ -68,7 +96,7 @@ export class CitaService {
 
   // Actualizar cita existente
   updateCita(id: number, cita: CitaUpdate): Observable<Cita> {
-    return this.http.put<Cita>(`${this.apiUrl}${id}/`, cita);
+    return this.http.patch<Cita>(`${this.apiUrl}${id}/`, cita);
   }
 
   // Cambiar estado de cita
@@ -82,7 +110,7 @@ export class CitaService {
   updateCitaCalendar(id: number, cita: CitaUpdate): Observable<Cita> {
     console.log('cita-service: ', cita);
 
-    return this.http.put<Cita>(`${this.apiUrl}${id}/`, cita).pipe(
+    return this.http.patch<Cita>(`${this.apiUrl}${id}/`, cita).pipe(
       catchError((error) => {
         if (error.status === 400 && error.error?.non_field_errors) {
           // Manejar errores de validación del backend
@@ -113,5 +141,43 @@ export class CitaService {
   // Obtener citas del médico actual
   getMisCitas(params?: PaginationParams): Observable<ApiResponse<Cita>> {
     return this.getCitas(params);
+  }
+
+  // Nuevos métodos para los selects
+  buscarPacientes(search?: string): Observable<PacienteSelect[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<PacienteSelect[]>(`${this.selectUrl}pacientes/`, {
+      params,
+    });
+  }
+
+  buscarMedicoEspecialidades(
+    search?: string
+  ): Observable<MedicoEspecialidadSelect[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<MedicoEspecialidadSelect[]>(
+      `${this.selectUrl}medico-especialidades/`,
+      { params }
+    );
+  }
+
+  obtenerHorariosDisponibles(
+    medicoEspecialidadId: number,
+    fecha: string
+  ): Observable<HorariosDisponibles> {
+    let params = new HttpParams()
+      .set('medico_especialidad', medicoEspecialidadId.toString())
+      .set('fecha', fecha);
+
+    return this.http.get<HorariosDisponibles>(
+      `${this.apiUrl}horas-disponibles/`,
+      { params }
+    );
   }
 }

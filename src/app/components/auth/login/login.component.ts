@@ -1,5 +1,10 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -9,7 +14,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'], // ✅ ahora sí coincide
+  styleUrls: ['./login.component.scss'], // ahora sí coincide
 })
 export class LoginComponent {
   loginForm: FormGroup;
@@ -29,26 +34,30 @@ export class LoginComponent {
     });
   }
 
-  togglePassword() { this.showPassword = !this.showPassword; }
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
 
-  isInvalid(ctrl: string){
+  isInvalid(ctrl: string) {
     const c = this.loginForm.get(ctrl);
     return !!(c && c.invalid && (c.touched || c.dirty));
   }
 
-  showError(ctrl: string, err: string){
+  showError(ctrl: string, err: string) {
     const c = this.loginForm.get(ctrl);
     return !!(c && c.hasError(err) && (c.touched || c.dirty));
   }
 
-  markTouched(ctrl: string){ this.loginForm.get(ctrl)?.markAsTouched(); }
+  markTouched(ctrl: string) {
+    this.loginForm.get(ctrl)?.markAsTouched();
+  }
 
   onSubmit(): void {
     if (!this.loginForm.valid || this.loading) {
       this.loginForm.markAllAsTouched();
       return;
     }
-    this.loading = true; 
+    this.loading = true;
     this.errorMessage = null;
     const { email, password } = this.loginForm.value;
 
@@ -61,11 +70,11 @@ export class LoginComponent {
         this.errorMessage = 'Credenciales incorrectas';
         console.error(err);
         this.loading = false;
-        
-        // ✅ REGISTRAR INTENTO FALLIDO EN BITÁCORA
+
+        // REGISTRAR INTENTO FALLIDO EN BITÁCORA
         this.authService.registrarIntentoFallido(email);
       },
-      complete: () => this.loading = false
+      complete: () => (this.loading = false),
     });
   }
 }

@@ -284,6 +284,7 @@ export class CitaCalendarioComponent implements OnInit {
           );
 
           this.limpiarVariablesModal();
+          this.recargarCalendario();
         },
         error: (err) => {
           this.reprogCargando = false;
@@ -336,7 +337,7 @@ export class CitaCalendarioComponent implements OnInit {
 
   // Crear nueva cita
   crearNuevaCita(): void {
-    this.router.navigate(['/citas/nueva']);
+    this.router.navigate(['citas/crear']);
   }
 
   handleEventClick(clickInfo: EventClickArg): void {

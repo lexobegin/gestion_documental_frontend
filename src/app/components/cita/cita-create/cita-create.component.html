@@ -8,14 +8,6 @@
           </h5>
         </div>
         <div class="card-body">
-          <!-- Estados -->
-          <div *ngIf="cargando" class="text-center mb-3">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Cargando...</span>
-            </div>
-            <p class="mt-2 text-muted">Cargando datos...</p>
-          </div>
-
           <div *ngIf="error" class="alert alert-danger mb-3">
             <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
             <button
@@ -25,75 +17,250 @@
             ></button>
           </div>
 
-          <!-- Formulario -->
-          <form (ngSubmit)="guardar()" #citaForm="ngForm" *ngIf="!cargando">
+          <form (ngSubmit)="guardar()" #citaForm="ngForm">
             <div class="row">
-              <!-- Paciente -->
+              <!-- Paciente con Dropdown de Bootstrap -->
               <div class="col-md-6 mb-3">
-                <label for="paciente" class="form-label">
+                <label class="form-label">
                   Paciente <span class="text-danger">*</span>
                 </label>
-                <select
-                  class="form-select"
-                  id="paciente"
-                  name="paciente"
-                  [(ngModel)]="cita.paciente"
-                  #paciente="ngModel"
-                  required
-                  [class.is-invalid]="
-                    paciente.invalid && (paciente.dirty || paciente.touched)
-                  "
-                >
-                  <option value="">Seleccionar paciente...</option>
-                  <option *ngFor="let p of pacientes" [value]="p.id">
-                    {{ p.nombre }} {{ p.apellido }} - {{ p.email }}
-                  </option>
-                </select>
-                <div
-                  class="invalid-feedback"
-                  *ngIf="paciente.errors?.['required']"
-                >
-                  Selecciona un paciente
+
+                <div class="dropdown" #pacienteDropdown>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Buscar paciente..."
+                      [(ngModel)]="searchPaciente"
+                      (input)="filtrarPacientes()"
+                      name="searchPaciente"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      autocomplete="off"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      (click)="limpiarPaciente()"
+                      title="Limpiar selección"
+                      *ngIf="cita.paciente"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                    >
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <ul
+                      class="dropdown-menu w-100"
+                      style="max-height: 300px; overflow-y: auto"
+                    >
+                      <!-- Busqueda dentro del dropdown -->
+                      <li>
+                        <div class="px-3 py-2 border-bottom">
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Filtrar pacientes..."
+                            (input)="filtrarPacientes()"
+                            [(ngModel)]="searchPaciente"
+                            name="searchPacienteInner"
+                            (click)="$event.stopPropagation()"
+                          />
+                        </div>
+                      </li>
+
+                      <!-- Loading -->
+                      <li *ngIf="cargandoPacientes">
+                        <div class="px-3 py-2 text-center">
+                          <div
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                          >
+                            <span class="visually-hidden">Cargando...</span>
+                          </div>
+                          <span class="ms-2 text-muted"
+                            >Cargando pacientes...</span
+                          >
+                        </div>
+                      </li>
+
+                      <!-- Resultados -->
+                      <li *ngFor="let p of pacientesFiltrados">
+                        <a
+                          class="dropdown-item"
+                          (click)="seleccionarPaciente(p)"
+                        >
+                          <div
+                            class="d-flex justify-content-between align-items-start"
+                          >
+                            <div>
+                              <strong>{{ p.nombre_completo }}</strong>
+                              <div class="text-muted small">{{ p.email }}</div>
+                            </div>
+                            <div class="text-end">
+                              <span class="badge bg-success">{{
+                                p.estado
+                              }}</span>
+                              <span
+                                *ngIf="p.tipo_sangre"
+                                class="badge bg-info d-block mt-1"
+                                >Sangre: {{ p.tipo_sangre }}</span
+                              >
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+
+                      <!-- Sin resultados -->
+                      <li
+                        *ngIf="
+                          !cargandoPacientes && pacientesFiltrados.length === 0
+                        "
+                      >
+                        <div class="px-3 py-2 text-muted text-center">
+                          No se encontraron pacientes
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Paciente seleccionado -->
+                <div class="mt-2" *ngIf="cita.paciente">
+                  <span class="badge bg-primary fs-6">
+                    <i class="fas fa-user me-1"></i>
+                    {{ getPacienteSeleccionado() }}
+                  </span>
                 </div>
               </div>
 
-              <!-- Cambiar el selector de médico por médico-especialidad -->
+              <!-- Médico con Dropdown de Bootstrap -->
               <div class="col-md-6 mb-3">
-                <label for="medico_especialidad" class="form-label">
+                <label class="form-label">
                   Médico y Especialidad <span class="text-danger">*</span>
                 </label>
-                <select
-                  class="form-select"
-                  id="medico_especialidad"
-                  name="medico_especialidad"
-                  [(ngModel)]="cita.medico_especialidad"
-                  #medico_especialidad="ngModel"
-                  required
-                  [class.is-invalid]="
-                    medico_especialidad.invalid &&
-                    (medico_especialidad.dirty || medico_especialidad.touched)
-                  "
-                >
-                  <option value="">Seleccionar médico y especialidad...</option>
-                  <option
-                    *ngFor="let me of medicosEspecialidades"
-                    [value]="me.id"
-                  >
-                    Dr. {{ me.medico_nombre }} {{ me.medico_apellido }} -
-                    {{ me.especialidad_nombre }}
-                  </option>
-                </select>
-                <div
-                  class="invalid-feedback"
-                  *ngIf="medico_especialidad.errors?.['required']"
-                >
-                  Selecciona un médico y especialidad
+
+                <div class="dropdown" #medicoDropdown>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Buscar médico o especialidad..."
+                      [(ngModel)]="searchMedico"
+                      (input)="filtrarMedicos()"
+                      name="searchMedico"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      autocomplete="off"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      (click)="limpiarMedico()"
+                      title="Limpiar selección"
+                      *ngIf="cita.medico_especialidad"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                    >
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <ul
+                      class="dropdown-menu w-100"
+                      style="max-height: 300px; overflow-y: auto"
+                    >
+                      <!-- Busqueda dentro del dropdown -->
+                      <li>
+                        <div class="px-3 py-2 border-bottom">
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Filtrar médicos..."
+                            (input)="filtrarMedicos()"
+                            [(ngModel)]="searchMedico"
+                            name="searchMedicoInner"
+                            (click)="$event.stopPropagation()"
+                          />
+                        </div>
+                      </li>
+
+                      <!-- Loading -->
+                      <li *ngIf="cargandoMedicos">
+                        <div class="px-3 py-2 text-center">
+                          <div
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                          >
+                            <span class="visually-hidden">Cargando...</span>
+                          </div>
+                          <span class="ms-2 text-muted"
+                            >Cargando médicos...</span
+                          >
+                        </div>
+                      </li>
+
+                      <!-- Resultados -->
+                      <li *ngFor="let me of medicosFiltrados">
+                        <a
+                          class="dropdown-item"
+                          (click)="seleccionarMedico(me)"
+                        >
+                          <div
+                            class="d-flex justify-content-between align-items-start"
+                          >
+                            <div>
+                              <strong>{{ me.medico_nombre_completo }}</strong>
+                              <div class="text-muted small">
+                                {{ me.especialidad_nombre }}
+                              </div>
+                            </div>
+                            <div>
+                              <span class="badge bg-secondary">{{
+                                me.especialidad_codigo
+                              }}</span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+
+                      <!-- Sin resultados -->
+                      <li
+                        *ngIf="
+                          !cargandoMedicos && medicosFiltrados.length === 0
+                        "
+                      >
+                        <div class="px-3 py-2 text-muted text-center">
+                          No se encontraron médicos
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Médico seleccionado -->
+                <div class="mt-2" *ngIf="cita.medico_especialidad">
+                  <span class="badge bg-info fs-6">
+                    <i class="fas fa-user-md me-1"></i>
+                    {{ getMedicoSeleccionado() }}
+                  </span>
                 </div>
               </div>
             </div>
 
+            <!-- Resto del formulario se mantiene igual -->
             <div class="row">
-              <!-- Fecha -->
               <div class="col-md-6 mb-3">
                 <label for="fecha_cita" class="form-label">
                   Fecha de la cita <span class="text-danger">*</span>
@@ -111,50 +278,87 @@
                     fecha_cita.invalid &&
                     (fecha_cita.dirty || fecha_cita.touched)
                   "
+                  (change)="onMedicoYFechaChange()"
                 />
-                <div
-                  class="invalid-feedback"
-                  *ngIf="fecha_cita.errors?.['required']"
-                >
-                  La fecha es obligatoria
-                </div>
                 <div class="form-text">
                   La fecha debe ser hoy o en el futuro
                 </div>
               </div>
 
-              <!-- Hora -->
               <div class="col-md-6 mb-3">
-                <label for="hora_cita" class="form-label">
-                  Hora de la cita <span class="text-danger">*</span>
+                <label class="form-label">
+                  Horarios Disponibles <span class="text-danger">*</span>
                 </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="hora_cita"
-                  name="hora_cita"
-                  [(ngModel)]="cita.hora_cita"
-                  #hora_cita="ngModel"
-                  required
-                  [class.is-invalid]="
-                    hora_cita.invalid && (hora_cita.dirty || hora_cita.touched)
-                  "
-                />
-                <div
-                  class="invalid-feedback"
-                  *ngIf="hora_cita.errors?.['required']"
-                >
-                  La hora es obligatoria
+
+                <div *ngIf="cargandoHorarios" class="text-center py-3">
+                  <div
+                    class="spinner-border spinner-border-sm text-primary"
+                    role="status"
+                  >
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <small class="ms-2 text-muted"
+                    >Cargando horarios disponibles...</small
+                  >
                 </div>
-                <div class="form-text">Horario de atención: 08:00 - 18:00</div>
+
+                <div
+                  *ngIf="
+                    !cargandoHorarios &&
+                    cita.medico_especialidad &&
+                    cita.fecha_cita
+                  "
+                >
+                  <div
+                    class="row g-2 mb-3"
+                    style="max-height: 200px; overflow-y: auto"
+                  >
+                    <div
+                      *ngFor="let horario of horariosDisponibles"
+                      class="col-4 col-md-3"
+                    >
+                      <div
+                        class="card h-100 cursor-pointer border-2"
+                        [class.border-success]="horario.disponible"
+                        [class.border-primary]="cita.hora_cita === horario.hora"
+                        (click)="seleccionarHora(horario.hora)"
+                      >
+                        <div class="card-body text-center p-2">
+                          <div class="fw-bold text-truncate">
+                            {{ formatearHora(horario.hora) }}
+                          </div>
+                          <small class="badge bg-success">Disponible</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="!cita.medico_especialidad || !cita.fecha_cita"
+                  class="alert alert-info"
+                >
+                  <small>
+                    <i class="fas fa-info-circle me-1"></i>
+                    Selecciona un médico y fecha para ver los horarios
+                    disponibles
+                  </small>
+                </div>
+
+                <div *ngIf="cita.hora_cita" class="mt-2">
+                  <span class="badge bg-primary fs-6">
+                    <i class="fas fa-clock me-1"></i>
+                    Hora seleccionada: {{ formatearHora(cita.hora_cita) }}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <!-- Motivo -->
+            <!-- Motivo y Notas -->
             <div class="mb-3">
-              <label for="motivo" class="form-label">
-                Motivo de la consulta <span class="text-danger">*</span>
-              </label>
+              <label for="motivo" class="form-label"
+                >Motivo de la consulta <span class="text-danger">*</span></label
+              >
               <textarea
                 class="form-control"
                 id="motivo"
@@ -169,15 +373,11 @@
                   motivo.invalid && (motivo.dirty || motivo.touched)
                 "
               ></textarea>
-              <div class="invalid-feedback" *ngIf="motivo.errors?.['required']">
-                El motivo es obligatorio
-              </div>
               <div class="form-text">
                 {{ (cita.motivo || "").length }}/500 caracteres
               </div>
             </div>
 
-            <!-- Notas -->
             <div class="mb-4">
               <label for="notas" class="form-label">Notas adicionales</label>
               <textarea
@@ -206,16 +406,15 @@
                 <i class="fas fa-info-circle me-2"></i>Resumen de la cita
               </h6>
               <p class="mb-1">
-                <strong>Paciente:</strong>
-                {{ getPacienteNombre(cita.paciente) || "Por seleccionar" }}
+                <strong>Paciente:</strong> {{ getPacienteSeleccionado() }}
               </p>
               <p class="mb-1">
-                <strong>Médico:</strong>
-                {{ cita.medico_especialidad || "Por seleccionar" }}
+                <strong>Médico:</strong> {{ getMedicoSeleccionado() }}
               </p>
               <p class="mb-0">
                 <strong>Fecha y hora:</strong>
-                {{ formatearFecha(cita.fecha_cita) }} a las {{ cita.hora_cita }}
+                {{ formatearFecha(cita.fecha_cita) }} a las
+                {{ formatearHora(cita.hora_cita) }}
               </p>
             </div>
 
@@ -231,7 +430,14 @@
               <button
                 type="submit"
                 class="btn btn-primary"
-                [disabled]="citaForm.invalid || enviando"
+                [disabled]="
+                  !cita.paciente ||
+                  !cita.medico_especialidad ||
+                  !cita.fecha_cita ||
+                  !cita.hora_cita ||
+                  !cita.motivo ||
+                  enviando
+                "
               >
                 <i class="fas fa-save me-1" *ngIf="!enviando"></i>
                 <i class="fas fa-spinner fa-spin me-1" *ngIf="enviando"></i>

@@ -31,31 +31,226 @@
             #citaForm="ngForm"
             *ngIf="cita && !cargando"
           >
+            <!-- Alerta si no es editable -->
+            <div *ngIf="!esEditable()" class="alert alert-warning mb-3">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Esta cita no se puede modificar porque su estado es
+              <strong>{{ cita.estado }}</strong
+              >. Solo puedes modificar citas en estado "pendiente" o
+              "confirmada".
+            </div>
+
             <div class="row">
-              <!-- Información del Paciente (solo lectura) -->
+              <!-- Paciente con Dropdown -->
               <div class="col-md-6 mb-3">
                 <label class="form-label">Paciente</label>
-                <div class="form-control bg-light">
-                  <strong
-                    >{{ cita.paciente_nombre }}
-                    {{ cita.paciente_apellido }}</strong
-                  >
+
+                <div
+                  class="dropdown"
+                  #pacienteDropdown
+                  [class.pe-none]="!esEditable()"
+                  [class.opacity-50]="!esEditable()"
+                >
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Buscar paciente..."
+                      [(ngModel)]="searchPaciente"
+                      (input)="filtrarPacientes()"
+                      name="searchPaciente"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      autocomplete="off"
+                      [readonly]="!esEditable()"
+                    />
+                    <button
+                      class="btn btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      [disabled]="!esEditable()"
+                    >
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <ul
+                      class="dropdown-menu w-100"
+                      style="max-height: 300px; overflow-y: auto"
+                      *ngIf="esEditable()"
+                    >
+                      <li>
+                        <div class="px-3 py-2 border-bottom">
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Filtrar pacientes..."
+                            (input)="filtrarPacientes()"
+                            [(ngModel)]="searchPaciente"
+                            name="searchPacienteInner"
+                            (click)="$event.stopPropagation()"
+                          />
+                        </div>
+                      </li>
+
+                      <li *ngIf="cargandoPacientes">
+                        <div class="px-3 py-2 text-center">
+                          <div
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                          >
+                            <span class="visually-hidden">Cargando...</span>
+                          </div>
+                          <span class="ms-2 text-muted"
+                            >Cargando pacientes...</span
+                          >
+                        </div>
+                      </li>
+
+                      <li *ngFor="let p of pacientesFiltrados">
+                        <a
+                          class="dropdown-item"
+                          (click)="seleccionarPaciente(p)"
+                        >
+                          <div
+                            class="d-flex justify-content-between align-items-start"
+                          >
+                            <div>
+                              <strong>{{ p.nombre_completo }}</strong>
+                              <div class="text-muted small">{{ p.email }}</div>
+                            </div>
+                            <div class="text-end">
+                              <span class="badge bg-success">{{
+                                p.estado
+                              }}</span>
+                              <span
+                                *ngIf="p.tipo_sangre"
+                                class="badge bg-info d-block mt-1"
+                                >Sangre: {{ p.tipo_sangre }}</span
+                              >
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+
+                      <li
+                        *ngIf="
+                          !cargandoPacientes && pacientesFiltrados.length === 0
+                        "
+                      >
+                        <div class="px-3 py-2 text-muted text-center">
+                          No se encontraron pacientes
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-                <div class="form-text">ID: {{ cita.paciente }}</div>
+
+                <div class="form-text">ID Paciente: {{ cita.paciente }}</div>
               </div>
 
-              <!-- Información del Médico (solo lectura) -->
+              <!-- Médico con Dropdown -->
               <div class="col-md-6 mb-3">
                 <label class="form-label">Médico y Especialidad</label>
-                <div class="form-control bg-light">
-                  <strong
-                    >Dr. {{ cita.medico_nombre }}
-                    {{ cita.medico_apellido }}</strong
-                  ><br />
-                  <span class="badge bg-info">{{
-                    cita.especialidad_nombre
-                  }}</span>
+
+                <div
+                  class="dropdown"
+                  #medicoDropdown
+                  [class.pe-none]="!esEditable()"
+                  [class.opacity-50]="!esEditable()"
+                >
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Buscar médico o especialidad..."
+                      [(ngModel)]="searchMedico"
+                      (input)="filtrarMedicos()"
+                      name="searchMedico"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      autocomplete="off"
+                      [readonly]="!esEditable()"
+                    />
+                    <button
+                      class="btn btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      [disabled]="!esEditable()"
+                    >
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <ul
+                      class="dropdown-menu w-100"
+                      style="max-height: 300px; overflow-y: auto"
+                      *ngIf="esEditable()"
+                    >
+                      <li>
+                        <div class="px-3 py-2 border-bottom">
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Filtrar médicos..."
+                            (input)="filtrarMedicos()"
+                            [(ngModel)]="searchMedico"
+                            name="searchMedicoInner"
+                            (click)="$event.stopPropagation()"
+                          />
+                        </div>
+                      </li>
+
+                      <li *ngIf="cargandoMedicos">
+                        <div class="px-3 py-2 text-center">
+                          <div
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                          >
+                            <span class="visually-hidden">Cargando...</span>
+                          </div>
+                          <span class="ms-2 text-muted"
+                            >Cargando médicos...</span
+                          >
+                        </div>
+                      </li>
+
+                      <li *ngFor="let me of medicosFiltrados">
+                        <a
+                          class="dropdown-item"
+                          (click)="seleccionarMedico(me)"
+                        >
+                          <div
+                            class="d-flex justify-content-between align-items-start"
+                          >
+                            <div>
+                              <strong>{{ me.medico_nombre_completo }}</strong>
+                              <div class="text-muted small">
+                                {{ me.especialidad_nombre }}
+                              </div>
+                            </div>
+                            <div>
+                              <span class="badge bg-secondary">{{
+                                me.especialidad_codigo
+                              }}</span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+
+                      <li
+                        *ngIf="
+                          !cargandoMedicos && medicosFiltrados.length === 0
+                        "
+                      >
+                        <div class="px-3 py-2 text-muted text-center">
+                          No se encontraron médicos
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+
                 <div class="form-text">
                   ID Médico-Especialidad: {{ cita.medico_especialidad }}
                 </div>
@@ -81,43 +276,78 @@
                     fecha_cita.invalid &&
                     (fecha_cita.dirty || fecha_cita.touched)
                   "
-                  [disabled]="
-                    cita.estado === 'realizada' || cita.estado === 'cancelada'
-                  "
+                  (change)="onMedicoYFechaChange()"
+                  [readonly]="!esEditable()"
                 />
-                <div
-                  class="invalid-feedback"
-                  *ngIf="fecha_cita.errors?.['required']"
-                >
-                  La fecha es obligatoria
-                </div>
               </div>
 
-              <!-- Hora -->
+              <!-- Horarios Disponibles -->
               <div class="col-md-6 mb-3">
-                <label for="hora_cita" class="form-label">
-                  Hora de la cita <span class="text-danger">*</span>
+                <label class="form-label">
+                  Horarios Disponibles <span class="text-danger">*</span>
                 </label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="hora_cita"
-                  name="hora_cita"
-                  [(ngModel)]="cita.hora_cita"
-                  #hora_cita="ngModel"
-                  required
-                  [class.is-invalid]="
-                    hora_cita.invalid && (hora_cita.dirty || hora_cita.touched)
-                  "
-                  [disabled]="
-                    cita.estado === 'realizada' || cita.estado === 'cancelada'
-                  "
-                />
+
+                <div *ngIf="cargandoHorarios" class="text-center py-3">
+                  <div
+                    class="spinner-border spinner-border-sm text-primary"
+                    role="status"
+                  >
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <small class="ms-2 text-muted"
+                    >Cargando horarios disponibles...</small
+                  >
+                </div>
+
                 <div
-                  class="invalid-feedback"
-                  *ngIf="hora_cita.errors?.['required']"
+                  *ngIf="
+                    !cargandoHorarios &&
+                    cita.medico_especialidad &&
+                    cita.fecha_cita
+                  "
                 >
-                  La hora es obligatoria
+                  <div
+                    class="row g-2 mb-3"
+                    style="max-height: 200px; overflow-y: auto"
+                  >
+                    <div
+                      *ngFor="let horario of horariosDisponibles"
+                      class="col-4 col-md-3"
+                    >
+                      <div
+                        class="card h-100 cursor-pointer border-2"
+                        [class.border-success]="horario.disponible"
+                        [class.border-primary]="cita.hora_cita === horario.hora"
+                        (click)="esEditable() && seleccionarHora(horario.hora)"
+                        [class.pe-none]="!esEditable()"
+                      >
+                        <div class="card-body text-center p-2">
+                          <div class="fw-bold text-truncate">
+                            {{ formatearHora(horario.hora) }}
+                          </div>
+                          <small class="badge bg-success">Disponible</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="!cita.medico_especialidad || !cita.fecha_cita"
+                  class="alert alert-info"
+                >
+                  <small>
+                    <i class="fas fa-info-circle me-1"></i>
+                    Selecciona un médico y fecha para ver los horarios
+                    disponibles
+                  </small>
+                </div>
+
+                <div *ngIf="cita.hora_cita" class="mt-2">
+                  <span class="badge bg-primary fs-6">
+                    <i class="fas fa-clock me-1"></i>
+                    Hora seleccionada: {{ formatearHora(cita.hora_cita) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -137,9 +367,6 @@
                 <option value="cancelada">Cancelada</option>
                 <option value="realizada">Realizada</option>
               </select>
-              <div class="form-text">
-                Actualiza el estado de la cita según corresponda
-              </div>
             </div>
 
             <!-- Motivo -->
@@ -159,10 +386,8 @@
                 [class.is-invalid]="
                   motivo.invalid && (motivo.dirty || motivo.touched)
                 "
+                [readonly]="!esEditable()"
               ></textarea>
-              <div class="invalid-feedback" *ngIf="motivo.errors?.['required']">
-                El motivo es obligatorio
-              </div>
               <div class="form-text">
                 {{ (cita.motivo || "").length }}/500 caracteres
               </div>
@@ -180,6 +405,7 @@
                 rows="2"
                 maxlength="300"
                 placeholder="Notas adicionales u observaciones..."
+                [readonly]="!esEditable()"
               ></textarea>
               <div class="form-text">
                 {{ (cita.notas || "").length }}/300 caracteres
@@ -215,7 +441,7 @@
                 <button
                   type="submit"
                   class="btn btn-primary me-2"
-                  [disabled]="citaForm.invalid || enviando"
+                  [disabled]="citaForm.invalid || enviando || !esEditable()"
                 >
                   <i class="fas fa-save me-1" *ngIf="!enviando"></i>
                   <i class="fas fa-spinner fa-spin me-1" *ngIf="enviando"></i>
