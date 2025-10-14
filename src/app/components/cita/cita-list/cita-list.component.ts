@@ -227,11 +227,17 @@ export class CitaListComponent implements OnInit {
   }
 
   // Cambio de estado
-  cambiarEstado(cita: Cita, nuevoEstado: string): void {
+  cambiarEstadoo(cita: Cita, nuevoEstado: string): void {
     this.citaService.cambiarEstadoCita(cita.id, nuevoEstado).subscribe({
       next: (citaActualizada) => {
         // Actualizar la cita en la lista
+        console.log('cita.id: ', cita.id);
+        console.log('citas: ', this.citas);
+
         const index = this.citas.findIndex((c) => c.id === cita.id);
+        console.log('index: ', index);
+        console.log('citaAct: ', citaActualizada);
+
         if (index !== -1) {
           this.citas[index] = citaActualizada;
         }
@@ -241,6 +247,56 @@ export class CitaListComponent implements OnInit {
         console.error('Error changing cita state:', err);
       },
     });
+  }
+
+  cambiarEstado(cita: Cita, nuevoEstado: string): void {
+    this.citaService.cambiarEstadoCita(cita.id, nuevoEstado).subscribe({
+      next: (response: any) => {
+        // El backend retorna { detail: string, cita: Cita }
+        const citaActualizada = response.cita;
+
+        //console.log('Cita actualizada:', citaActualizada); // Verificar la estructura
+
+        // Actualizar la cita en la lista
+        const index = this.citas.findIndex((c) => c.id === cita.id);
+        if (index !== -1) {
+          this.citas[index] = citaActualizada;
+          // Mensaje de éxito
+          this.mostrarMensajeTemporal(
+            `Estado cambiado a "${this.getEstadoTexto(nuevoEstado)}"`
+          );
+        }
+      },
+      error: (err) => {
+        this.error = 'Error al cambiar el estado de la cita';
+        console.error('Error changing cita state:', err);
+      },
+    });
+  }
+
+  // Método para mostrar mensaje temporal
+  mostrarMensajeTemporal(mensaje: string): void {
+    // Crear un toast temporal
+    const toast = document.createElement('div');
+    toast.className =
+      'alert alert-success alert-dismissible fade show position-fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.style.minWidth = '300px';
+    toast.innerHTML = `
+    <i class="fas fa-check-circle me-2"></i>${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+
+    document.body.appendChild(toast);
+
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 3000);
   }
 
   // Eliminación
@@ -296,17 +352,51 @@ export class CitaListComponent implements OnInit {
     return textos[estado] || estado;
   }
 
-  formatearFecha(fecha: string): string {
+  formatearFecha1(fecha: string): string {
     return new Date(fecha).toLocaleDateString('es-ES');
   }
 
-  formatearHora(hora: string): string {
+  formatearHora1(hora: string): string {
     return hora.substring(0, 5); // Formato HH:MM
   }
 
-  formatearFechaHora(fechaHora: string): string {
+  formatearFechaHora1(fechaHora: string): string {
     return new Date(fechaHora).toLocaleString('es-ES');
   }
+
+  formatearFecha(fecha: string | null | undefined): string {
+    if (!fecha) {
+      return '--/--/----';
+    }
+    try {
+      return new Date(fecha).toLocaleDateString('es-ES');
+    } catch (error) {
+      return 'Fecha inválida';
+    }
+  }
+
+  formatearHora(hora: string | null | undefined): string {
+    if (!hora) {
+      return '--:--';
+    }
+    try {
+      return hora.substring(0, 5);
+    } catch (error) {
+      return 'Hora inválida';
+    }
+  }
+
+  formatearFechaHora(fechaHora: string | null | undefined): string {
+    if (!fechaHora) {
+      return 'Fecha no disponible';
+    }
+    try {
+      return new Date(fechaHora).toLocaleString('es-ES');
+    } catch (error) {
+      return 'Fecha/hora inválida';
+    }
+  }
+
   irACalendario(): void {
     this.router.navigate(['/citas/calendario']);
   }
