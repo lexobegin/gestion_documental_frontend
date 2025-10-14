@@ -2,14 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HorarioMedico } from '../../models/horario-alison/horario-medico.model';
+import { environment } from '../../../environments/environment'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class HorarioMedicoService {
 
-  private apiUrl = 'http://localhost:8000/api/horarios-medico/';
-  private medicoEspecialidadUrl = 'http://localhost:8000/api/medico-especialidad/';
+  // Usamos la URL del environment (local o producción según el build)
+  private apiUrl = `${environment.apiUrl}/horarios-medico/`;
+  private medicoEspecialidadUrl = `${environment.apiUrl}/medico-especialidad/`;
 
   constructor(private http: HttpClient) {}
 
