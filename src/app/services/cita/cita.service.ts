@@ -84,6 +84,46 @@ export class CitaService {
     });
   }
 
+  // Obtener todas las citas sin paginación
+  getCitasSinPaginacion(params?: {
+    search?: string;
+    estado?: string;
+    paciente?: number;
+    medico?: number;
+    fecha_cita?: string;
+    ordering?: string;
+  }): Observable<Cita[]> {
+    let httpParams = new HttpParams();
+
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+
+    if (params?.estado) {
+      httpParams = httpParams.set('estado', params.estado);
+    }
+
+    if (params?.paciente) {
+      httpParams = httpParams.set('paciente', params.paciente.toString());
+    }
+
+    if (params?.medico) {
+      httpParams = httpParams.set('medico', params.medico.toString());
+    }
+
+    if (params?.fecha_cita) {
+      httpParams = httpParams.set('fecha_cita', params.fecha_cita);
+    }
+
+    if (params?.ordering) {
+      httpParams = httpParams.set('ordering', params.ordering);
+    }
+
+    return this.http.get<Cita[]>(`${this.apiUrl}sin-paginacion/`, {
+      params: httpParams,
+    });
+  }
+
   // Obtener una cita por ID
   getCitaById(id: number): Observable<Cita> {
     return this.http.get<Cita>(`${this.apiUrl}${id}/`);
