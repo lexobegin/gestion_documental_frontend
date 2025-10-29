@@ -102,19 +102,24 @@ export class CitaCalendarioComponent implements OnInit {
     this.cargando = true;
     this.error = undefined;
 
-    this.citaService.getCitas({ ordering: 'fecha_cita,hora_cita' }).subscribe({
-      next: (response) => {
-        this.citas = response.results;
-        this.calendarOptions.events = this.mapearCitasAEventos(this.citas);
-        this.cargando = false;
-        this.cdRef.detectChanges();
-      },
-      error: (err) => {
-        this.error = 'Error al cargar las citas para el calendario';
-        this.cargando = false;
-        console.error('Error loading citas for calendar:', err);
-      },
-    });
+    this.citaService
+      .getCitasSinPaginacion({ ordering: 'fecha_cita,hora_cita' })
+      .subscribe({
+        next: (response) => {
+          console.log('response: ', response);
+
+          this.citas = response;
+
+          this.calendarOptions.events = this.mapearCitasAEventos(this.citas);
+          this.cargando = false;
+          this.cdRef.detectChanges();
+        },
+        error: (err) => {
+          this.error = 'Error al cargar las citas para el calendario';
+          this.cargando = false;
+          console.error('Error loading citas for calendar:', err);
+        },
+      });
   }
 
   mapearCitasAEventos(citas: Cita[]): EventInput[] {
