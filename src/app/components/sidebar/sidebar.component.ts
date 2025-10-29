@@ -34,7 +34,8 @@ export class SidebarComponent {
       title: 'Historia Clinica',
       expanded: false,
       children: [
-        { title: 'Consulta', route: '/consultas' },
+        // 🔹 Corrección: ruta actualizada a /consultas/lista
+        { title: 'Consulta', route: '/consultas/lista' },
         { title: 'Citas Medicas', route: '/citas' },
       ],
     },

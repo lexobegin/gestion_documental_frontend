@@ -3,7 +3,7 @@
     <li *ngFor="let menu of menus">
       <!-- Elemento sin submenús -->
       <ng-container *ngIf="!menu.children?.length; else hasChildren">
-        <a [routerLink]="menu.route">
+        <a [routerLink]="menu.route" routerLinkActive="active">
           {{ menu.title }}
         </a>
       </ng-container>
@@ -16,7 +16,11 @@
         </div>
         <ul class="submenu" [ngClass]="{ open: menu.expanded }">
           <li *ngFor="let child of menu.children">
-            <a [routerLink]="child.route">
+            <a
+              [routerLink]="child.route"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }"
+            >
               {{ child.title }}
             </a>
           </li>

@@ -1,0 +1,148 @@
+<div class="container mt-4" *ngIf="!cargando; else cargandoTpl">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-edit me-2"></i>Editar Consulta
+        </h5>
+        <button type="button" class="btn btn-light btn-sm" (click)="volver()">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form #f="ngForm" (ngSubmit)="guardar(f)" novalidate>
+        <!-- Información principal -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-stethoscope me-2"></i>Datos de la Consulta
+            </h6>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="motivo_consulta" class="form-label">
+              Motivo de la Consulta <span class="text-danger">*</span>
+            </label>
+            <input
+              id="motivo_consulta"
+              type="text"
+              class="form-control"
+              name="motivo_consulta"
+              [(ngModel)]="consulta.motivo_consulta"
+              required
+              [class.is-invalid]="f.submitted && f.controls['motivo_consulta'].invalid"
+            />
+            <div class="invalid-feedback">
+              El motivo de la consulta es obligatorio.
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="proxima_cita" class="form-label">Próxima Cita</label>
+            <input
+              id="proxima_cita"
+              type="date"
+              class="form-control"
+              name="proxima_cita"
+              [(ngModel)]="consulta.proxima_cita"
+            />
+          </div>
+        </div>
+
+        <!-- Datos clínicos -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-heartbeat me-2"></i>Datos Clínicos
+            </h6>
+          </div>
+
+          <div class="col-md-3 mb-3">
+            <label>Peso (kg)</label>
+            <input type="number" step="0.1" class="form-control" name="peso" [(ngModel)]="consulta.peso" />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label>Altura (m)</label>
+            <input type="number" step="0.01" class="form-control" name="altura" [(ngModel)]="consulta.altura" />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label>Presión Arterial</label>
+            <input type="text" class="form-control" name="presion_arterial" [(ngModel)]="consulta.presion_arterial" />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label>Temperatura (°C)</label>
+            <input type="number" step="0.1" class="form-control" name="temperatura" [(ngModel)]="consulta.temperatura" />
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="mb-3">
+          <label>Síntomas</label>
+          <textarea class="form-control" rows="2" name="sintomas" [(ngModel)]="consulta.sintomas"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Diagnóstico</label>
+          <textarea class="form-control" rows="2" name="diagnostico" [(ngModel)]="consulta.diagnostico"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Tratamiento</label>
+          <textarea class="form-control" rows="2" name="tratamiento" [(ngModel)]="consulta.tratamiento"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Observaciones</label>
+          <textarea class="form-control" rows="2" name="observaciones" [(ngModel)]="consulta.observaciones"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Notas Privadas</label>
+          <textarea class="form-control" rows="2" name="notas_privadas" [(ngModel)]="consulta.notas_privadas"></textarea>
+        </div>
+
+        <!-- Mensajes -->
+        <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Error:</strong> {{ error }}
+          <button type="button" class="btn-close" (click)="error = undefined"></button>
+        </div>
+
+        <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show">
+          <i class="fas fa-check-circle me-2"></i>
+          <strong>Éxito:</strong> {{ mensaje }}
+          <button type="button" class="btn-close" (click)="mensaje = undefined"></button>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+          <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Los campos marcados con <span class="text-danger">*</span> son obligatorios.
+          </small>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="volver()">
+              <i class="fas fa-times me-1"></i> Cancelar
+            </button>
+
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
+              <i class="fas fa-save me-1" *ngIf="!guardando"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="guardando"></i>
+              {{ guardando ? 'Guardando...' : 'Actualizar Consulta' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<ng-template #cargandoTpl>
+  <div class="text-center mt-5">
+    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+    <p class="text-muted mt-2">Cargando consulta...</p>
+  </div>
+</ng-template>

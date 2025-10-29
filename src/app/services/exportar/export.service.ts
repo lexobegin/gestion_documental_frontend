@@ -55,6 +55,35 @@ export class ExportService {
     }));
   }
 
+  // NUEVO: Método para preparar datos de consultas
+prepararDatosConsultas(consultas: any[]): any[] {
+  return (consultas || []).map((c) => ({
+    'ID': c.id,
+    'Paciente': `${c.paciente_nombre || ''} ${c.paciente_apellido || ''}`.trim() || '—',
+    'Email Paciente': c.paciente_email || '—',
+    'Médico': `Dr. ${c.medico_nombre || ''} ${c.medico_apellido || ''}`.trim() || '—',
+    'Motivo de Consulta': c.motivo_consulta || '—',
+    'Diagnóstico': c.diagnostico || '—',
+    'Tratamiento': c.tratamiento || '—',
+    'Presión Arterial': c.presion_arterial || '—',
+    'Temperatura (°C)': c.temperatura ?? '—',
+    'Frecuencia Cardíaca': c.frecuencia_cardiaca ?? '—',
+    'Frecuencia Respiratoria': c.frecuencia_respiratoria ?? '—',
+    'Saturación O₂ (%)': c.saturacion_oxigeno ?? '—',
+    'Peso (kg)': c.peso ?? '—',
+    'Altura (m)': c.altura ?? '—',
+    'IMC': c.imc ?? '—',
+    'Próxima Cita': c.proxima_cita
+      ? new Date(c.proxima_cita).toLocaleDateString('es-ES')
+      : '—',
+    'Fecha Consulta': c.fecha_consulta
+      ? new Date(c.fecha_consulta).toLocaleString('es-ES')
+      : '—',
+    'Notas Privadas': c.notas_privadas || '—'
+  }));
+}
+
+
   /** Método auxiliar para calcular edad */
   private calcularEdad(fechaNacimiento: string): string {
     if (!fechaNacimiento) return 'N/A';
