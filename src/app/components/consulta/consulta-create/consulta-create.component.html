@@ -1,151 +1,302 @@
 <div class="container mt-4">
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <div class="d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">
-          <i class="fas fa-stethoscope me-2"></i>Registrar Nueva Consulta
-        </h5>
-        <a routerLink="/consultas/lista" class="btn btn-light btn-sm">
-          <i class="fas fa-arrow-left me-1"></i> Volver
-        </a>
-      </div>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-file-medical me-2"></i>Crear Nueva Consulta
+            </h5>
+            <div>
+              <!-- Botón de control de voz -->
+              <button
+                class="btn btn-warning btn-sm me-2"
+                (click)="toggleGrabacion()"
+                [class.btn-success]="!grabando"
+                [class.btn-danger]="grabando"
+                title="Ctrl+Shift+V"
+              >
+                <i
+                  class="fas"
+                  [class.fa-microphone]="!grabando"
+                  [class.fa-microphone-slash]="grabando"
+                ></i>
+                {{ grabando ? " Detener Voz" : " Dictado por Voz" }}
+              </button>
 
-    <div class="card-body">
-      <form #f="ngForm" (ngSubmit)="guardar(f)" novalidate>
-        <!-- Datos del Paciente -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <h6 class="text-primary mb-3">
-              <i class="fas fa-user me-2"></i>Datos del Paciente
-            </h6>
-          </div>
-
-          <label for="paciente_email" class="form-label">
-            Paciente <span class="text-danger">*</span>
-          </label>
-          <input
-            id="paciente_email"
-            type="text"
-            class="form-control"
-            name="paciente_email"
-            [(ngModel)]="consulta.paciente_email"
-            required
-            placeholder="Ej: Juan Pérez o juanperez@mail.com"
-            [class.is-invalid]="f.submitted && f.controls['paciente_email'].invalid"
-          />
-          <div class="invalid-feedback">
-            Debe ingresar el nombre o correo del paciente.
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label for="motivo_consulta" class="form-label">
-              Motivo de la Consulta <span class="text-danger">*</span>
-            </label>
-            <input
-              id="motivo_consulta"
-              type="text"
-              class="form-control"
-              name="motivo_consulta"
-              [(ngModel)]="consulta.motivo_consulta"
-              required
-              placeholder="Ej: Dolor abdominal, revisión, etc."
-              [class.is-invalid]="f.submitted && f.controls['motivo_consulta'].invalid"
-            />
-            <div class="invalid-feedback">
-              El motivo de la consulta es obligatorio.
+              <button class="btn btn-light btn-sm" (click)="cancelar()">
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
             </div>
           </div>
         </div>
-
-        <!-- Información Clínica -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <h6 class="text-primary mb-3">
-              <i class="fas fa-heartbeat me-2"></i>Información Clínica
+        <div class="card-body">
+          <!-- Información del paciente -->
+          <div class="alert alert-info mb-4">
+            <h6 class="alert-heading">
+              <i class="fas fa-user-injured me-2"></i>Información del Paciente
             </h6>
+            <p class="mb-1">
+              <strong>Paciente:</strong> {{ pacienteNombre }}
+              {{ pacienteApellido }}
+            </p>
+            <p class="mb-1"><strong>ID Paciente:</strong> {{ pacienteId }}</p>
+            <p class="mb-0"><strong>ID Cita:</strong> {{ citaId || "N/A" }}</p>
           </div>
 
-          <div class="col-md-3 mb-3">
-            <label>Peso (kg)</label>
-            <input type="number" step="0.1" class="form-control" name="peso" [(ngModel)]="consulta.peso" />
+          <!-- Panel de control de voz -->
+          <div class="alert alert-warning mb-4" *ngIf="mostrarPanelVoz">
+            <h6 class="alert-heading">
+              <i class="fas fa-microphone me-2"></i>Control de Dictado por Voz
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <p class="mb-2"><strong>Comandos de voz:</strong></p>
+                <ul class="small mb-2">
+                  <li>
+                    <strong>"diagnóstico"</strong> - Cambiar a campo diagnóstico
+                  </li>
+                  <li>
+                    <strong>"tratamiento"</strong> - Cambiar a campo tratamiento
+                  </li>
+                  <li>
+                    <strong>"observaciones"</strong> - Cambiar a campo
+                    observaciones
+                  </li>
+                  <li><strong>"fin"</strong> - Finalizar grabación</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-2"><strong>Atajos de teclado:</strong></p>
+                <ul class="small mb-2">
+                  <li>
+                    <strong>Ctrl + Shift + V</strong> - Iniciar/Detener
+                    grabación
+                  </li>
+                  <li><strong>Escape</strong> - Detener grabación</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Estado de grabación -->
+            <div class="mt-2" *ngIf="grabando">
+              <div class="d-flex align-items-center">
+                <div
+                  class="spinner-grow spinner-grow-sm text-danger me-2"
+                  role="status"
+                >
+                  <span class="visually-hidden">Grabando...</span>
+                </div>
+                <strong class="text-danger">GRABANDO...</strong>
+                <span class="badge bg-primary ms-2">{{ campoActivo }}</span>
+              </div>
+
+              <!-- Transcripción en tiempo real -->
+              <div class="mt-2 p-2 bg-light rounded" *ngIf="textoTranscrito">
+                <small class="text-muted">Transcripción:</small>
+                <div class="fw-semibold">{{ textoTranscrito }}</div>
+              </div>
+            </div>
           </div>
 
-          <div class="col-md-3 mb-3">
-            <label>Altura (m)</label>
-            <input type="number" step="0.01" class="form-control" name="altura" [(ngModel)]="consulta.altura" />
+          <div *ngIf="error" class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button
+              type="button"
+              class="btn-close float-end"
+              (click)="error = undefined"
+            ></button>
           </div>
 
-          <div class="col-md-3 mb-3">
-            <label>Presión Arterial</label>
-            <input type="text" class="form-control" name="presion_arterial" [(ngModel)]="consulta.presion_arterial" />
-          </div>
+          <!-- Formulario -->
+          <form (ngSubmit)="guardar()" #consultaForm="ngForm">
+            <div class="row">
+              <!-- Motivo de consulta -->
+              <div class="col-12 mb-3">
+                <label for="motivo_consulta" class="form-label">
+                  Motivo de la Consulta <span class="text-danger">*</span>
+                </label>
+                <textarea
+                  class="form-control"
+                  id="motivo_consulta"
+                  name="motivo_consulta"
+                  [(ngModel)]="consulta.motivo_consulta"
+                  #motivo_consulta="ngModel"
+                  rows="2"
+                  required
+                  maxlength="500"
+                  placeholder="Describa el motivo principal de la consulta..."
+                  [class.is-invalid]="
+                    motivo_consulta.invalid &&
+                    (motivo_consulta.dirty || motivo_consulta.touched)
+                  "
+                ></textarea>
+                <div class="invalid-feedback">
+                  El motivo de la consulta es obligatorio
+                </div>
+              </div>
 
-          <div class="col-md-3 mb-3">
-            <label>Temperatura (°C)</label>
-            <input type="number" step="0.1" class="form-control" name="temperatura" [(ngModel)]="consulta.temperatura" />
-          </div>
+              <!-- Síntomas -->
+              <div class="col-12 mb-3">
+                <label for="sintomas" class="form-label">Síntomas</label>
+                <textarea
+                  class="form-control"
+                  id="sintomas"
+                  name="sintomas"
+                  [(ngModel)]="consulta.sintomas"
+                  #sintomas="ngModel"
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="Describa los síntomas presentados por el paciente..."
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Campos con dictado por voz -->
+            <div class="row">
+              <!-- Diagnóstico -->
+              <div class="col-md-6 mb-3">
+                <label for="diagnostico" class="form-label">
+                  Diagnóstico
+                  <span
+                    class="badge bg-warning ms-1"
+                    *ngIf="campoActivo === 'diagnostico'"
+                  >
+                    <i class="fas fa-microphone"></i> Activo
+                  </span>
+                </label>
+                <div class="input-group">
+                  <textarea
+                    class="form-control"
+                    id="diagnostico"
+                    name="diagnostico"
+                    [(ngModel)]="consulta.diagnostico"
+                    #diagnostico="ngModel"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Diagnóstico médico..."
+                    #diagnosticoTextarea
+                  ></textarea>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    (click)="limpiarCampo('diagnostico')"
+                    title="Limpiar campo"
+                  >
+                    <i class="fas fa-eraser"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tratamiento -->
+              <div class="col-md-6 mb-3">
+                <label for="tratamiento" class="form-label">
+                  Tratamiento
+                  <span
+                    class="badge bg-warning ms-1"
+                    *ngIf="campoActivo === 'tratamiento'"
+                  >
+                    <i class="fas fa-microphone"></i> Activo
+                  </span>
+                </label>
+                <div class="input-group">
+                  <textarea
+                    class="form-control"
+                    id="tratamiento"
+                    name="tratamiento"
+                    [(ngModel)]="consulta.tratamiento"
+                    #tratamiento="ngModel"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Tratamiento prescrito..."
+                    #tratamientoTextarea
+                  ></textarea>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    (click)="limpiarCampo('tratamiento')"
+                    title="Limpiar campo"
+                  >
+                    <i class="fas fa-eraser"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="mb-4">
+              <label for="observaciones" class="form-label">
+                Observaciones
+                <span
+                  class="badge bg-warning ms-1"
+                  *ngIf="campoActivo === 'observaciones'"
+                >
+                  <i class="fas fa-microphone"></i> Activo
+                </span>
+              </label>
+              <div class="input-group">
+                <textarea
+                  class="form-control"
+                  id="observaciones"
+                  name="observaciones"
+                  [(ngModel)]="consulta.observaciones"
+                  #observaciones="ngModel"
+                  rows="3"
+                  maxlength="500"
+                  placeholder="Observaciones adicionales..."
+                  #observacionesTextarea
+                ></textarea>
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="limpiarCampo('observaciones')"
+                  title="Limpiar campo"
+                >
+                  <i class="fas fa-eraser"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="alert alert-secondary">
+              <h6 class="alert-heading">
+                <i class="fas fa-info-circle me-2"></i>Resumen de la Consulta
+              </h6>
+              <p class="mb-1">
+                <strong>Paciente:</strong> {{ pacienteNombre }}
+                {{ pacienteApellido }}
+              </p>
+              <p class="mb-1">
+                <strong>Médico ID:</strong> {{ consulta.medico }}
+              </p>
+              <p class="mb-0">
+                <strong>Historia Clínica ID:</strong>
+                {{ consulta.historia_clinica }}
+              </p>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelar()"
+              >
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="consultaForm.invalid || enviando"
+              >
+                <i class="fas fa-save me-1" *ngIf="!enviando"></i>
+                <i class="fas fa-spinner fa-spin me-1" *ngIf="enviando"></i>
+                {{ enviando ? "Guardando..." : "Guardar Consulta" }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <!-- Síntomas, diagnóstico, tratamiento -->
-        <div class="mb-3">
-          <label>Síntomas</label>
-          <textarea class="form-control" rows="2" name="sintomas" [(ngModel)]="consulta.sintomas"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label>Diagnóstico</label>
-          <textarea class="form-control" rows="2" name="diagnostico" [(ngModel)]="consulta.diagnostico"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label>Tratamiento</label>
-          <textarea class="form-control" rows="2" name="tratamiento" [(ngModel)]="consulta.tratamiento"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label>Observaciones</label>
-          <textarea class="form-control" rows="2" name="observaciones" [(ngModel)]="consulta.observaciones"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label>Notas Privadas</label>
-          <textarea class="form-control" rows="2" name="notas_privadas" [(ngModel)]="consulta.notas_privadas"></textarea>
-        </div>
-
-        <!-- Mensajes -->
-        <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          <strong>Error:</strong> {{ error }}
-          <button type="button" class="btn-close" (click)="error = undefined"></button>
-        </div>
-
-        <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show">
-          <i class="fas fa-check-circle me-2"></i>
-          <strong>Éxito:</strong> {{ mensaje }}
-          <button type="button" class="btn-close" (click)="mensaje = undefined"></button>
-        </div>
-
-        <!-- Botones -->
-        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-          <small class="text-muted">
-            <i class="fas fa-info-circle me-1"></i>
-            Los campos marcados con <span class="text-danger">*</span> son obligatorios.
-          </small>
-
-          <div class="d-flex gap-2">
-            <a routerLink="/consultas/lista" class="btn btn-outline-secondary">
-              <i class="fas fa-times me-1"></i> Cancelar
-            </a>
-
-            <button type="submit" class="btn btn-primary" [disabled]="guardando">
-              <i class="fas fa-save me-1" *ngIf="!guardando"></i>
-              <i class="fas fa-spinner fa-spin me-1" *ngIf="guardando"></i>
-              {{ guardando ? 'Guardando...' : 'Guardar Consulta' }}
-            </button>
-          </div>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

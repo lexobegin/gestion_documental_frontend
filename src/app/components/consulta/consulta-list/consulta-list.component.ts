@@ -2,206 +2,211 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Consulta } from '../../../models/consulta/consulta.model';
+import { Consulta, ApiResponse } from '../../../models/consulta/consulta.model';
+import {
+  Cita,
+  ApiResponse as CitaApiResponse,
+} from '../../../models/cita/cita.model';
 import { ConsultaService } from '../../../services/consulta/consulta.service';
-import { ExportService } from '../../../services/exportar/export.service';
+import { CitaService } from '../../../services/cita/cita.service';
 
 @Component({
   selector: 'app-consulta-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './consulta-list.component.html',
-  styleUrls: ['./consulta-list.component.scss']
+  styleUrls: ['./consulta-list.component.scss'],
 })
 export class ConsultaListComponent implements OnInit {
+  // Datos para las tablas
+  citas: Cita[] = [];
   consultas: Consulta[] = [];
-  todasConsultas: Consulta[] = []; // para exportación
-  cargando = false;
-  generandoReporte = false;
-  error?: string;
 
-  // Paginación
-  paginaActual = 1;
-  totalPaginas = 1;
-  totalConsultas = 0;
-  tamanoPagina = 10;
+  // Estados de carga
+  cargandoCitas: boolean = false;
+  cargandoConsultas: boolean = false;
+  error: string | undefined;
 
-  // Búsqueda
-  terminoBusqueda = '';
+  // Búsqueda y paginación para CITAS
+  terminoBusquedaCitas: string = '';
+  paginaActualCitas: number = 1;
+  totalCitas: number = 0;
+  totalPaginasCitas: number = 0;
 
-  // Modales
-  mostrarModalEliminar = false;
-  mostrarModalDetalle = false;
-  consultaSeleccionada?: Consulta;
-  consultaAEliminar?: Consulta;
+  // Búsqueda y paginación para CONSULTAS
+  terminoBusquedaConsultas: string = '';
+  paginaActualConsultas: number = 1;
+  totalConsultas: number = 0;
+  totalPaginasConsultas: number = 0;
+
+  // Modal de historial
+  mostrarModalHistorial: boolean = false;
+  consultaSeleccionada: Consulta | null = null;
+
+  // Límites por página
+  readonly limitePorPagina: number = 10;
 
   constructor(
-    private srv: ConsultaService,
-    private exportSrv: ExportService,
+    private consultaService: ConsultaService,
+    private citaService: CitaService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cargar();
+    this.cargarCitas();
+    this.cargarConsultas();
   }
 
-  cargar(pagina: number = 1): void {
-    this.cargando = true;
+  // ========== MÉTODOS PARA CITAS ==========
+  cargarCitas(pagina: number = 1): void {
+    this.cargandoCitas = true;
     this.error = undefined;
-    this.paginaActual = pagina;
 
-    const filtros: any = { page: pagina, page_size: this.tamanoPagina };
-    if (this.terminoBusqueda) filtros.search = this.terminoBusqueda;
+    const params: any = {
+      page: pagina,
+      ordering: '-fecha_cita,-hora_cita',
+      estado: 'realizada', // Solo mostrar citas realizadas para crear consultas
+    };
 
-    this.srv.getConsultas(filtros).subscribe({
-      next: (respuesta) => {
-        this.consultas = respuesta.results || [];
-        this.totalConsultas = respuesta.count || 0;
-        this.totalPaginas = Math.ceil(this.totalConsultas / this.tamanoPagina);
-        this.cargando = false;
-        this.cargarTodasConsultas();
+    if (this.terminoBusquedaCitas) {
+      params.search = this.terminoBusquedaCitas;
+    }
+
+    this.citaService.getCitas(params).subscribe({
+      next: (response: CitaApiResponse<Cita>) => {
+        this.citas = response.results;
+        this.totalCitas = response.count;
+        this.totalPaginasCitas = Math.ceil(
+          response.count / this.limitePorPagina
+        );
+        this.paginaActualCitas = pagina;
+        this.cargandoCitas = false;
       },
-      error: (e) => {
-        console.error('Error al listar consultas:', e);
-        this.error = this.extraerError(e) || 'No se pudo cargar las consultas';
-        this.cargando = false;
-      }
+      error: (err) => {
+        this.error = 'Error al cargar las citas';
+        this.cargandoCitas = false;
+        console.error('Error loading citas:', err);
+      },
     });
   }
 
-  cargarTodasConsultas(): void {
-    this.srv.getConsultas().subscribe({
-      next: (res) => (this.todasConsultas = res.results || []),
-      error: () => (this.todasConsultas = [])
-    });
+  buscarCitas(): void {
+    this.paginaActualCitas = 1;
+    this.cargarCitas(1);
   }
 
-  buscar(): void {
-    this.paginaActual = 1;
-    this.cargar(1);
+  limpiarBusquedaCitas(): void {
+    this.terminoBusquedaCitas = '';
+    this.paginaActualCitas = 1;
+    this.cargarCitas(1);
   }
 
-  limpiarFiltros(): void {
-    this.terminoBusqueda = '';
-    this.cargar(1);
-  }
-
-  cambiarPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.cargar(pagina);
+  cambiarPaginaCitas(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginasCitas) {
+      this.cargarCitas(pagina);
     }
   }
 
-  crear(): void {
-    this.router.navigate(['/consulta-create']);
+  // Crear consulta desde cita
+  crearConsultaDesdeCita(cita: Cita): void {
+    // Navegar al componente de creación pasando los datos de la cita
+    this.router.navigate(['consulta-create'], {
+      queryParams: {
+        paciente_id: cita.paciente,
+        paciente_nombre: cita.paciente_nombre,
+        paciente_apellido: cita.paciente_apellido,
+        medico_id: cita.medico_id,
+        cita_id: cita.id,
+      },
+    });
   }
 
-  editar(id?: number): void {
-    if (!id) return;
-    this.router.navigate(['/consulta-update', id]);
+  // ========== MÉTODOS PARA CONSULTAS ==========
+  cargarConsultas(pagina: number = 1): void {
+    this.cargandoConsultas = true;
+    this.error = undefined;
+
+    const params: any = {
+      page: pagina,
+      ordering: '-fecha_consulta',
+    };
+
+    if (this.terminoBusquedaConsultas) {
+      params.search = this.terminoBusquedaConsultas;
+    }
+
+    this.consultaService.getConsultas(params).subscribe({
+      next: (response: ApiResponse<Consulta>) => {
+        this.consultas = response.results;
+        this.totalConsultas = response.count;
+        this.totalPaginasConsultas = Math.ceil(
+          response.count / this.limitePorPagina
+        );
+        this.paginaActualConsultas = pagina;
+        this.cargandoConsultas = false;
+      },
+      error: (err) => {
+        this.error = 'Error al cargar las consultas';
+        this.cargandoConsultas = false;
+        console.error('Error loading consultas:', err);
+      },
+    });
   }
 
-  verDetalle(consulta: Consulta): void {
+  buscarConsultas(): void {
+    this.paginaActualConsultas = 1;
+    this.cargarConsultas(1);
+  }
+
+  limpiarBusquedaConsultas(): void {
+    this.terminoBusquedaConsultas = '';
+    this.paginaActualConsultas = 1;
+    this.cargarConsultas(1);
+  }
+
+  cambiarPaginaConsultas(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginasConsultas) {
+      this.cargarConsultas(pagina);
+    }
+  }
+
+  // ========== MÉTODOS PARA HISTORIAL ==========
+  verHistorial(consulta: Consulta): void {
     this.consultaSeleccionada = consulta;
-    this.mostrarModalDetalle = true;
+    this.mostrarModalHistorial = true;
   }
 
-  confirmarEliminar(consulta: Consulta): void {
-    this.consultaAEliminar = consulta;
-    this.mostrarModalEliminar = true;
+  cerrarModalHistorial(): void {
+    this.mostrarModalHistorial = false;
+    this.consultaSeleccionada = null;
   }
 
-  eliminar(): void {
-    if (!this.consultaAEliminar?.id) return;
-    const id = this.consultaAEliminar.id;
-    const copia = [...this.consultas];
-
-    this.consultas = this.consultas.filter((c) => c.id !== id);
-    this.mostrarModalEliminar = false;
-
-    this.srv.deleteConsulta(id).subscribe({
-      next: () => this.cargar(this.paginaActual),
-      error: (e) => {
-        console.error('Error al eliminar consulta:', e);
-        this.error = this.extraerError(e) || 'No se pudo eliminar la consulta';
-        this.consultas = copia;
-      }
-    });
+  editarConsulta(id: number): void {
+    this.router.navigate(['/consultas/editar', id]);
   }
 
-  cancelarEliminar(): void {
-    this.mostrarModalEliminar = false;
-    this.consultaAEliminar = undefined;
+  // ========== UTILIDADES ==========
+  trackById(index: number, item: any): number {
+    return item.id;
   }
 
-  cerrarModalDetalle(): void {
-    this.mostrarModalDetalle = false;
-    this.consultaSeleccionada = undefined;
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-ES');
   }
 
-  // ==================== REPORTES ====================
-
-  generarReportePDF(): void {
-    this.generarReporte('pdf');
+  formatearFechaHora(fechaHora: string): string {
+    return new Date(fechaHora).toLocaleString('es-ES');
   }
 
-  generarReporteExcel(): void {
-    this.generarReporte('excel');
+  formatearHora(hora: string): string {
+    if (!hora) return '--:--';
+    return hora.substring(0, 5);
   }
 
-  generarReporteHTML(): void {
-    this.generarReporte('html');
-  }
-
-  private generarReporte(formato: 'pdf' | 'excel' | 'html'): void {
-    if (!this.todasConsultas.length) {
-      this.error = 'No hay datos para generar reporte.';
-      return;
-    }
-
-    this.generandoReporte = true;
-
-    try {
-      const datosExportar = this.exportSrv.prepararDatosConsultas(this.todasConsultas);
-      const fecha = new Date().toISOString().split('T')[0];
-      const filename = `reporte_consultas_${fecha}`;
-      const title = `Reporte de Consultas - ${new Date().toLocaleDateString('es-ES')}`;
-
-      switch (formato) {
-        case 'pdf':
-          this.exportSrv.exportToPDF(datosExportar, filename, title);
-          break;
-        case 'excel':
-          this.exportSrv.exportToExcel(datosExportar, filename);
-          break;
-        case 'html':
-          this.exportSrv.exportToHTML(datosExportar, filename, title);
-          break;
-      }
-    } catch (e) {
-      console.error('Error al generar reporte:', e);
-      this.error = `Error al generar reporte ${formato.toUpperCase()}`;
-    } finally {
-      this.generandoReporte = false;
-    }
-  }
-
-  // ==================== UTILIDADES ====================
-
-  private extraerError(err: any): string {
-    const e = err?.error;
-    if (!e) return '';
-    if (typeof e === 'string') return e;
-    if (e.detail) return e.detail;
-    if (typeof e === 'object') {
-      return Object.entries(e)
-        .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-        .join(' | ');
-    }
-    return '';
-  }
-
-  trackById(_i: number, c: Consulta): number | undefined {
-    return c.id;
+  truncarTexto(texto: string | null, longitud: number = 50): string {
+    if (!texto) return '—';
+    return texto.length > longitud
+      ? texto.substring(0, longitud) + '...'
+      : texto;
   }
 }
