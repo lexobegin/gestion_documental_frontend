@@ -14,7 +14,7 @@ import { UsuarioListComponent } from './components/usuario/usuario-list/usuario-
 import { UsuarioCreateComponent } from './components/usuario/usuario-create/usuario-create.component';
 import { UsuarioUpdateComponent } from './components/usuario/usuario-update/usuario-update.component';
 
-// Especialidades 
+// Especialidades
 import { EspecialidadListComponent } from './components/especialidad/especialidad-list/especialidad-list.component';
 import { EspecialidadCreateComponent } from './components/especialidad/especialidad-create/especialidad-create.component';
 import { EspecialidadUpdateComponent } from './components/especialidad/especialidad-update/especialidad-update.component';
@@ -34,7 +34,7 @@ import { CitaCalendarioComponent } from './components/cita/cita-calendario/cita-
 // Backups
 import { BackupListComponent } from './components/backup/backup-list/backup-list.component';
 
-// Horarios Médicos 
+// Horarios Médicos
 import { HorarioMedicoListComponent } from './components/horario/list/horario-medico-list.component';
 import { HorarioMedicoCreateComponent } from './components/horario/create/horario-medico-create.component';
 import { HorarioMedicoUpdateComponent } from './components/horario/update/horario-medico-update.component';
@@ -94,7 +94,10 @@ export const routes: Routes = [
       // Especialidades - Alison
       { path: 'especialidades', component: EspecialidadListComponent },
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
-      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
+      {
+        path: 'especialidades/editar/:id',
+        component: EspecialidadUpdateComponent,
+      },
 
       // Bitácora
       { path: 'bitacora', component: BitacoraListComponent },
@@ -104,7 +107,7 @@ export const routes: Routes = [
       { path: 'horarios/create', component: HorarioMedicoCreateComponent },
       { path: 'horarios/update/:id', component: HorarioMedicoUpdateComponent },
 
-      // 🩺 Consultas Médicas
+      // Consultas Médicas
       { path: 'consultas/lista', component: ConsultaListComponent },
       { path: 'consulta-create', component: ConsultaCreateComponent },
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
