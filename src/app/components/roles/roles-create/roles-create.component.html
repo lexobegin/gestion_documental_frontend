@@ -1,37 +1,64 @@
 <div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title mb-0">Crear rol</h5>
-                <a routerLink="/roles" class="btn btn-outline-secondary btn-sm">Volver</a>
-            </div>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user-shield me-2 text-primary"></i>Crear Rol
+        </h5>
+        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+          <i class="fas fa-arrow-left me-1"></i>Volver
+        </button>
+      </div>
 
-            <form #rolForm="ngForm" (ngSubmit)="crearRol()" autocomplete="off" novalidate>
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input id="nombre" type="text" class="form-control" [(ngModel)]="nombre" name="nombre" required
-                            minlength="2" />
-                    </div>
+      <!-- Formulario -->
+      <form #rolForm="ngForm" (ngSubmit)="crearRol()" autocomplete="off" novalidate>
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-control"
+              [(ngModel)]="nombre"
+              name="nombre"
+              required
+              minlength="2"
+            />
+          </div>
 
-                    <div class="col-md-12">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <input id="descripcion" type="text" class="form-control" [(ngModel)]="descripcion"
-                            name="descripcion" />
-                    </div>
-                </div>
-
-                <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
-                <div *ngIf="success" class="alert alert-success mt-3">{{ success }}</div>
-
-                <div class="mt-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100"
-                        [disabled]="loading || !nombre || rolForm.invalid">
-                        {{ loading ? 'Creando…' : 'Crear rol' }}
-                    </button>
-                    <a routerLink="/roles" class="btn btn-link">Cancelar</a>
-                </div>
-            </form>
+          <div class="col-md-12">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <input
+              id="descripcion"
+              type="text"
+              class="form-control"
+              [(ngModel)]="descripcion"
+              name="descripcion"
+            />
+          </div>
         </div>
+
+        <!-- Mensajes -->
+        <div *ngIf="error" class="alert alert-danger mt-3 text-center">
+          <i class="fas fa-circle-exclamation me-1"></i>{{ error }}
+        </div>
+        <div *ngIf="success" class="alert alert-success mt-3 text-center">
+          <i class="fas fa-check-circle me-1"></i>{{ success }}
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-3 d-flex gap-2">
+          <button
+            type="submit"
+            class="btn btn-primary w-100"
+            [disabled]="loading || !nombre || rolForm.invalid"
+          >
+            <i class="fas fa-save me-1"></i>{{ loading ? 'Creando…' : 'Crear Rol' }}
+          </button>
+          <button class="btn btn-link" (click)="volver()">Cancelar</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>

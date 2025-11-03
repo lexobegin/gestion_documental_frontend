@@ -1,18 +1,74 @@
-<div class="roles-edit">
-    <h2>Editar Rol</h2>
-    <form>
-        <div>
-            <label for="nombre">Nombre del rol:</label>
-            <input id="nombre" name="nombre" [(ngModel)]="nombre" />
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user-shield me-2 text-primary"></i>Editar Rol
+        </h5>
+        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+          <i class="fas fa-arrow-left me-1"></i>Volver
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form (ngSubmit)="guardar()" autocomplete="off" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="nombre" class="form-label">Nombre del rol</label>
+            <input
+              id="nombre"
+              name="nombre"
+              class="form-control"
+              [(ngModel)]="nombre"
+              required
+              minlength="2"
+            />
+          </div>
         </div>
-        <div style="margin-top:1em;">
-            <label>Permisos:</label>
-            <div *ngFor="let permiso of permisos">
-                <input type="checkbox" [checked]="permiso.seleccionado" (change)="togglePermiso(permiso)" />
-                {{ permiso.nombre }}
+
+        <!-- Permisos -->
+        <div class="mt-4">
+          <label class="form-label fw-semibold">Permisos asignados</label>
+          <div *ngIf="loading" class="text-muted">Cargando permisos...</div>
+          <div *ngIf="!loading">
+            <div class="row">
+              <div
+                class="col-md-4 mb-2"
+                *ngFor="let permiso of permisos">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [checked]="permiso.seleccionado"
+                    (change)="togglePermiso(permiso)"
+                    id="permiso-{{ permiso.id }}"
+                  />
+                  <label class="form-check-label" for="permiso-{{ permiso.id }}">
+                    {{ permiso.nombre }}
+                  </label>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-        <button type="button" (click)="guardar()" style="margin-top:1em;">Guardar cambios</button>
-    </form>
-    <div *ngIf="mensaje" style="color:green; margin-top:1em;">{{ mensaje }}</div>
+
+        <!-- Mensajes -->
+        <div *ngIf="mensaje" class="alert alert-success mt-3 text-center">
+          <i class="fas fa-check-circle me-1"></i>{{ mensaje }}
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4 d-flex gap-2">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="loading">
+            <i class="fas fa-save me-1"></i>Guardar cambios
+          </button>
+          <button class="btn btn-link" (click)="volver()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
