@@ -185,6 +185,11 @@ export class ConsultaListComponent implements OnInit {
     this.router.navigate(['/consultas/editar', id]);
   }
 
+  //NUEVO MÉTODO para botón de Exámenes Médicos
+  gestionarExamenes(id: number): void {
+    this.router.navigate(['/consulta-examenes', id]);
+  }
+
   // ========== UTILIDADES ==========
   trackById(index: number, item: any): number {
     return item.id;
