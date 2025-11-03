@@ -65,7 +65,7 @@ export class ConsultaListComponent implements OnInit {
     const params: any = {
       page: pagina,
       ordering: '-fecha_cita,-hora_cita',
-      estado: 'realizada', // Solo mostrar citas realizadas para crear consultas
+      estado: 'confirmada', // Solo mostrar citas realizadas para crear consultas
     };
 
     if (this.terminoBusquedaCitas) {
@@ -115,6 +115,7 @@ export class ConsultaListComponent implements OnInit {
         paciente_id: cita.paciente,
         paciente_nombre: cita.paciente_nombre,
         paciente_apellido: cita.paciente_apellido,
+        motivo: cita.motivo,
         medico_id: cita.medico_id,
         cita_id: cita.id,
       },
