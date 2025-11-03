@@ -57,6 +57,7 @@ export class ConsultaService {
 
   // Crear nueva consulta
   createConsulta(consulta: ConsultaCreate): Observable<Consulta> {
+    console.log('CONSULTASERV:', consulta);
     return this.http.post<Consulta>(this.apiUrl, consulta);
   }
 
