@@ -1,9 +1,13 @@
 <div class="container mt-4" *ngIf="!cargando; else cargandoTpl">
   <!-- ================== CABECERA ================== -->
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+    <div
+      class="card-header bg-success text-white d-flex justify-content-between align-items-center"
+    >
       <h5 class="mb-0">
-        <i class="fas fa-vials me-2"></i> Exámenes Médicos de la Consulta #{{ consulta.id }}
+        <i class="fas fa-vials me-2"></i> Exámenes Médicos de la Consulta #{{
+          consulta.id
+        }}
       </h5>
       <button class="btn btn-light btn-sm" (click)="volver()">
         <i class="fas fa-arrow-left me-1"></i> Volver
@@ -11,9 +15,17 @@
     </div>
     <div class="card-body">
       <div class="row g-2">
-        <div class="col-md-4"><strong>Paciente:</strong> {{ consulta.paciente_nombre }} {{ consulta.paciente_apellido }}</div>
-        <div class="col-md-4"><strong>Médico:</strong> Dr. {{ consulta.medico_nombre }} {{ consulta.medico_apellido }}</div>
-        <div class="col-md-4"><strong>Fecha:</strong> {{ consulta.fecha_consulta | date:'short' }}</div>
+        <div class="col-md-4">
+          <strong>Paciente:</strong> {{ consulta.paciente_nombre }}
+          {{ consulta.paciente_apellido }}
+        </div>
+        <div class="col-md-4">
+          <strong>Médico:</strong> Dr. {{ consulta.medico_nombre }}
+          {{ consulta.medico_apellido }}
+        </div>
+        <div class="col-md-4">
+          <strong>Fecha:</strong> {{ consulta.fecha_consulta | date : "short" }}
+        </div>
       </div>
     </div>
   </div>
@@ -21,26 +33,42 @@
   <!-- ================== TIPOS DE EXAMEN ================== -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
-      <h6 class="mb-0"><i class="fas fa-list me-2"></i> Tipos de Examen Médicos Existentes</h6>
+      <h6 class="mb-0">
+        <i class="fas fa-list me-2"></i> Tipos de Examen Médicos Existentes
+      </h6>
     </div>
     <div class="card-body">
       <div class="row g-2 align-items-end mb-3">
         <div class="col-md-3">
           <label class="form-label">Código</label>
-          <input class="form-control" [(ngModel)]="nuevoTipo.codigo" placeholder="Ej: HEMO-002">
+          <input
+            class="form-control"
+            [(ngModel)]="nuevoTipo.codigo"
+            placeholder="Ej: HEMO-002"
+          />
         </div>
         <div class="col-md-3">
           <label class="form-label">Nombre</label>
-          <input class="form-control" [(ngModel)]="nuevoTipo.nombre" placeholder="Ej: Hemograma Completo">
+          <input
+            class="form-control"
+            [(ngModel)]="nuevoTipo.nombre"
+            placeholder="Ej: Hemograma Completo"
+          />
         </div>
         <div class="col-md-3">
           <label class="form-label">Descripción</label>
-          <input class="form-control" [(ngModel)]="nuevoTipo.descripcion" placeholder="Breve descripción">
+          <input
+            class="form-control"
+            [(ngModel)]="nuevoTipo.descripcion"
+            placeholder="Breve descripción"
+          />
         </div>
         <div class="col-md-2">
           <label class="form-label">Urgencia por defecto</label>
           <select class="form-select" [(ngModel)]="nuevoTipo.urgencia_default">
-            <option *ngFor="let u of urgenciasDisponibles" [value]="u">{{ u }}</option>
+            <option *ngFor="let u of urgenciasDisponibles" [value]="u">
+              {{ u }}
+            </option>
           </select>
         </div>
         <div class="col-md-1 text-end">
@@ -67,13 +95,19 @@
               <td>{{ t.id }}</td>
               <td>{{ t.codigo }}</td>
               <td>{{ t.nombre }}</td>
-              <td>{{ t.urgencia_default || 'Normal' }}</td>
+              <td>{{ t.urgencia_default || "Rutina" }}</td>
               <td>
                 <span class="badge bg-success" *ngIf="t.activo">Activo</span>
-                <span class="badge bg-secondary" *ngIf="!t.activo">Inactivo</span>
+                <span class="badge bg-secondary" *ngIf="!t.activo"
+                  >Inactivo</span
+                >
               </td>
               <td>
-                <button class="btn btn-sm btn-outline-danger" (click)="confirmarEliminar(t, 'tipo')" title="Eliminar tipo de examen">
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="confirmarEliminar(t, 'tipo')"
+                  title="Eliminar tipo de examen"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -82,7 +116,9 @@
         </table>
       </div>
       <ng-template #sinTipos>
-        <p class="text-muted text-center my-3">No hay tipos de examen registrados.</p>
+        <p class="text-muted text-center my-3">
+          No hay tipos de examen registrados.
+        </p>
       </ng-template>
     </div>
   </div>
@@ -98,18 +134,26 @@
           <label class="form-label">Tipo de examen</label>
           <select class="form-select" [(ngModel)]="nuevo.tipo_examen">
             <option [ngValue]="null" disabled>Selecciona...</option>
-            <option *ngFor="let t of tiposExamen" [ngValue]="t.id">{{ t.nombre }}</option>
+            <option *ngFor="let t of tiposExamen" [ngValue]="t.id">
+              {{ t.nombre }}
+            </option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">Urgencia</label>
           <select class="form-select" [(ngModel)]="nuevo.urgencia">
-            <option *ngFor="let u of urgenciasDisponibles" [value]="u">{{ u }}</option>
+            <option *ngFor="let u of urgenciasDisponibles" [value]="u">
+              {{ u }}
+            </option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">Indicaciones específicas</label>
-          <input class="form-control" [(ngModel)]="nuevo.indicaciones_especificas" placeholder="Opcional">
+          <input
+            class="form-control"
+            [(ngModel)]="nuevo.indicaciones_especificas"
+            placeholder="Opcional"
+          />
         </div>
         <div class="col-md-1 text-end">
           <button class="btn btn-success w-100" (click)="crearExamen()">
@@ -143,12 +187,20 @@
             <tr *ngFor="let e of examenes">
               <td>{{ e.id }}</td>
               <td>{{ e.tipo_examen_nombre }}</td>
-              <td><span class="badge bg-warning text-dark">{{ e.urgencia }}</span></td>
-              <td><span class="badge bg-secondary">{{ e.estado }}</span></td>
-              <td>{{ e.resultados || '—' }}</td>
-              <td>{{ e.fecha_solicitud | date:'short' }}</td>
               <td>
-                <button class="btn btn-sm btn-outline-danger" (click)="confirmarEliminar(e, 'solicitud')" title="Eliminar solicitud">
+                <span class="badge bg-warning text-dark">{{ e.urgencia }}</span>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ e.estado }}</span>
+              </td>
+              <td>{{ e.resultados || "—" }}</td>
+              <td>{{ e.fecha_solicitud | date : "short" }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="confirmarEliminar(e, 'solicitud')"
+                  title="Eliminar solicitud"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -172,7 +224,12 @@
 </ng-template>
 
 <!-- ================== MODAL CONFIRMACIÓN ================== -->
-<div class="modal fade show" [class.d-block]="mostrarModalEliminar" tabindex="-1" role="dialog">
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalEliminar"
+  tabindex="-1"
+  role="dialog"
+>
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
@@ -183,7 +240,10 @@
       <div class="modal-body">
         <p>¿Estás seguro de que deseas eliminar este registro?</p>
         <div class="alert alert-warning">
-          <strong>{{ elementoSeleccionado?.nombre || 'Elemento seleccionado' }}</strong><br />
+          <strong>{{
+            elementoSeleccionado?.nombre || "Elemento seleccionado"
+          }}</strong
+          ><br />
           <small class="text-muted">ID: {{ elementoSeleccionado?.id }}</small>
         </div>
         <p class="text-danger small mb-0">
@@ -192,7 +252,11 @@
         </p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cancelarEliminar()">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarEliminar()"
+        >
           <i class="fas fa-times me-1"></i> Cancelar
         </button>
         <button type="button" class="btn btn-danger" (click)="eliminar()">
@@ -215,10 +279,19 @@
   >
     <div class="d-flex">
       <div class="toast-body">
-        <i class="fas" [ngClass]="t.tipo === 'success' ? 'fa-check-circle' : 'fa-times-circle'"></i>
+        <i
+          class="fas"
+          [ngClass]="
+            t.tipo === 'success' ? 'fa-check-circle' : 'fa-times-circle'
+          "
+        ></i>
         {{ t.mensaje }}
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="t.mostrar = false"></button>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        (click)="t.mostrar = false"
+      ></button>
     </div>
   </div>
 </div>

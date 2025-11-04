@@ -5,7 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ConsultaService } from '../../../services/consulta/consulta.service';
-import { ExamenMedicoService, ExamenMedico } from '../../../services/examen/examen-medico.service';
+import {
+  ExamenMedicoService,
+  ExamenMedico,
+} from '../../../services/examen/examen-medico.service';
 import { Consulta } from '../../../models/consulta/consulta.model';
 
 interface ToastMsg {
@@ -24,7 +27,7 @@ export class ConsultaExamenesComponent implements OnInit {
   consulta!: Consulta;
   examenes: ExamenMedico[] = [];
   tiposExamen: any[] = [];
-  urgenciasDisponibles = ['Normal', 'Urgente', 'Rutina'];
+  urgenciasDisponibles = ['Rutina', 'Urgente', 'Emergencia'];
   cargando = true;
 
   mostrarModalEliminar = false;
@@ -35,8 +38,8 @@ export class ConsultaExamenesComponent implements OnInit {
 
   nuevo = {
     tipo_examen: null as number | null,
-    urgencia: 'Normal',
-    indicaciones_especificas: ''
+    urgencia: 'Rutina',
+    indicaciones_especificas: '',
   };
 
   nuevoTipo = {
@@ -44,7 +47,7 @@ export class ConsultaExamenesComponent implements OnInit {
     nombre: '',
     descripcion: '',
     indicaciones: '',
-    urgencia_default: 'Rutina'
+    urgencia_default: 'Rutina',
   };
 
   constructor(
@@ -90,20 +93,33 @@ export class ConsultaExamenesComponent implements OnInit {
       this.mostrarToast('Completa el código y nombre del examen.', 'error');
       return;
     }
+    console.log('TIPOEXAMEN: ', this.nuevoTipo);
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
       'Content-Type': 'application/json',
     });
 
-    this.http.post(`${environment.apiUrl}/tipos-examen/`, this.nuevoTipo, { headers }).subscribe({
-      next: () => {
-        this.mostrarToast('Tipo de examen creado correctamente ✅', 'success');
-        this.nuevoTipo = { codigo: '', nombre: '', descripcion: '', indicaciones: '', urgencia_default: 'Rutina' };
-        this.cargarTipos();
-      },
-      error: () => this.mostrarToast('Error al crear tipo de examen ❌', 'error'),
-    });
+    this.http
+      .post(`${environment.apiUrl}/tipos-examen/`, this.nuevoTipo, { headers })
+      .subscribe({
+        next: () => {
+          this.mostrarToast(
+            'Tipo de examen creado correctamente ✅',
+            'success'
+          );
+          this.nuevoTipo = {
+            codigo: '',
+            nombre: '',
+            descripcion: '',
+            indicaciones: '',
+            urgencia_default: 'Rutina',
+          };
+          this.cargarTipos();
+        },
+        error: () =>
+          this.mostrarToast('Error al crear tipo de examen ❌', 'error'),
+      });
   }
 
   crearExamen(): void {
@@ -114,17 +130,24 @@ export class ConsultaExamenesComponent implements OnInit {
 
     const payload = {
       consulta: this.consulta.id,
-      paciente: (this.consulta as any).paciente || (this.consulta as any).historia_clinica?.paciente,
+      paciente:
+        (this.consulta as any).paciente ||
+        (this.consulta as any).historia_clinica?.paciente,
       medico: this.consulta.medico,
       tipo_examen: Number(this.nuevo.tipo_examen),
       urgencia: this.nuevo.urgencia,
-      indicaciones_especificas: this.nuevo.indicaciones_especificas
+      indicaciones_especificas: this.nuevo.indicaciones_especificas,
     };
+    console.log('EXAMEN: ', payload);
 
     this.srvExamen.crearExamen(payload).subscribe({
       next: () => {
         this.mostrarToast('Examen solicitado correctamente ✅', 'success');
-        this.nuevo = { tipo_examen: null, urgencia: 'Normal', indicaciones_especificas: '' };
+        this.nuevo = {
+          tipo_examen: null,
+          urgencia: 'Rutina',
+          indicaciones_especificas: '',
+        };
         this.cargarExamenes();
       },
       error: () => this.mostrarToast('Error al solicitar examen ❌', 'error'),
@@ -155,7 +178,8 @@ export class ConsultaExamenesComponent implements OnInit {
           this.mostrarToast('Tipo de examen eliminado 🗑️', 'success');
           this.cargarTipos();
         },
-        error: () => this.mostrarToast('Error al eliminar tipo de examen ❌', 'error'),
+        error: () =>
+          this.mostrarToast('Error al eliminar tipo de examen ❌', 'error'),
       });
     } else if (this.tipoEliminacion === 'solicitud') {
       this.srvExamen.eliminarSolicitudExamen(id).subscribe({
@@ -163,7 +187,8 @@ export class ConsultaExamenesComponent implements OnInit {
           this.mostrarToast('Solicitud de examen eliminada 🗑️', 'success');
           this.cargarExamenes();
         },
-        error: () => this.mostrarToast('Error al eliminar solicitud ❌', 'error'),
+        error: () =>
+          this.mostrarToast('Error al eliminar solicitud ❌', 'error'),
       });
     }
   }

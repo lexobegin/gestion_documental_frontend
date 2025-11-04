@@ -90,6 +90,8 @@ export class CitaListComponent implements OnInit {
     this.citaService.getCitas(params).subscribe({
       next: (response: ApiResponse<Cita>) => {
         this.citas = response.results;
+        console.log('CITAS: ', this.citas);
+
         this.totalCitas = response.count;
         this.totalPaginas = Math.ceil(response.count / this.limitePorPagina);
         this.paginaActual = pagina;
@@ -364,13 +366,32 @@ export class CitaListComponent implements OnInit {
     return new Date(fechaHora).toLocaleString('es-ES');
   }
 
-  formatearFecha(fecha: string | null | undefined): string {
+  formatearFecha2(fecha: string | null | undefined): string {
     if (!fecha) {
       return '--/--/----';
     }
     try {
       return new Date(fecha).toLocaleDateString('es-ES');
     } catch (error) {
+      return 'Fecha inválida';
+    }
+  }
+
+  formatearFecha(fecha: string | null | undefined): string {
+    if (!fecha) {
+      return '--/--/----';
+    }
+    try {
+      // Dividir el string en partes
+      const [year, month, day] = fecha.split('-').map(Number);
+      // Crear una fecha local sin conversión UTC
+      const dateObj = new Date(year, month - 1, day);
+      return dateObj.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
       return 'Fecha inválida';
     }
   }

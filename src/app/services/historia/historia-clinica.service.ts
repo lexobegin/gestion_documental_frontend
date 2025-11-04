@@ -16,6 +16,7 @@ export interface HistoriaClinica {
 export interface HistoriaClinicaCreate {
   paciente: number;
   observaciones_generales?: string;
+  activo: boolean;
 }
 
 @Injectable({
@@ -35,6 +36,7 @@ export class HistoriaClinicaService {
   createHistoriaClinica(
     historia: HistoriaClinicaCreate
   ): Observable<HistoriaClinica> {
+    console.log('Enviando al servidor:', historia);
     return this.http.post<HistoriaClinica>(this.apiUrl, historia);
   }
 
@@ -44,5 +46,12 @@ export class HistoriaClinicaService {
       httpParams = httpParams.set('paciente', params.paciente.toString());
     }
     return this.http.get<any>(this.apiUrl, { params: httpParams });
+  }
+
+  // Agregar método para obtener historias sin filtrar por activo
+  getAllHistoriasByPaciente(pacienteId: number): Observable<any> {
+    return this.http.get(
+      `${environment.apiUrl}/historias-clinicas/?paciente=${pacienteId}`
+    );
   }
 }

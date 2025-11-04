@@ -115,10 +115,7 @@ export class ConsultaCreateComponent implements OnInit {
 
       // Asignar datos básicos
       this.consulta.medico = this.medicoId;
-      // Aquí deberías buscar la historia_clínica del paciente
-      // Por ahora usamos un valor temporal
-      //this.consulta.historia_clinica = this.pacienteId;
-      // Buscar historia clínica activa del paciente
+
       this.buscarHistoriaClinicaActiva();
     });
   }
@@ -143,7 +140,7 @@ export class ConsultaCreateComponent implements OnInit {
           } else {
             // No hay historia clínica activa - CREAR UNA INMEDIATAMENTE
             console.log('No hay historia clínica activa, creando una nueva...');
-            //this.crearHistoriaClinicaInmediata();
+            this.crearHistoriaClinicaInmediata();
           }
         },
         error: (err) => {
@@ -155,35 +152,100 @@ export class ConsultaCreateComponent implements OnInit {
   }
 
   crearHistoriaClinicaInmediata(): void {
+    // Primero, buscar todas las historias clínicas del paciente (activas e inactivas)
+    this.historiaClinicaService
+      .getHistoriasClinicas({ paciente: this.pacienteId })
+      .subscribe({
+        next: (response: any) => {
+          console.log('Todas las historias del paciente:', response);
+
+          if (response.results && response.results.length > 0) {
+            // Ya existe al menos una historia clínica para este paciente
+            const historiaExistente = response.results[0];
+
+            if (historiaExistente.activo) {
+              // Usar la historia activa existente
+              this.consulta.historia_clinica = historiaExistente.id;
+              console.log(
+                'Usando historia clínica activa existente:',
+                historiaExistente.id
+              );
+            } else {
+              // Reactivar una historia existente inactiva
+              this.reactivarHistoriaClinica(historiaExistente.id);
+            }
+          } else {
+            // No existe ninguna historia clínica, crear una nueva
+            this.crearNuevaHistoriaClinica();
+          }
+        },
+        error: (err) => {
+          console.error('Error al buscar historias:', err);
+          // Intentar crear nueva historia como fallback
+          this.crearNuevaHistoriaClinica();
+        },
+      });
+  }
+
+  // Método para crear nueva historia clínica
+  crearNuevaHistoriaClinica(): void {
     const nuevaHistoria = {
       paciente: this.pacienteId,
-      observaciones_generales: `Historia clínica creada automáticamente - ${new Date().toLocaleDateString(
+      observaciones_generales: `Historia clínica creada desde consulta - ${new Date().toLocaleDateString(
         'es-ES'
       )}`,
+      activo: false,
     };
 
-    console.log('Creando historia clínica:', nuevaHistoria);
+    console.log('Creando NUEVA historia clínica:', nuevaHistoria);
 
     this.historiaClinicaService.createHistoriaClinica(nuevaHistoria).subscribe({
       next: (historiaCreada: any) => {
-        console.log('Historia clínica creada exitosamente:', historiaCreada);
+        console.log('Nueva historia clínica creada:', historiaCreada);
         if (historiaCreada && historiaCreada.id) {
           this.consulta.historia_clinica = historiaCreada.id;
           console.log(
-            'Historia clínica asignada al formulario:',
+            'Nueva historia asignada:',
             this.consulta.historia_clinica
           );
-        } else {
-          console.error('No se recibió ID de historia clínica');
-          this.error = 'Error al crear historia clínica: ID no recibido';
         }
       },
       error: (err: any) => {
-        console.error('Error al crear historia clínica:', err);
-        this.error =
-          'No se pudo crear la historia clínica. Verifique los datos del paciente.';
+        console.error('Error al crear nueva historia:', err);
+        this.manejarErrorHistoriaClinica(err);
       },
     });
+  }
+
+  // Método para reactivar historia existente (si es necesario)
+  reactivarHistoriaClinica(historiaId: number): void {
+    console.log('Reactivando historia existente:', historiaId);
+    // Aquí necesitarías un método en el servicio para actualizar la historia clínica
+    // Por ahora, simplemente usar la existente aunque esté inactiva
+    this.consulta.historia_clinica = historiaId;
+    console.log('Historia reactivada/assignada:', historiaId);
+  }
+
+  manejarErrorHistoriaClinica(err: any): void {
+    console.error('Error detallado:', err);
+
+    if (err.status === 400) {
+      if (err.error?.non_field_errors) {
+        this.error = `Error: ${err.error.non_field_errors.join(', ')}`;
+      } else if (err.error) {
+        // Mostrar todos los errores de validación
+        const errores = Object.values(err.error).flat();
+        this.error = `Errores de validación: ${errores.join(', ')}`;
+      } else {
+        this.error = 'Error al crear historia clínica. Datos inválidos.';
+      }
+    } else if (err.status === 404) {
+      this.error = 'Paciente no encontrado. Verifique el ID del paciente.';
+    } else {
+      this.error = 'Error del servidor al crear historia clínica.';
+    }
+
+    console.log('Error completo:', err);
   }
 
   // Método para cargar el historial clínico
@@ -212,6 +274,7 @@ export class ConsultaCreateComponent implements OnInit {
     const nuevaHistoria = {
       paciente: this.pacienteId,
       observaciones_generales: `Historia clínica creada automáticamente desde consulta - ${new Date().toLocaleDateString()}`,
+      activo: false,
     };
 
     console.log('CREATE HC:', nuevaHistoria);
@@ -445,54 +508,6 @@ export class ConsultaCreateComponent implements OnInit {
   }
 
   // Envío del formulario
-  guardar2(): void {
-    if (this.enviando) return;
-
-    this.enviando = true;
-    this.error = undefined;
-
-    // Detener grabación si está activa
-    if (this.grabando) {
-      this.detenerGrabacion();
-    }
-
-    // Validaciones básicas
-    if (!this.consulta.motivo_consulta) {
-      this.error = 'El motivo de la consulta es obligatorio';
-      this.enviando = false;
-      return;
-    }
-
-    this.consultaService.createConsulta(this.consulta).subscribe({
-      next: (consultaCreada) => {
-        this.enviando = false;
-        this.router.navigate(['/consultas'], {
-          queryParams: {
-            mensaje: `Consulta creada exitosamente para ${this.pacienteNombre} ${this.pacienteApellido}`,
-            tipo: 'success',
-          },
-        });
-      },
-      error: (err) => {
-        this.enviando = false;
-
-        if (err.status === 400) {
-          this.error = 'Datos inválidos. Verifica la información ingresada.';
-          if (err.error) {
-            const errores = Object.values(err.error).flat();
-            if (errores.length > 0) {
-              this.error = errores.join(', ');
-            }
-          }
-        } else {
-          this.error = 'Error al crear la consulta. Intenta nuevamente.';
-        }
-
-        console.error('Error creating consulta:', err);
-      },
-    });
-  }
-
   guardar(): void {
     if (this.enviando) return;
 
@@ -557,55 +572,6 @@ export class ConsultaCreateComponent implements OnInit {
       // Ya tiene historia clínica, crear directamente la consulta
       crearConsulta(this.consulta.historia_clinica);
     }
-  }
-
-  guardar3(): void {
-    if (this.enviando) return;
-
-    // Validaciones básicas
-    if (!this.consulta.motivo_consulta) {
-      this.error = 'El motivo de la consulta es obligatorio';
-      return;
-    }
-
-    // Verificar que tenemos historia clínica
-    if (
-      !this.consulta.historia_clinica ||
-      this.consulta.historia_clinica === 0
-    ) {
-      this.error =
-        'No se ha podido asignar una historia clínica. Intente nuevamente.';
-      return;
-    }
-
-    this.enviando = true;
-    this.error = undefined;
-
-    // Detener grabación si está activa
-    if (this.grabando) {
-      this.detenerGrabacion();
-    }
-
-    console.log(
-      'Enviando consulta con historia clínica:',
-      this.consulta.historia_clinica
-    );
-    console.log('Consulta ABC:', this.consulta);
-    this.consultaService.createConsulta(this.consulta).subscribe({
-      next: (consultaCreada) => {
-        console.log('Consulta creada exitosamente:', consultaCreada);
-        this.enviando = false;
-        this.router.navigate(['/consultas'], {
-          queryParams: {
-            mensaje: `Consulta creada exitosamente para ${this.pacienteNombre} ${this.pacienteApellido}`,
-            tipo: 'success',
-          },
-        });
-      },
-      error: (err: any) => {
-        this.manejarErrorCreacionConsulta(err);
-      },
-    });
   }
 
   // Agregar este método en la clase
