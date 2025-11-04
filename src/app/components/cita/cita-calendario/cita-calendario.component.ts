@@ -265,6 +265,7 @@ export class CitaCalendarioComponent implements OnInit {
 
     this.reprogCargando = true;
     this.mostrarModalHoras = false;
+    console.log('DATOS: ', datosActualizacion);
 
     this.citaService
       .updateCitaCalendar(this.citaSeleccionada.id, datosActualizacion)
