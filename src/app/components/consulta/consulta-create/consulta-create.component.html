@@ -8,6 +8,15 @@
               <i class="fas fa-file-medical me-2"></i>Crear Nueva Consulta
             </h5>
             <div>
+              <!-- Botón de historial clínico -->
+              <button
+                class="btn btn-info btn-sm me-2"
+                (click)="cargarHistorialClinico()"
+                [disabled]="!pacienteId"
+                title="Ver historial clínico del paciente"
+              >
+                <i class="fas fa-history me-1"></i> Historial
+              </button>
               <!-- Botón de control de voz -->
               <button
                 class="btn btn-warning btn-sm me-2"
@@ -42,6 +51,26 @@
             </p>
             <p class="mb-1"><strong>ID Paciente:</strong> {{ pacienteId }}</p>
             <p class="mb-0"><strong>ID Cita:</strong> {{ citaId || "N/A" }}</p>
+          </div>
+
+          <!-- Agregar esta alerta después de la información del paciente -->
+          <div
+            class="alert alert-light mb-4"
+            *ngIf="consulta.historia_clinica && consulta.historia_clinica !== 0"
+          >
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong>Historia Clínica asignada:</strong> ID
+            {{ consulta.historia_clinica }}
+          </div>
+
+          <div
+            class="alert alert-warning mb-4"
+            *ngIf="
+              !consulta.historia_clinica || consulta.historia_clinica === 0
+            "
+          >
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            <strong>Asignando historia clínica...</strong>
           </div>
 
           <!-- Panel de control de voz -->
@@ -296,6 +325,78 @@
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal/Sección de Historial Clínico -->
+<div
+  class="modal fade show d-block"
+  *ngIf="mostrarHistorial"
+  style="background-color: rgba(0, 0, 0, 0.5)"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-history me-2"></i>
+          Historial Clínico - {{ pacienteNombre }} {{ pacienteApellido }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="mostrarHistorial = false"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="cargandoHistorial" class="text-center">
+          <div class="spinner-border text-info" role="status">
+            <span class="visually-hidden">Cargando historial...</span>
+          </div>
+          <p class="mt-2">Cargando historial clínico...</p>
+        </div>
+
+        <div *ngIf="!cargandoHistorial">
+          <div
+            *ngIf="historiasClinicas.length === 0"
+            class="alert alert-warning"
+          >
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            No se encontró historial clínico para este paciente.
+          </div>
+
+          <div *ngFor="let historia of historiasClinicas" class="card mb-3">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <strong>
+                Historia #{{ historia.id }}
+                <span *ngIf="historia.activo" class="badge bg-success ms-2"
+                  >Activa</span
+                >
+              </strong>
+              <small class="text-muted">
+                {{ formatearFecha(historia.fecha_creacion) }}
+              </small>
+            </div>
+            <div class="card-body">
+              <p><strong>Observaciones Generales:</strong></p>
+              <p class="mb-0">
+                {{ historia.observaciones_generales || "Sin observaciones" }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="mostrarHistorial = false"
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   </div>

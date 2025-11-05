@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { RolService } from '../../../services/rol/rol.service';
 
 @Component({
@@ -8,21 +9,22 @@ import { RolService } from '../../../services/rol/rol.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './roles-create.component.html',
-  styleUrl: './roles-create.component.scss'
+  styleUrls: []
 })
 export class RolesCreateComponent {
-  nombre: string = '';
-  descripcion: string = '';
+  nombre = '';
+  descripcion = '';
   loading = false;
   success: string | null = null;
   error: string | null = null;
 
-  constructor(private rolService: RolService) { }
+  constructor(private rolService: RolService, private router: Router) {}
 
   crearRol() {
     this.loading = true;
     this.success = null;
     this.error = null;
+
     // Enviar el campo correcto 'nombre_rol' según backend
     this.rolService.create({ nombre_rol: this.nombre, descripcion: this.descripcion }).subscribe({
       next: () => {
@@ -36,5 +38,9 @@ export class RolesCreateComponent {
         this.loading = false;
       }
     });
+  }
+
+  volver() {
+    this.router.navigate(['/roles']);
   }
 }
