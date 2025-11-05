@@ -52,6 +52,13 @@ import { ConsultaListComponent } from './components/consulta/consulta-list/consu
 import { ConsultaCreateComponent } from './components/consulta/consulta-create/consulta-create.component';
 import { ConsultaUpdateComponent } from './components/consulta/consulta-update/consulta-update.component';
 
+
+// Gestionar Recetas - Alison
+import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
+import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
+import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
+
+
 export const routes: Routes = [
   {
     path: '',
@@ -111,6 +118,13 @@ export const routes: Routes = [
       { path: 'consultas/lista', component: ConsultaListComponent },
       { path: 'consulta-create', component: ConsultaCreateComponent },
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
+
+      // Recetas Médicas - Alison
+      { path: 'recetas', component: RecetaListComponent },
+      { path: 'recetas/crear', component: RecetaCreateComponent },
+      { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
+      
+      
 
       // Default
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

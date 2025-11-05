@@ -37,6 +37,8 @@ export class SidebarComponent {
         // 🔹 Corrección: ruta actualizada a /consultas/lista
         { title: 'Consulta', route: '/consultas/lista' },
         { title: 'Citas Medicas', route: '/citas' },
+        { title: 'Recetas', route: '/recetas' },
+        { title: 'Consentimientos', route: '/consentimientos' },
       ],
     },
     {

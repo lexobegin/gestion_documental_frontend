@@ -1,0 +1,105 @@
+<div class="container mt-4">
+  <!-- ENCABEZADO -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <h4 class="fw-bold text-success mb-0">
+        <i class="fas fa-pen me-2"></i> Editar Receta Médica
+      </h4>
+      <button class="btn btn-secondary" (click)="volver()">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form class="row g-3">
+        <!-- Consulta -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Consulta Médica</label>
+          <select class="form-select" [(ngModel)]="receta.id_consulta" name="consulta" disabled>
+            <option *ngFor="let c of consultasDisponibles" [value]="c.id">
+              Consulta #{{ c.id }} — {{ formatearFecha(c.fecha) }} — {{ c.paciente }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Paciente -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Paciente</label>
+          <input type="text" class="form-control" [(ngModel)]="receta.paciente" name="paciente" readonly />
+        </div>
+
+        <!-- Diagnóstico -->
+        <div class="col-md-12">
+          <label class="form-label fw-semibold">Diagnóstico <span class="text-danger">*</span></label>
+          <textarea class="form-control" rows="2" [(ngModel)]="receta.diagnostico" name="diagnostico"></textarea>
+        </div>
+
+        <!-- Medicamentos -->
+        <div class="col-12">
+          <label class="form-label fw-semibold">Medicamentos</label>
+          <div class="d-flex justify-content-end mb-2">
+            <button type="button" class="btn btn-sm btn-primary" (click)="agregarMedicamento()">
+              <i class="fas fa-plus me-1"></i> Agregar
+            </button>
+          </div>
+
+          <div *ngFor="let med of receta.detalles; let i = index" class="card border-light mb-3">
+            <div class="card-header bg-light fw-semibold">
+              Medicamento {{ i + 1 }}
+              <button type="button" class="btn btn-sm btn-danger float-end" (click)="eliminarMedicamento(i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <div class="card-body row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Nombre</label>
+                <input type="text" class="form-control" [(ngModel)]="med.nombre_medicamento" name="nombre{{ i }}" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">Dosis</label>
+                <input type="text" class="form-control" [(ngModel)]="med.dosis" name="dosis{{ i }}" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Frecuencia</label>
+                <input type="text" class="form-control" [(ngModel)]="med.frecuencia" name="frecuencia{{ i }}" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Duración</label>
+                <input type="text" class="form-control" [(ngModel)]="med.duracion" name="duracion{{ i }}" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Indicaciones</label>
+                <input type="text" class="form-control" [(ngModel)]="med.indicaciones" name="indicaciones{{ i }}" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="col-12">
+          <label class="form-label fw-semibold">Observaciones</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="receta.observaciones" name="observaciones"></textarea>
+        </div>
+
+        <!-- Firma -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Actualizar Firma Digital</label>
+          <input type="file" class="form-control" (change)="onFileSelected($event)" />
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTONES -->
+  <div class="d-flex justify-content-end mt-4 gap-2">
+    <button class="btn btn-secondary" (click)="volver()">
+      <i class="fas fa-times me-1"></i> Cancelar
+    </button>
+    <button class="btn btn-success" (click)="guardarCambios()">
+      <i class="fas fa-save me-1"></i> Guardar Cambios
+    </button>
+  </div>
+</div>
