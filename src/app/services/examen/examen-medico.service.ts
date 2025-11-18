@@ -34,19 +34,19 @@ export class ExamenMedicoService {
 
   constructor(private http: HttpClient) {}
 
-  /** 🧾 Listar exámenes por consulta */
+  /** Listar exámenes por consulta */
   getExamenesPorConsulta(consultaId: number): Observable<ExamenMedico[]> {
     return this.http.get<ExamenMedico[]>(
       `${this.apiUrlSolicitudes}por-consulta/${consultaId}/`
     );
   }
 
-  /** 🧪 Crear examen (usa endpoint solicitar-desde-consulta) */
+  /** Crear examen (usa endpoint solicitar-desde-consulta) */
   crearExamen(data: ExamenCrear): Observable<ExamenMedico> {
     const token = localStorage.getItem('auth_token');
 
     if (!token) {
-      alert('⚠️ No se encontró el token de autenticación. Inicia sesión nuevamente.');
+      alert(' No se encontró el token de autenticación. Inicia sesión nuevamente.');
       throw new Error('Token no encontrado');
     }
 
@@ -64,14 +64,14 @@ export class ExamenMedicoService {
     );
   }
 
-  /** 📋 Obtener tipos de examen activos para select */
+  /** Obtener tipos de examen activos para select */
   getTiposExamenSelect(): Observable<{ id: number; nombre: string }[]> {
     return this.http.get<{ id: number; nombre: string }[]>(
       `${environment.apiUrl}/select/tipos-examen/`
     );
   }
 
-  /** 🗑️ Eliminar un tipo de examen */
+  /** Eliminar un tipo de examen */
   eliminarTipoExamen(id: number): Observable<any> {
     const token = localStorage.getItem('auth_token');
     const headers = token
@@ -81,7 +81,7 @@ export class ExamenMedicoService {
     return this.http.delete(`${this.apiUrlTipos}${id}/`, { headers });
   }
 
-  /** 🗑️ Eliminar una solicitud de examen */
+  /** Eliminar una solicitud de examen */
   eliminarSolicitudExamen(id: number): Observable<any> {
     const token = localStorage.getItem('auth_token');
     const headers = token
