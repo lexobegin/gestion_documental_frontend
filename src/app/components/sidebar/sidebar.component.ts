@@ -28,16 +28,29 @@ export class SidebarComponent {
       children: [
         { title: 'Horario', route: '/horarios' },
         { title: 'Paciente', route: '/pacientes' },
+        { title: 'Agenda', route: '/agenda' },
+        { title: 'Citas Medicas', route: '/citas' },
       ],
     },
     {
       title: 'Historia Clinica',
       expanded: false,
       children: [
-        // 🔹 Corrección: ruta actualizada a /consultas/lista
+        // Corrección: ruta actualizada a /consultas/lista
         { title: 'Consulta', route: '/consultas/lista' },
-        { title: 'Citas Medicas', route: '/citas' },
-        { title: 'Recetas', route: '/recetas' },
+        { title: 'Receta', route: '/recetas' },
+        { title: 'Examen', route: '/examen' },
+        { title: 'Historial Medico', route: '/historial-medico' },
+        { title: 'Seguimiento', route: '/seguimiento' },
+      ],
+    },
+    {
+      title: 'Blockchain y Notificacion',
+      expanded: false,
+      children: [
+        // Corrección: ruta actualizada a /consultas/lista
+        { title: 'Auditoria', route: 'auditoria' },
+        { title: 'Notificacion', route: 'noticacion' },
         { title: 'Consentimientos', route: '/consentimientos' },
       ],
     },
@@ -49,6 +62,7 @@ export class SidebarComponent {
         { title: 'Backup/Restore', route: '/backups' },
       ],
     },
+    { title: 'Reporte', route: '/reporte', expanded: false, children: [] },
   ];
 
   toggleMenu(menu: any) {
