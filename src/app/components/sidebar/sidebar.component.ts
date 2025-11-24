@@ -22,6 +22,7 @@ export class SidebarComponent {
         { title: 'Especialidades', route: '/especialidades' },
       ],
     },
+
     {
       title: 'Agenda Medica',
       expanded: false,
@@ -32,28 +33,29 @@ export class SidebarComponent {
         { title: 'Citas Medicas', route: '/citas' },
       ],
     },
+
     {
       title: 'Historia Clinica',
       expanded: false,
       children: [
-        // Corrección: ruta actualizada a /consultas/lista
         { title: 'Consulta', route: '/consultas/lista' },
         { title: 'Receta', route: '/recetas' },
-        { title: 'Examen', route: '/examen' },
+        { title: 'Examen', route: '/historia-clinica/examenes' }, // ← CORREGIDO
         { title: 'Historial Medico', route: '/historial-medico' },
         { title: 'Seguimiento', route: '/seguimiento' },
       ],
     },
+
     {
       title: 'Blockchain y Notificacion',
       expanded: false,
       children: [
-        // Corrección: ruta actualizada a /consultas/lista
         { title: 'Auditoria', route: 'auditoria' },
         { title: 'Notificacion', route: 'noticacion' },
         { title: 'Consentimientos', route: '/consentimientos' },
       ],
     },
+
     {
       title: 'Sistema',
       expanded: false,
@@ -62,6 +64,7 @@ export class SidebarComponent {
         { title: 'Backup/Restore', route: '/backups' },
       ],
     },
+
     { title: 'Reporte', route: '/reporte', expanded: false, children: [] },
   ];
 

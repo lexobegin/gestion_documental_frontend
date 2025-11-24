@@ -53,11 +53,13 @@ import { ConsultaCreateComponent } from './components/consulta/consulta-create/c
 import { ConsultaUpdateComponent } from './components/consulta/consulta-update/consulta-update.component';
 import { ConsultaExamenesComponent } from './components/consulta/consulta-examenes/consulta-examenes.component';
 
-
 // Gestionar Recetas - Alison
 import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
+
+// *** NUEVO: GESTIÓN DE EXÁMENES MÉDICOS ***
+import { ExamenListComponent } from './components/examen/examen-list/examen-list.component';
 
 
 export const routes: Routes = [
@@ -99,18 +101,15 @@ export const routes: Routes = [
       { path: 'roles/editar/:id', component: RolesEditComponent },
       { path: 'permisos/crear', component: PermisosCreateComponent },
 
-      // Especialidades - Alison
+      // Especialidades
       { path: 'especialidades', component: EspecialidadListComponent },
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
-      {
-        path: 'especialidades/editar/:id',
-        component: EspecialidadUpdateComponent,
-      },
+      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
 
       // Bitácora
       { path: 'bitacora', component: BitacoraListComponent },
 
-      // Horarios Médicos - Alison
+      // Horarios Médicos
       { path: 'horarios', component: HorarioMedicoListComponent },
       { path: 'horarios/create', component: HorarioMedicoCreateComponent },
       { path: 'horarios/update/:id', component: HorarioMedicoUpdateComponent },
@@ -121,12 +120,13 @@ export const routes: Routes = [
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
       { path: 'consulta-examenes/:id', component: ConsultaExamenesComponent },
 
-      // Recetas Médicas - Alison
+      // Recetas Médicas
       { path: 'recetas', component: RecetaListComponent },
       { path: 'recetas/crear', component: RecetaCreateComponent },
       { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
-      
-      
+
+      // *** NUEVA RUTA PARA GESTIONAR EXÁMENES ***
+      { path: 'historia-clinica/examenes', component: ExamenListComponent },
 
       // Default
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

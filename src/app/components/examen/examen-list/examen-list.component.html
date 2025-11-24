@@ -1,0 +1,162 @@
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  
+  <h3 class="m-0">Gestión de Exámenes Médicos</h3>
+
+  <!-- CONTENEDOR DE BOTONES -->
+  <div class="d-flex gap-2">
+    <button class="btn btn-danger" (click)="descargarPDF()">
+      Exportar PDF 
+    </button>
+
+    <button class="btn btn-success" (click)="descargarExcel()">
+      Exportar Excel
+    </button>
+  </div>
+
+</div>
+
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="text-center p-4">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <!-- Tabla -->
+  <table class="table table-striped" *ngIf="!cargando">
+    <thead class="table-dark">
+      <tr>
+        <th>Paciente</th>
+        <th>Tipo Examen</th>
+        <th>Urgencia</th>
+        <th>Estado</th>
+        <th>Fecha Solicitud</th>
+        <th>Resultado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let ex of examenes || []">
+        <td>{{ ex.paciente_nombre }} {{ ex.paciente_apellido }}</td>
+        <td>{{ ex.tipo_examen_nombre }}</td>
+        <td>{{ ex.urgencia }}</td>
+
+        <td>
+          <span class="badge"
+                [class.bg-warning]="ex.estado == 'solicitado'"
+                [class.bg-success]="ex.estado == 'completado'">
+            {{ ex.estado }}
+          </span>
+        </td>
+
+        <td>{{ ex.fecha_solicitud | date:'short' }}</td>
+
+        <td>
+          <ng-container *ngIf="ex.estado === 'completado'; else sinRes">
+            ✔ Resultado cargado
+          </ng-container>
+          <ng-template #sinRes>—</ng-template>
+        </td>
+
+        <td>
+          <button 
+            *ngIf="ex.estado === 'solicitado'" 
+            class="btn btn-primary btn-sm" 
+            (click)="abrirModal(ex)">
+            Registrar Resultado
+          </button>
+
+          <button 
+            *ngIf="ex.estado === 'completado'" 
+            class="btn btn-secondary btn-sm"
+            (click)="abrirModal(ex)">
+            Ver Resultado
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ===================== MODAL ===================== -->
+
+<div *ngIf="mostrarModal" 
+     class="modal fade show d-block" 
+     style="background: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ examenSeleccionado?.estado === 'solicitado'
+              ? 'Registrar Resultado del Examen'
+              : 'Resultado del Examen' }}
+        </h5>
+
+        <button class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- PANEL INFORMATIVO CUANDO YA TIENE RESULTADO -->
+        <div *ngIf="examenSeleccionado?.estado === 'completado'" 
+             class="alert alert-success d-flex gap-2 align-items-center" role="alert">
+          <i class="bi bi-check-circle-fill" style="font-size: 1.7rem;"></i>
+          <div>
+            <strong>Resultado registrado correctamente.</strong><br>
+            Fecha del resultado: {{ examenSeleccionado?.fecha_resultado | date:'short' }}
+          </div>
+        </div>
+
+        <!-- INFO DEL EXAMEN -->
+        <div class="mb-3 p-3 border rounded bg-light">
+          <p class="mb-1"><strong>Paciente:</strong> {{ examenSeleccionado?.paciente_nombre }} {{ examenSeleccionado?.paciente_apellido }}</p>
+          <p class="mb-1"><strong>Tipo de Examen:</strong> {{ examenSeleccionado?.tipo_examen_nombre }}</p>
+          <p class="mb-1"><strong>Urgencia:</strong> {{ examenSeleccionado?.urgencia }}</p>
+          <p class="mb-1"><strong>Fecha de Solicitud:</strong> {{ examenSeleccionado?.fecha_solicitud | date:'fullDate' }}</p>
+        </div>
+
+        <form [formGroup]="resultadoForm">
+
+          <!-- Resultados -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Resultados</label>
+            <textarea rows="4" class="form-control"
+                      formControlName="resultados"
+                      [readonly]="examenSeleccionado?.estado === 'completado'"></textarea>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Observaciones</label>
+            <textarea rows="3" class="form-control"
+                      formControlName="observaciones"
+                      [readonly]="examenSeleccionado?.estado === 'completado'"></textarea>
+          </div>
+
+        </form>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+
+        <!-- SOLO aparece si está en modo registrar -->
+        <button 
+          *ngIf="examenSeleccionado?.estado === 'solicitado'"
+          class="btn btn-primary"
+          (click)="registrarResultado()">
+          Guardar Resultado
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
