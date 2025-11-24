@@ -50,7 +50,7 @@ export class SidebarComponent {
       children: [
         // Corrección: ruta actualizada a /consultas/lista
         { title: 'Auditoria', route: 'auditoria' },
-        { title: 'Notificacion', route: 'noticacion' },
+        { title: 'Notificacion', route: '/notificacion' },
         { title: 'Consentimientos', route: '/consentimientos' },
       ],
     },
