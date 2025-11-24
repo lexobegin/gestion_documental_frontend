@@ -57,6 +57,8 @@ import { ConsultaExamenesComponent } from './components/consulta/consulta-examen
 import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
+
+// Notificaciones (de la otra rama)
 import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
 import { NotificacionCreateComponent } from './components/notificacion/notificacion-create/notificacion-create.component';
 import { NotificacionUpdateComponent } from './components/notificacion/notificacion-update/notificacion-update.component';
@@ -76,13 +78,10 @@ export const routes: Routes = [
       { path: 'citas/editar/:id', component: CitaUpdateComponent },
       { path: 'citas/calendario', component: CitaCalendarioComponent },
 
-      // Citas
+      // Notificaciones (de la otra rama)
       { path: 'notificacion', component: NotificacionListComponent },
       { path: 'notificacion/crear', component: NotificacionCreateComponent },
-      {
-        path: 'notificacion/editar/:id',
-        component: NotificacionUpdateComponent,
-      },
+      { path: 'notificacion/editar/:id', component: NotificacionUpdateComponent },
 
       // Backups
       { path: 'backups', component: BackupListComponent },
@@ -108,18 +107,15 @@ export const routes: Routes = [
       { path: 'roles/editar/:id', component: RolesEditComponent },
       { path: 'permisos/crear', component: PermisosCreateComponent },
 
-      // Especialidades - Alison
+      // Especialidades
       { path: 'especialidades', component: EspecialidadListComponent },
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
-      {
-        path: 'especialidades/editar/:id',
-        component: EspecialidadUpdateComponent,
-      },
+      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
 
       // Bitácora
       { path: 'bitacora', component: BitacoraListComponent },
 
-      // Horarios Médicos - Alison
+      // Horarios Médicos
       { path: 'horarios', component: HorarioMedicoListComponent },
       { path: 'horarios/create', component: HorarioMedicoCreateComponent },
       { path: 'horarios/update/:id', component: HorarioMedicoUpdateComponent },
@@ -130,7 +126,7 @@ export const routes: Routes = [
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
       { path: 'consulta-examenes/:id', component: ConsultaExamenesComponent },
 
-      // Recetas Médicas - Alison
+      // Recetas Médicas (tus cambios)
       { path: 'recetas', component: RecetaListComponent },
       { path: 'recetas/crear', component: RecetaCreateComponent },
       { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
