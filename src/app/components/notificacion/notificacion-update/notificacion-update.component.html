@@ -1,0 +1,327 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-edit me-2"></i>Editar Notificación
+        </h5>
+        <a routerLink="/notificacion" class="btn btn-light btn-sm">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Cargando -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando notificación...</p>
+      </div>
+
+      <!-- Error de carga -->
+      <div *ngIf="!cargando && error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Formulario -->
+      <form
+        *ngIf="!cargando && !error"
+        #f="ngForm"
+        (ngSubmit)="guardar(f)"
+        novalidate
+      >
+        <!-- Información de Solo Lectura -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-muted mb-3">
+              <i class="fas fa-info-circle me-2"></i>Información del Sistema
+            </h6>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">ID de Notificación</label>
+              <p class="form-control-plaintext">{{ notificacion.id }}</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Fecha de Envío</label>
+              <p class="form-control-plaintext">
+                {{ formatearFecha(notificacion.fecha_envio) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información Editable -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-edit me-2"></i>Información Editable
+            </h6>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="usuario" class="form-label">
+              Usuario Destinatario <span class="text-danger">*</span>
+            </label>
+            <select
+              id="usuario"
+              class="form-select"
+              [(ngModel)]="notificacion.usuario"
+              name="usuario"
+              required
+              [class.is-invalid]="f.submitted && f.controls['usuario'].invalid"
+            >
+              <option *ngFor="let user of usuarios" [ngValue]="user.usuario.id">
+                {{ user.nombre_completo }} ({{ user.email }}) -
+                {{ user.estado }}
+              </option>
+            </select>
+            <div
+              class="invalid-feedback"
+              *ngIf="f.submitted && f.controls['usuario'].invalid"
+            >
+              Debe seleccionar un usuario destinatario.
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="tipo" class="form-label">
+              Tipo de Notificación <span class="text-danger">*</span>
+            </label>
+            <select
+              id="tipo"
+              class="form-select"
+              [(ngModel)]="notificacion.tipo"
+              name="tipo"
+              required
+              [class.is-invalid]="f.submitted && f.controls['tipo'].invalid"
+            >
+              <option
+                *ngFor="let tipo of tiposNotificacion"
+                [value]="tipo.value"
+              >
+                {{ tipo.label }}
+              </option>
+            </select>
+            <div
+              class="invalid-feedback"
+              *ngIf="f.submitted && f.controls['tipo'].invalid"
+            >
+              Debe seleccionar un tipo de notificación.
+            </div>
+          </div>
+
+          <div class="col-12 mb-3">
+            <label for="titulo" class="form-label">
+              Título <span class="text-danger">*</span>
+            </label>
+            <input
+              id="titulo"
+              type="text"
+              class="form-control"
+              [(ngModel)]="notificacion.titulo"
+              name="titulo"
+              required
+              minlength="2"
+              maxlength="200"
+              placeholder="Ingrese el título de la notificación"
+              [class.is-invalid]="f.submitted && f.controls['titulo'].invalid"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="f.submitted && f.controls['titulo'].invalid"
+            >
+              El título es requerido y debe tener al menos 2 caracteres.
+            </div>
+          </div>
+
+          <div class="col-12 mb-3">
+            <label for="mensaje" class="form-label">
+              Mensaje <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="mensaje"
+              class="form-control"
+              [(ngModel)]="notificacion.mensaje"
+              name="mensaje"
+              required
+              minlength="5"
+              rows="6"
+              placeholder="Escriba el mensaje completo de la notificación..."
+              [class.is-invalid]="f.submitted && f.controls['mensaje'].invalid"
+            ></textarea>
+            <div
+              class="invalid-feedback"
+              *ngIf="f.submitted && f.controls['mensaje'].invalid"
+            >
+              El mensaje es requerido y debe tener al menos 5 caracteres.
+            </div>
+            <div class="form-text d-flex justify-content-between">
+              <span>Mensaje detallado de la notificación.</span>
+              <span
+                [class.text-danger]="contadorCaracteres > 500"
+                [class.text-muted]="contadorCaracteres <= 500"
+              >
+                {{ contadorCaracteres }}/500 caracteres
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="form-check form-switch">
+              <input
+                id="leida"
+                class="form-check-input"
+                type="checkbox"
+                [(ngModel)]="notificacion.leida"
+                name="leida"
+                role="switch"
+              />
+              <label for="leida" class="form-check-label fw-bold">
+                Marcar como leída
+              </label>
+            </div>
+            <div class="form-text">
+              Si está activo, la notificación aparecerá como leída.
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos Adicionales -->
+        <div hidden class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-code me-2"></i>Datos Adicionales
+            </h6>
+          </div>
+          <div class="col-12 mb-3">
+            <label for="datos_adicionales" class="form-label">
+              Datos Adicionales (JSON)
+            </label>
+            <textarea
+              id="datos_adicionales"
+              class="form-control"
+              [(ngModel)]="datosAdicionalesTexto"
+              name="datos_adicionales"
+              rows="4"
+              placeholder='Ejemplo: {"cita_id": 123, "fecha": "2024-01-15", "ubicacion": "Consultorio A"}'
+              [class.is-invalid]="!datosAdicionalesValidos"
+            ></textarea>
+            <div class="invalid-feedback" *ngIf="!datosAdicionalesValidos">
+              El formato JSON no es válido. Por favor, verifique la sintaxis.
+            </div>
+            <div class="form-text">
+              Datos adicionales en formato JSON para información específica de
+              la notificación.
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensajes de Estado -->
+        <div
+          *ngIf="error"
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Error:</strong> {{ error }}
+          <button
+            type="button"
+            class="btn-close"
+            (click)="error = undefined"
+          ></button>
+        </div>
+
+        <div
+          *ngIf="mensaje"
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          <i class="fas fa-check-circle me-2"></i>
+          <strong>Éxito:</strong> {{ mensaje }}
+          <button
+            type="button"
+            class="btn-close"
+            (click)="mensaje = undefined"
+          ></button>
+        </div>
+
+        <!-- Vista Previa -->
+        <div class="card bg-light mb-4">
+          <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Vista Previa</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <strong class="text-primary">{{
+                notificacion.titulo || "[Sin título]"
+              }}</strong>
+              <span
+                class="badge ms-2"
+                [ngClass]="{
+                  'bg-primary': notificacion.tipo === 'cita',
+                  'bg-info': notificacion.tipo === 'resultado',
+                  'bg-warning': notificacion.tipo === 'seguimiento',
+                  'bg-secondary': notificacion.tipo === 'sistema',
+                  'bg-success': notificacion.tipo === 'receta',
+                  'bg-dark': notificacion.tipo === 'documento'
+                }"
+              >
+                {{ getTipoLabel(notificacion.tipo) }}
+              </span>
+              <span
+                class="badge ms-1"
+                [ngClass]="notificacion.leida ? 'bg-secondary' : 'bg-warning'"
+              >
+                {{ notificacion.leida ? "Leída" : "No leída" }}
+              </span>
+            </div>
+            <div class="mb-2">
+              <p class="mb-1">{{ notificacion.mensaje || "[Sin mensaje]" }}</p>
+            </div>
+            <div class="text-muted small">
+              <i class="fas fa-user me-1"></i>
+              Destinatario: {{ getUsuarioNombre(notificacion.usuario) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div
+          class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
+        >
+          <div>
+            <small class="text-muted">
+              <i class="fas fa-info-circle me-1"></i>
+              Los campos marcados con <span class="text-danger">*</span> son
+              obligatorios.
+            </small>
+          </div>
+          <div class="d-flex gap-2">
+            <a routerLink="/notificacion" class="btn btn-outline-secondary">
+              <i class="fas fa-times me-1"></i> Cancelar
+            </a>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="guardando || !datosAdicionalesValidos"
+            >
+              <i class="fas fa-save me-1" *ngIf="!guardando"></i>
+              <i class="fas fa-spinner fa-spin me-1" *ngIf="guardando"></i>
+              {{ guardando ? "Guardando..." : "Guardar Cambios" }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

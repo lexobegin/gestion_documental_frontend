@@ -1,0 +1,534 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-bell me-2"></i>Gestión de Notificaciones
+        </h5>
+        <button class="btn btn-primary" (click)="crear()">
+          <i class="fas fa-plus me-1"></i> Nueva notificación
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="row mb-4">
+        <!-- Buscador -->
+        <div class="col-md-4 mb-3">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por título, mensaje o usuario..."
+              [(ngModel)]="terminoBusqueda"
+              (keyup.enter)="buscar()"
+            />
+          </div>
+        </div>
+
+        <!-- Filtro por Tipo -->
+        <div class="col-md-3 mb-3">
+          <select
+            class="form-select"
+            [(ngModel)]="filtroTipo"
+            (change)="aplicarFiltros()"
+          >
+            <option *ngFor="let tipo of tiposNotificacion" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro por Estado -->
+        <div class="col-md-3 mb-3">
+          <select
+            class="form-select"
+            [(ngModel)]="filtroLeida"
+            (change)="aplicarFiltros()"
+          >
+            <option
+              *ngFor="let estado of estadosLectura"
+              [value]="estado.value"
+            >
+              {{ estado.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="col-md-2 mb-3">
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-outline-secondary"
+              (click)="limpiarFiltros()"
+              title="Limpiar filtros"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+            <button
+              class="btn btn-outline-info"
+              (click)="marcarTodasLeidas()"
+              title="Marcar todas como leídas"
+            >
+              <i class="fas fa-check-double"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Exportación -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-end align-items-center">
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-outline-danger btn-sm"
+                (click)="generarReportePDF()"
+                [disabled]="
+                  generandoReporte || todasNotificaciones.length === 0
+                "
+                title="Exportar a PDF"
+              >
+                <i class="fas fa-file-pdf me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                PDF
+              </button>
+              <button
+                class="btn btn-outline-success btn-sm"
+                (click)="generarReporteExcel()"
+                [disabled]="
+                  generandoReporte || todasNotificaciones.length === 0
+                "
+                title="Exportar a Excel"
+              >
+                <i class="fas fa-file-excel me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                Excel
+              </button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                (click)="generarReporteHTML()"
+                [disabled]="
+                  generandoReporte || todasNotificaciones.length === 0
+                "
+                title="Exportar a HTML"
+              >
+                <i class="fas fa-file-code me-1" *ngIf="!generandoReporte"></i>
+                <i
+                  class="fas fa-spinner fa-spin me-1"
+                  *ngIf="generandoReporte"
+                ></i>
+                HTML
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Exportación -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div
+            class="alert alert-info py-2 mb-0"
+            *ngIf="todasNotificaciones.length > 0"
+          >
+            <small>
+              <i class="fas fa-info-circle me-1"></i>
+              Los reportes incluirán
+              <strong>{{ todasNotificaciones.length }} notificaciones</strong>
+              con los filtros actuales
+            </small>
+          </div>
+          <div
+            class="alert alert-warning py-2 mb-0"
+            *ngIf="todasNotificaciones.length === 0 && !cargando"
+          >
+            <small>
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              No hay datos para generar reportes
+            </small>
+          </div>
+          <div class="alert alert-secondary py-2 mb-0" *ngIf="cargando">
+            <small>
+              <i class="fas fa-spinner fa-spin me-1"></i>
+              Cargando datos para exportación...
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados -->
+      <div *ngIf="cargando" class="mb-3 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando notificaciones...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando && notificaciones.length">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th width="60">ID</th>
+              <th>Usuario</th>
+              <th>Tipo</th>
+              <th>Título</th>
+              <th>Mensaje</th>
+              <th width="100">Estado</th>
+              <th width="150">Fecha Envío</th>
+              <th width="120" class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let notif of notificaciones; trackBy: trackById"
+              [class.table-active]="!notif.leida"
+            >
+              <td class="fw-bold">{{ notif.id }}</td>
+              <td>
+                <div class="d-flex flex-column">
+                  <span class="fw-semibold">{{
+                    notif.usuario_nombre || "Usuario"
+                  }}</span>
+                  <small class="text-muted">{{
+                    notif.usuario_email || "ID: " + notif.usuario
+                  }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getTipoBadgeClass(notif.tipo)">
+                  {{ getTipoLabel(notif.tipo) }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ notif.titulo }}</strong>
+              </td>
+              <td>
+                <span class="text-muted" title="{{ notif.mensaje }}">
+                  {{ formatearMensajeCorto(notif.mensaje) }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="notif.leida ? 'bg-secondary' : 'bg-warning'"
+                >
+                  {{ notif.leida ? "Leída" : "No leída" }}
+                </span>
+              </td>
+              <td>
+                <small class="text-muted">{{
+                  formatearFecha(notif.fecha_envio)
+                }}</small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button
+                    class="btn btn-outline-info"
+                    (click)="verDetalle(notif)"
+                    title="Ver detalles"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-primary"
+                    (click)="editar(notif.id)"
+                    title="Editar notificación"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-warning"
+                    (click)="marcarComoLeida(notif)"
+                    [disabled]="notif.leida"
+                    title="Marcar como leída"
+                  >
+                    <i class="fas fa-check" *ngIf="!notif.leida"></i>
+                    <i class="fas fa-check-double" *ngIf="notif.leida"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger"
+                    (click)="confirmarEliminar(notif)"
+                    title="Eliminar notificación"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div
+        *ngIf="!cargando && notificaciones.length"
+        class="d-flex justify-content-between align-items-center mt-4"
+      >
+        <div class="text-muted">
+          Mostrando {{ notificaciones.length }} de
+          {{ totalNotificaciones }} notificaciones
+        </div>
+        <nav *ngIf="totalPaginas > 1">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="paginaActual === 1">
+              <a
+                class="page-link"
+                (click)="cambiarPagina(paginaActual - 1)"
+                href="javascript:void(0)"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+
+            <li
+              *ngFor="let pagina of [].constructor(totalPaginas); let i = index"
+              class="page-item"
+              [class.active]="paginaActual === i + 1"
+            >
+              <a
+                class="page-link"
+                (click)="cambiarPagina(i + 1)"
+                href="javascript:void(0)"
+              >
+                {{ i + 1 }}
+              </a>
+            </li>
+
+            <li
+              class="page-item"
+              [class.disabled]="paginaActual === totalPaginas"
+            >
+              <a
+                class="page-link"
+                (click)="cambiarPagina(paginaActual + 1)"
+                href="javascript:void(0)"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!cargando && !notificaciones.length" class="text-center py-5">
+        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No se encontraron notificaciones</h5>
+        <p class="text-muted">
+          Intenta ajustar los filtros o crea una nueva notificación.
+        </p>
+        <button class="btn btn-primary" (click)="crear()">
+          <i class="fas fa-plus me-1"></i> Crear primera notificación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalEliminar"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar esta notificación?</p>
+        <div class="alert alert-warning">
+          <strong>{{ notificacionAEliminar?.titulo }}</strong
+          ><br />
+          <small class="text-muted"
+            >{{ getTipoLabel(notificacionAEliminar?.tipo || "") }} -
+            {{ notificacionAEliminar?.usuario_nombre }}</small
+          >
+        </div>
+        <p class="text-danger small">
+          <i class="fas fa-info-circle me-1"></i>
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarEliminar()"
+        >
+          <i class="fas fa-times me-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="eliminar()">
+          <i class="fas fa-trash me-1"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalEliminar"></div>
+
+<!-- Modal de Detalles de la Notificación -->
+<div
+  class="modal fade show"
+  [class.d-block]="mostrarModalDetalle"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-bell me-2"></i>Detalles de la Notificación
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="cerrarModalDetalle()"
+        ></button>
+      </div>
+      <div class="modal-body" *ngIf="notificacionSeleccionada">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información General</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">ID:</td>
+                <td>{{ notificacionSeleccionada.id }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Título:</td>
+                <td>
+                  <strong>{{ notificacionSeleccionada.titulo }}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Tipo:</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getTipoBadgeClass(notificacionSeleccionada.tipo)"
+                  >
+                    {{ getTipoLabel(notificacionSeleccionada.tipo) }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Estado:</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="
+                      notificacionSeleccionada.leida
+                        ? 'bg-secondary'
+                        : 'bg-warning'
+                    "
+                  >
+                    {{ notificacionSeleccionada.leida ? "Leída" : "No leída" }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">Información del Usuario</h6>
+            <table class="table table-sm table-borderless">
+              <tr>
+                <td class="fw-bold" style="width: 40%">Usuario ID:</td>
+                <td>{{ notificacionSeleccionada.usuario }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Nombre:</td>
+                <td>{{ notificacionSeleccionada.usuario_nombre || "—" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Email:</td>
+                <td>{{ notificacionSeleccionada.usuario_email || "—" }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Fecha Envío:</td>
+                <td>
+                  {{ formatearFecha(notificacionSeleccionada.fecha_envio) }}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mensaje Completo -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Mensaje Completo</h6>
+            <div class="alert alert-light border">
+              <p class="mb-0">{{ notificacionSeleccionada.mensaje }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos Adicionales -->
+        <div
+          class="row mt-3"
+          *ngIf="notificacionSeleccionada.datos_adicionales"
+        >
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Datos Adicionales</h6>
+            <pre class="bg-light p-3 border rounded small">{{
+              notificacionSeleccionada.datos_adicionales | json
+            }}</pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModalDetalle()"
+        >
+          <i class="fas fa-times me-1"></i> Cerrar
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning"
+          (click)="marcarComoLeida(notificacionSeleccionada!)"
+          [disabled]="notificacionSeleccionada?.leida"
+        >
+          <i class="fas fa-check me-1"></i>
+          {{
+            notificacionSeleccionada?.leida ? "Ya leída" : "Marcar como leída"
+          }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="editar(notificacionSeleccionada?.id)"
+        >
+          <i class="fas fa-edit me-1"></i> Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalDetalle"></div>

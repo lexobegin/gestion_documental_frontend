@@ -47,18 +47,19 @@ import { PacienteListComponent } from './components/paciente/paciente-list/pacie
 import { PacienteCreateComponent } from './components/paciente/paciente-create/paciente-create.component';
 import { PacienteUpdateComponent } from './components/paciente/paciente-update/paciente-update.component';
 
-// Consultas Médicas 
+// Consultas Médicas
 import { ConsultaListComponent } from './components/consulta/consulta-list/consulta-list.component';
 import { ConsultaCreateComponent } from './components/consulta/consulta-create/consulta-create.component';
 import { ConsultaUpdateComponent } from './components/consulta/consulta-update/consulta-update.component';
 import { ConsultaExamenesComponent } from './components/consulta/consulta-examenes/consulta-examenes.component';
 
-
 // Gestionar Recetas - Alison
 import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
-
+import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
+import { NotificacionCreateComponent } from './components/notificacion/notificacion-create/notificacion-create.component';
+import { NotificacionUpdateComponent } from './components/notificacion/notificacion-update/notificacion-update.component';
 
 export const routes: Routes = [
   {
@@ -74,6 +75,14 @@ export const routes: Routes = [
       { path: 'citas/crear', component: CitaCreateComponent },
       { path: 'citas/editar/:id', component: CitaUpdateComponent },
       { path: 'citas/calendario', component: CitaCalendarioComponent },
+
+      // Citas
+      { path: 'notificacion', component: NotificacionListComponent },
+      { path: 'notificacion/crear', component: NotificacionCreateComponent },
+      {
+        path: 'notificacion/editar/:id',
+        component: NotificacionUpdateComponent,
+      },
 
       // Backups
       { path: 'backups', component: BackupListComponent },
@@ -125,8 +134,6 @@ export const routes: Routes = [
       { path: 'recetas', component: RecetaListComponent },
       { path: 'recetas/crear', component: RecetaCreateComponent },
       { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
-      
-      
 
       // Default
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
