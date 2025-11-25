@@ -1,0 +1,157 @@
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-calendar-alt me-2"></i>Agenda de Citas
+        </h5>
+        <div>
+          <button
+            class="btn btn-light btn-sm me-2"
+            (click)="recargarCalendario()"
+          >
+            <i class="fas fa-sync-alt me-1"></i> Actualizar
+          </button>
+          <button hidden class="btn btn-light btn-sm" (click)="volverALista()">
+            <i class="fas fa-list me-1"></i> Vista Lista
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Estados -->
+      <div *ngIf="cargando" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando calendario...</p>
+      </div>
+
+      <div *ngIf="reprogCargando" class="alert alert-info mb-3">
+        <div class="d-flex align-items-center">
+          <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <strong>Reprogramando cita...</strong>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button
+          type="button"
+          class="btn-close float-end"
+          (click)="error = undefined"
+        ></button>
+      </div>
+
+      <!-- Instrucciones de uso -->
+      <div class="alert alert-info mb-3">
+        <h6 class="alert-heading">
+          <i class="fas fa-info-circle me-2"></i>Instrucciones
+        </h6>
+        <p class="mb-2">
+          <strong>Arrastrar y soltar:</strong> Haz clic en una cita y arrástrala
+          a una nueva fecha/hora para reprogramarla.
+        </p>
+        <p class="mb-0">
+          <strong>Cambiar duración:</strong> Arrastra los bordes de la cita para
+          ajustar su duración.
+        </p>
+      </div>
+
+      <!-- Leyenda de estados -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <div class="color-box bg-warning me-2"></div>
+              <small>Pendiente (arrastrable)</small>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="color-box bg-success me-2"></div>
+              <small>Confirmada (arrastrable)</small>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="color-box bg-danger me-2"></div>
+              <small>Cancelada (no arrastrable)</small>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="color-box bg-secondary me-2"></div>
+              <small>Realizada (no arrastrable)</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FullCalendar -->
+      <div class="calendar-container" *ngIf="!cargando">
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para seleccionar hora disponible -->
+  <div
+    *ngIf="mostrarModalHoras"
+    class="modal fade show d-block"
+    tabindex="-1"
+    style="background-color: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-clock me-2"></i>Seleccionar Hora
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            (click)="cerrarModal()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">
+            <strong>Fecha seleccionada:</strong>
+            {{ getFechaFormateada() }}
+          </p>
+
+          <div
+            *ngIf="horasDisponibles.length === 0"
+            class="alert alert-warning"
+          >
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            No hay horas disponibles para esta fecha.
+          </div>
+
+          <div
+            *ngIf="horasDisponibles.length > 0"
+            class="horas-disponibles-container"
+          >
+            <h6 class="mb-3">Horas disponibles:</h6>
+            <div class="row g-2">
+              <div *ngFor="let hora of horasDisponibles" class="col-4 col-sm-3">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary w-100 mb-2"
+                  (click)="seleccionarHora(hora)"
+                >
+                  {{ hora }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cerrarModal()"
+          >
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

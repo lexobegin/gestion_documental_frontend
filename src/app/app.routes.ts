@@ -65,6 +65,7 @@ import { ExamenListComponent } from './components/examen/examen-list/examen-list
 import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
 import { NotificacionCreateComponent } from './components/notificacion/notificacion-create/notificacion-create.component';
 import { NotificacionUpdateComponent } from './components/notificacion/notificacion-update/notificacion-update.component';
+import { AgendaCitaComponent } from './components/agenda/agenda-cita/agenda-cita.component';
 
 export const routes: Routes = [
   {
@@ -81,6 +82,9 @@ export const routes: Routes = [
       { path: 'citas/crear', component: CitaCreateComponent },
       { path: 'citas/editar/:id', component: CitaUpdateComponent },
       { path: 'citas/calendario', component: CitaCalendarioComponent },
+
+      // Agenda Cita
+      { path: 'agenda', component: AgendaCitaComponent },
 
       // Backups
       { path: 'backups', component: BackupListComponent },
