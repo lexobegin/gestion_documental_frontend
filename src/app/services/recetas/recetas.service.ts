@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Receta } from '../../models/recetas/receta.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class RecetasService {
 
@@ -15,15 +15,29 @@ export class RecetasService {
 
   constructor(private http: HttpClient) {}
 
-  // =======================
-  //        RECETAS
-  // =======================
+  private getHeaders() {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
+      'Content-Type': 'application/json',
+    });
+  }
+
+  // ==================== RECETAS ====================
+
   getRecetas(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
 
-  getReceta(id: number): Observable<Receta> {
-    return this.http.get<Receta>(`${this.apiUrl}${id}/`);
+  getRecetasPorConsulta(consultaId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?consulta=${consultaId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getRecetaById(id: number): Observable<Receta> {
+    return this.http.get<Receta>(`${this.apiUrl}${id}/`, {
+      headers: this.getHeaders()
+    });
   }
 
   createReceta(data: any): Observable<Receta> {
@@ -34,13 +48,14 @@ export class RecetasService {
     return this.http.put<Receta>(`${this.apiUrl}${id}/`, data);
   }
 
-  deleteReceta(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}${id}/`);
+  eliminarReceta(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}${id}/`, {
+      headers: this.getHeaders()
+    });
   }
 
-  // =======================
-  //   DETALLES DE RECETA
-  // =======================
+  // ======================= DETALLES =======================
+
   createDetalle(data: any): Observable<any> {
     return this.http.post(this.apiDetallesUrl, data);
   }
@@ -57,11 +72,9 @@ export class RecetasService {
     return this.http.get(`${this.apiDetallesUrl}?receta=${recetaId}`);
   }
 
-  // =======================
-  //        CONSULTAS
-  // =======================
+  // ======================= CONSULTAS =======================
+
   obtenerConsultas(): Observable<any> {
     return this.http.get<any>(this.apiConsultasUrl);
   }
-
 }

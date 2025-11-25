@@ -277,13 +277,20 @@
                     <i class="fas fa-edit"></i>
                   </button>
 
-                  <!-- NUEVO -->
+                  <!-- NUEVO BOTON DE EXAMENES -->
                   <button
                     class="btn btn-outline-success"
                     (click)="gestionarExamenes(consulta.id)"
                     title="Ver/crear exámenes médicos"
                   >
                     <i class="fas fa-vials"></i>
+                  </button>
+                  <!-- NUEVO BOTÓN DE RECETAS -->
+                  <button
+                     class="btn btn-outline-warning"
+                     (click)="gestionarRecetas(consulta.id)"
+                    title="Ver/crear receta médica">
+                    <i class="fas fa-prescription"></i>
                   </button>
                 </div>
               </td>

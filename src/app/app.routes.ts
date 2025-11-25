@@ -58,6 +58,7 @@ import { RecetaListComponent } from './components/Recetas-Alison/list/receta-lis
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
 
+
 // *** GESTIÓN DE EXÁMENES MÉDICOS ***
 import { ExamenListComponent } from './components/examen/examen-list/examen-list.component';
 import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
@@ -132,6 +133,7 @@ export const routes: Routes = [
       { path: 'consulta-create', component: ConsultaCreateComponent },
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
       { path: 'consulta-examenes/:id', component: ConsultaExamenesComponent },
+
 
       // Recetas
       { path: 'recetas', component: RecetaListComponent },

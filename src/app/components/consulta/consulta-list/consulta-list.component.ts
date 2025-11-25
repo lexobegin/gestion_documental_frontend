@@ -191,6 +191,11 @@ export class ConsultaListComponent implements OnInit {
     this.router.navigate(['/consulta-examenes', id]);
   }
 
+  // NUEVO MÉTODO para botón de Recetas Médicas
+  gestionarRecetas(id: number): void {
+  this.router.navigate(['/consultas/recetas', id]);
+}
+
   // ========== UTILIDADES ==========
   trackById(index: number, item: any): number {
     return item.id;
