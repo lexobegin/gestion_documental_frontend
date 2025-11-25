@@ -11,43 +11,6 @@
 
 <div *ngIf="!loading && !error" class="dashboard-wrapper" [class.dark-mode]="isDarkMode">
 
-  <!-- BARRA SUPERIOR -->
-  <div class="top-toolbar">
-    <div class="toolbar-left">
-      <div class="date-pill">
-        <mat-icon>calendar_today</mat-icon>
-        <span>{{ currentDate }}</span>
-      </div>
-
-      <div class="welcome-text">
-        Bienvenido, Dr. {{ userName }}
-      </div>
-    </div>
-
-    <div class="toolbar-actions">
-      <button mat-button class="date-filter-btn">
-        <mat-icon>date_range</mat-icon>
-        {{ selectedDateRange }}
-      </button>
-
-      <button mat-icon-button (click)="toggleDarkMode()">
-        <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
-      </button>
-
-      <button mat-icon-button [matBadge]="3" matBadgeColor="warn">
-        <mat-icon>notifications</mat-icon>
-      </button>
-
-      <button mat-icon-button (click)="refreshDashboard()">
-        <mat-icon>refresh</mat-icon>
-      </button>
-
-      <button mat-icon-button>
-        <mat-icon>account_circle</mat-icon>
-      </button>
-    </div>
-  </div>
-
   <!-- CONTENIDO PRINCIPAL — (AQUÍ DEBE ESTAR TODO EL RESTO) -->
   <div class="dashboard-content">
 

@@ -30,18 +30,18 @@ export class RecetaUpdateComponent implements OnInit {
   //   1. CARGAR RECETA REAL
   // ===========================
   cargarReceta(): void {
-    this.recetasService.getReceta(this.recetaId).subscribe({
-      next: (data) => {
-        console.log("🔵 Receta cargada:", data);
-        this.receta = data;
-      },
-      error: (err) => {
-        alert("❌ Error al cargar receta");
-        console.error(err);
-        this.router.navigate(['/recetas']);
-      },
-    });
-  }
+  this.recetasService.getRecetaById(this.recetaId).subscribe({
+    next: (data) => {
+      console.log("✔ Receta cargada:", data);
+      this.receta = data;
+    },
+    error: (err) => {
+      alert("❌ Error al cargar receta");
+      console.error(err);
+      this.router.navigate(['/recetas']);
+    }
+  });
+}
 
   // ===========================
   //   MANEJO DE MEDICAMENTOS

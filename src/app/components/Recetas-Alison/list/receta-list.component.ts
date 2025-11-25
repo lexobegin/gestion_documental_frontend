@@ -105,7 +105,7 @@ export class RecetaListComponent implements OnInit {
   eliminarReceta(id: number): void {
     if (!confirm('¿Seguro que deseas eliminar esta receta?')) return;
 
-    this.recetasService.deleteReceta(id).subscribe({
+    this.recetasService.eliminarReceta(id).subscribe({
       next: () => {
         this.recetas = this.recetas.filter((r) => r.id !== id);
       },
