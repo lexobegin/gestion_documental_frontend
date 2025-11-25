@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecetasService } from '../../../services/recetas/recetas.service';
-import { Receta } from '../../../models/recetas/receta.model';
 
 @Component({
   selector: 'app-receta-update',
@@ -12,97 +11,110 @@ import { Receta } from '../../../models/recetas/receta.model';
   templateUrl: './receta-update.component.html',
 })
 export class RecetaUpdateComponent implements OnInit {
-  consultasDisponibles = [
-    { id: 15, paciente: 'Carlos López', especialidad: 'Cardiología', fecha: '2025-10-23' },
-    { id: 2, paciente: 'Ana Rodríguez', especialidad: 'Neurología', fecha: '2025-10-22' },
-  ];
-
-  recetas = [
-    {
-      id: 1,
-      id_consulta: 15,
-      paciente: 'Carlos López',
-      diagnostico: 'Hipertensión arterial',
-      observaciones: 'Control de presión arterial y dieta balanceada.',
-      firmaDigital: null,
-      detalles: [
-        { nombre_medicamento: 'Losartán 50mg', dosis: '1 tableta', frecuencia: 'Cada 12 horas', duracion: '30 días', indicaciones: 'Tomar después de las comidas' },
-        { nombre_medicamento: 'Aspirina 100mg', dosis: '1 tableta', frecuencia: 'Cada 24 horas', duracion: '30 días', indicaciones: 'Tomar por las mañanas' }
-      ]
-    }
-  ];
 
   receta: any = null;
+  recetaId!: number;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private recetasService: RecetasService
+  ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.receta = this.recetas.find(r => r.id === id);
-
-    if (!this.receta) {
-      alert('⚠️ No se encontró la receta.');
-      this.router.navigate(['/recetas']);
-    }
+    this.recetaId = Number(this.route.snapshot.paramMap.get('id'));
+    this.cargarReceta();
   }
 
+  // ===========================
+  //   1. CARGAR RECETA REAL
+  // ===========================
+  cargarReceta(): void {
+    this.recetasService.getReceta(this.recetaId).subscribe({
+      next: (data) => {
+        console.log("🔵 Receta cargada:", data);
+        this.receta = data;
+      },
+      error: (err) => {
+        alert("❌ Error al cargar receta");
+        console.error(err);
+        this.router.navigate(['/recetas']);
+      },
+    });
+  }
+
+  // ===========================
+  //   MANEJO DE MEDICAMENTOS
+  // ===========================
   agregarMedicamento(): void {
     this.receta.detalles.push({
-      nombre_medicamento: '',
+      id: null,  // si es nuevo
+      medicamento: '',
       dosis: '',
       frecuencia: '',
       duracion: '',
       indicaciones: '',
+      _nuevo: true
     });
   }
 
   eliminarMedicamento(index: number): void {
+    const det = this.receta.detalles[index];
+
+    if (det.id) {
+      // si existe en BD → eliminar en backend
+      this.recetasService.deleteDetalle(det.id).subscribe({
+        next: () => console.log("🗑️ Detalle eliminado"),
+        error: (err) => console.error("❌ Error eliminando", err)
+      });
+    }
+
     this.receta.detalles.splice(index, 1);
   }
 
-  onFileSelected(event: any): void {
-    this.receta.firmaDigital = event.target.files[0];
-  }
-
+  // ===========================
+  //   GUARDAR CAMBIOS
+  // ===========================
   guardarCambios(): void {
-    // === VALIDACIONES ===
-    if (!this.receta.id_consulta) {
-      alert('⚠️ Debe seleccionar una consulta médica.');
-      return;
-    }
+    const payload = {
+      consulta: this.receta.consulta,
+      observaciones: this.receta.observaciones
+    };
 
-    if (!this.receta.diagnostico.trim()) {
-      alert('⚠️ Debe ingresar un diagnóstico.');
-      return;
-    }
+    // 1️⃣ Actualizar datos generales de la receta
+    this.recetasService.updateReceta(this.recetaId, payload).subscribe({
+      next: () => {
+        console.log("🟢 Receta actualizada.");
 
-    if (this.receta.detalles.length === 0) {
-      alert('⚠️ Debe agregar al menos un medicamento.');
-      return;
-    }
+        // 2️⃣ Actualizar / crear medicamentos
+        this.receta.detalles.forEach((d: any) => {
+          const detPayload = {
+            receta: this.recetaId,
+            medicamento: d.medicamento,
+            dosis: d.dosis,
+            frecuencia: d.frecuencia,
+            duracion: d.duracion,
+            indicaciones: d.indicaciones
+          };
 
-    const camposIncompletos = this.receta.detalles.some((det: any) =>
-      !det.nombre_medicamento.trim() ||
-      !det.dosis.trim() ||
-      !det.frecuencia.trim() ||
-      !det.duracion.trim()
-    );
+          if (d.id && !d._nuevo) {
+            // actualizar detalle existente
+            this.recetasService.updateDetalle(d.id, detPayload).subscribe();
+          } else if (d._nuevo) {
+            // crear detalle nuevo
+            this.recetasService.createDetalle(detPayload).subscribe();
+          }
+        });
 
-    if (camposIncompletos) {
-      alert('⚠️ Todos los campos de los medicamentos son obligatorios.');
-      return;
-    }
+        alert("✅ Receta actualizada correctamente");
+        this.router.navigate(['/recetas']);
+      },
 
-    // Firma no es obligatoria al editar, pero si se quiere actualizar:
-    if (this.receta.firmaDigital && !(this.receta.firmaDigital instanceof File)) {
-      alert('⚠️ La firma digital debe ser un archivo válido.');
-      return;
-    }
-
-    // === SI TODO ESTÁ OK ===
-    alert('✅ Cambios guardados correctamente.');
-    console.log('Receta actualizada:', this.receta);
-    this.router.navigate(['/recetas']);
+      error: (err) => {
+        console.error("❌ Error al actualizar receta:", err);
+        alert("Error al actualizar");
+      }
+    });
   }
 
   volver(): void {
@@ -111,10 +123,6 @@ export class RecetaUpdateComponent implements OnInit {
 
   formatearFecha(fecha?: string): string {
     if (!fecha) return '';
-    return new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    return new Date(fecha + "T00:00:00").toLocaleDateString('es-ES');
   }
 }

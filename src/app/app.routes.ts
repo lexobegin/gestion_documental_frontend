@@ -54,7 +54,7 @@ import { ConsultaUpdateComponent } from './components/consulta/consulta-update/c
 import { ConsultaExamenesComponent } from './components/consulta/consulta-examenes/consulta-examenes.component';
 
 // Recetas
-import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
+import { RecetaListComponent } from './components/Recetas-Alison/list/receta-list.component';
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
 

@@ -2,19 +2,22 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Receta, DetalleReceta } from '../../models/recetas/receta.model';
+import { Receta } from '../../models/recetas/receta.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RecetasService {
+
   private apiUrl = `${environment.apiUrl}/recetas/`;
-  private apiDetalleUrl = `${environment.apiUrl}/detalles-recetas/`;
-  private apiConsultasUrl = `${environment.apiUrl}/consultas/`; 
+  private apiDetallesUrl = `${environment.apiUrl}/detalles-receta/`; 
+  private apiConsultasUrl = `${environment.apiUrl}/consultas/`;
 
   constructor(private http: HttpClient) {}
 
-  // ======= CRUD Recetas =======
+  // =======================
+  //        RECETAS
+  // =======================
   getRecetas(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
@@ -23,11 +26,11 @@ export class RecetasService {
     return this.http.get<Receta>(`${this.apiUrl}${id}/`);
   }
 
-  createReceta(data: Receta): Observable<Receta> {
+  createReceta(data: any): Observable<Receta> {
     return this.http.post<Receta>(this.apiUrl, data);
   }
 
-  updateReceta(id: number, data: Receta): Observable<Receta> {
+  updateReceta(id: number, data: any): Observable<Receta> {
     return this.http.put<Receta>(`${this.apiUrl}${id}/`, data);
   }
 
@@ -35,21 +38,30 @@ export class RecetasService {
     return this.http.delete(`${this.apiUrl}${id}/`);
   }
 
-  // ======= CRUD Detalles =======
-  getDetalles(idReceta: number): Observable<DetalleReceta[]> {
-    return this.http.get<DetalleReceta[]>(`${this.apiDetalleUrl}?id_receta=${idReceta}`);
+  // =======================
+  //   DETALLES DE RECETA
+  // =======================
+  createDetalle(data: any): Observable<any> {
+    return this.http.post(this.apiDetallesUrl, data);
   }
 
-  createDetalle(data: DetalleReceta): Observable<DetalleReceta> {
-    return this.http.post<DetalleReceta>(this.apiDetalleUrl, data);
+  updateDetalle(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiDetallesUrl}${id}/`, data);
   }
 
   deleteDetalle(id: number): Observable<any> {
-    return this.http.delete(`${this.apiDetalleUrl}${id}/`);
+    return this.http.delete(`${this.apiDetallesUrl}${id}/`);
   }
 
-  // ======= Consultas (para selector de receta) =======
+  getDetallesByReceta(recetaId: number): Observable<any> {
+    return this.http.get(`${this.apiDetallesUrl}?receta=${recetaId}`);
+  }
+
+  // =======================
+  //        CONSULTAS
+  // =======================
   obtenerConsultas(): Observable<any> {
     return this.http.get<any>(this.apiConsultasUrl);
   }
+
 }
