@@ -47,7 +47,7 @@ import { PacienteListComponent } from './components/paciente/paciente-list/pacie
 import { PacienteCreateComponent } from './components/paciente/paciente-create/paciente-create.component';
 import { PacienteUpdateComponent } from './components/paciente/paciente-update/paciente-update.component';
 
-// Consultas Médicas 
+// Consultas Médicas
 import { ConsultaListComponent } from './components/consulta/consulta-list/consulta-list.component';
 import { ConsultaCreateComponent } from './components/consulta/consulta-create/consulta-create.component';
 import { ConsultaUpdateComponent } from './components/consulta/consulta-update/consulta-update.component';
@@ -60,7 +60,9 @@ import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta
 
 // *** GESTIÓN DE EXÁMENES MÉDICOS ***
 import { ExamenListComponent } from './components/examen/examen-list/examen-list.component';
-
+import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
+import { NotificacionCreateComponent } from './components/notificacion/notificacion-create/notificacion-create.component';
+import { NotificacionUpdateComponent } from './components/notificacion/notificacion-update/notificacion-update.component';
 
 export const routes: Routes = [
   {
@@ -68,7 +70,6 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
-
       // Dashboard
       { path: 'dashboard', component: DashboardComponent },
 
@@ -85,6 +86,14 @@ export const routes: Routes = [
       { path: 'autos', component: AutoListComponent },
       { path: 'autos/crear', component: AutoCreateComponent },
       { path: 'autos/editar/:id', component: AutoUpdateComponent },
+
+      // Notificaciones
+      { path: 'notificacion', component: NotificacionListComponent },
+      { path: 'notificacion/crear', component: NotificacionCreateComponent },
+      {
+        path: 'notificacion/editar/:id',
+        component: NotificacionUpdateComponent,
+      },
 
       // Usuarios
       { path: 'usuarios', component: UsuarioListComponent },
@@ -105,7 +114,10 @@ export const routes: Routes = [
       // Especialidades
       { path: 'especialidades', component: EspecialidadListComponent },
       { path: 'especialidades/crear', component: EspecialidadCreateComponent },
-      { path: 'especialidades/editar/:id', component: EspecialidadUpdateComponent },
+      {
+        path: 'especialidades/editar/:id',
+        component: EspecialidadUpdateComponent,
+      },
 
       // Bitácora
       { path: 'bitacora', component: BitacoraListComponent },
@@ -127,8 +139,8 @@ export const routes: Routes = [
       { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
 
       // *** GESTIÓN DE EXÁMENES MÉDICOS ***
-      { path: 'examen', component: ExamenListComponent },                         // Ruta directa
-      { path: 'historia-clinica/examenes', component: ExamenListComponent },      // Ruta dentro de Historia Clínica
+      { path: 'examen', component: ExamenListComponent }, // Ruta directa
+      { path: 'historia-clinica/examenes', component: ExamenListComponent }, // Ruta dentro de Historia Clínica
 
       // Default
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
