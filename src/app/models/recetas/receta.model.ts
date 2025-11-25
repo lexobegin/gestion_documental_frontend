@@ -1,7 +1,7 @@
 export interface DetalleReceta {
   id: number;
-  id_receta: number;
-  nombre_medicamento: string;
+  receta: number;               // FK según backend
+  medicamento: string;
   dosis: string;
   frecuencia: string;
   duracion: string;
@@ -10,11 +10,10 @@ export interface DetalleReceta {
 
 export interface Receta {
   id: number;
-  id_consulta: number;
+  consulta: number;             // el backend usa "consulta", no "id_consulta"
   fecha_receta: string;
   observaciones: string;
-  paciente: string;   // viene de consulta → paciente.nombre
-  medico: string;     // viene de consulta → medico.nombre
-  diagnostico: string; // consulta.diagnostico
-  detalles: DetalleReceta[];
+  paciente_nombre: string;      // así lo envía el serializer
+  medico_nombre: string;        // así lo envía el serializer
+  detalles: DetalleReceta[];    // viene read_only en el serializer
 }

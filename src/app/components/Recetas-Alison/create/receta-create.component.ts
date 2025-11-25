@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RecetasService } from '../../../services/recetas/recetas.service';
-import { Receta } from '../../../models/recetas/receta.model';
 
 @Component({
   selector: 'app-receta-create',
@@ -12,21 +11,23 @@ import { Receta } from '../../../models/recetas/receta.model';
   templateUrl: './receta-create.component.html',
 })
 export class RecetaCreateComponent implements OnInit {
+
   consultasDisponibles: any[] = [];
 
+  // Datos de la nueva receta
   nuevaReceta = {
-    id_consulta: '',
+    consulta: null as number | null,   // EL ÚNICO CAMPO QUE USA EL BACKEND
+    observaciones: '',                // EL OTRO CAMPO QUE USA EL BACKEND
+
+    // CAMPOS VISUALES (no se envían al backend en la receta)
     paciente: '',
-    diagnostico: '',
-    observaciones: '',
-    firmaDigital: null as File | null,
-    detalles: [] as any[],
+    detalles: [] as any[],            // Se enviarán al endpoint /detalles-receta/
   };
 
   constructor(
     private router: Router,
     private recetasService: RecetasService,
-    private cdr: ChangeDetectorRef // 🔹 NUEVO
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -38,21 +39,20 @@ export class RecetaCreateComponent implements OnInit {
       next: (data) => {
         this.consultasDisponibles = data.results ? data.results : data;
       },
-      error: (err) => console.error('Error al cargar consultas:', err),
+      error: (err) => console.error('❌ Error al cargar consultas:', err),
     });
   }
 
+  // Agregar medicamento visualmente
   agregarMedicamento(): void {
     this.nuevaReceta.detalles.push({
-      nombre_medicamento: '',
+      medicamento: '',
       dosis: '',
       frecuencia: '',
       duracion: '',
       indicaciones: '',
     });
-
-    console.log('Medicamento agregado:', this.nuevaReceta.detalles);
-    this.cdr.detectChanges(); // 🔹 FORZAR REFRESCO VISUAL
+    this.cdr.detectChanges();
   }
 
   eliminarMedicamento(index: number): void {
@@ -60,59 +60,66 @@ export class RecetaCreateComponent implements OnInit {
   }
 
   actualizarPaciente(): void {
-    const consultaId = Number(this.nuevaReceta.id_consulta);
-    const consulta = this.consultasDisponibles.find((c) => c.id === consultaId);
+    const consulta = this.consultasDisponibles.find(
+      (c) => c.id === Number(this.nuevaReceta.consulta)
+    );
     this.nuevaReceta.paciente = consulta ? consulta.paciente : '';
   }
 
-  onFileSelected(event: any): void {
-    this.nuevaReceta.firmaDigital = event.target.files[0];
-  }
-
   guardarReceta(): void {
-    if (!this.nuevaReceta.id_consulta) return alert('⚠️ Seleccione una consulta.');
-    if (!this.nuevaReceta.diagnostico.trim()) return alert('⚠️ Diagnóstico obligatorio.');
-    if (this.nuevaReceta.detalles.length === 0) return alert('⚠️ Agregue medicamentos.');
-
-    const camposIncompletos = this.nuevaReceta.detalles.some(
-      (d) =>
-        !d.nombre_medicamento.trim() ||
-        !d.dosis.trim() ||
-        !d.frecuencia.trim() ||
-        !d.duracion.trim()
-    );
-
-    if (camposIncompletos) {
-      alert('⚠️ Complete todos los campos del medicamento.');
+    if (!this.nuevaReceta.consulta) {
+      alert('⚠️ Seleccione una consulta.');
       return;
     }
 
-    const recetaPayload: Receta = {
-      ...(this.nuevaReceta as any),
-      id: 0,
-      fecha_receta: new Date().toISOString(),
-      medico: '',
+    // PAYLOAD REAL QUE ACEPTA EL BACKEND
+    const recetaPayload = {
+      consulta: Number(this.nuevaReceta.consulta),
+      observaciones: this.nuevaReceta.observaciones,
     };
 
+    console.log('🔵 Enviando receta:', recetaPayload);
+
+    // 1️⃣ Guardar receta primero
     this.recetasService.createReceta(recetaPayload).subscribe({
-      next: (res) => {
+      next: (recetaCreada) => {
+        console.log('🟢 Receta creada:', recetaCreada);
+
+        const recetaId = recetaCreada.id;
+
+        // 2️⃣ Guardar cada detalle (medicamento)
+        this.nuevaReceta.detalles.forEach((d) => {
+          const detallePayload = {
+            receta: recetaId,
+            medicamento: d.medicamento,
+            dosis: d.dosis,
+            frecuencia: d.frecuencia,
+            duracion: d.duracion,
+            indicaciones: d.indicaciones,
+          };
+
+          console.log('🟡 Guardando detalle:', detallePayload);
+
+          this.recetasService.createDetalle(detallePayload).subscribe({
+            error: (err) =>
+              console.error(' Error guardando detalle:', err),
+          });
+        });
+
         alert('✅ Receta registrada correctamente');
         this.router.navigate(['/recetas']);
       },
+
       error: (err) => {
-        console.error('❌ Error al guardar receta:', err);
-        alert('Error al guardar en el servidor.');
+        console.error('Error al guardar receta:', err);
+        alert('Error al guardar receta.');
       },
     });
   }
 
   formatearFecha(fecha?: string): string {
     if (!fecha) return '';
-    return new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    return new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES');
   }
 
   volver(): void {
