@@ -47,21 +47,20 @@ import { PacienteListComponent } from './components/paciente/paciente-list/pacie
 import { PacienteCreateComponent } from './components/paciente/paciente-create/paciente-create.component';
 import { PacienteUpdateComponent } from './components/paciente/paciente-update/paciente-update.component';
 
-// Consultas Médicas
+// Consultas Médicas 
 import { ConsultaListComponent } from './components/consulta/consulta-list/consulta-list.component';
 import { ConsultaCreateComponent } from './components/consulta/consulta-create/consulta-create.component';
 import { ConsultaUpdateComponent } from './components/consulta/consulta-update/consulta-update.component';
 import { ConsultaExamenesComponent } from './components/consulta/consulta-examenes/consulta-examenes.component';
 
-// Gestionar Recetas - Alison
+// Recetas
 import { RecetaListComponent } from './components/Recetas-Alison/list/list.component';
 import { RecetaCreateComponent } from './components/Recetas-Alison/create/receta-create.component';
 import { RecetaUpdateComponent } from './components/Recetas-Alison/update/receta-update.component';
 
-// Notificaciones (de la otra rama)
-import { NotificacionListComponent } from './components/notificacion/notificacion-list/notificacion-list.component';
-import { NotificacionCreateComponent } from './components/notificacion/notificacion-create/notificacion-create.component';
-import { NotificacionUpdateComponent } from './components/notificacion/notificacion-update/notificacion-update.component';
+// *** GESTIÓN DE EXÁMENES MÉDICOS ***
+import { ExamenListComponent } from './components/examen/examen-list/examen-list.component';
+
 
 export const routes: Routes = [
   {
@@ -69,6 +68,7 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
+
       // Dashboard
       { path: 'dashboard', component: DashboardComponent },
 
@@ -77,11 +77,6 @@ export const routes: Routes = [
       { path: 'citas/crear', component: CitaCreateComponent },
       { path: 'citas/editar/:id', component: CitaUpdateComponent },
       { path: 'citas/calendario', component: CitaCalendarioComponent },
-
-      // Notificaciones (de la otra rama)
-      { path: 'notificacion', component: NotificacionListComponent },
-      { path: 'notificacion/crear', component: NotificacionCreateComponent },
-      { path: 'notificacion/editar/:id', component: NotificacionUpdateComponent },
 
       // Backups
       { path: 'backups', component: BackupListComponent },
@@ -115,21 +110,25 @@ export const routes: Routes = [
       // Bitácora
       { path: 'bitacora', component: BitacoraListComponent },
 
-      // Horarios Médicos
+      // Horarios
       { path: 'horarios', component: HorarioMedicoListComponent },
       { path: 'horarios/create', component: HorarioMedicoCreateComponent },
       { path: 'horarios/update/:id', component: HorarioMedicoUpdateComponent },
 
-      // Consultas Médicas
+      // Consultas
       { path: 'consultas/lista', component: ConsultaListComponent },
       { path: 'consulta-create', component: ConsultaCreateComponent },
       { path: 'consulta-update/:id', component: ConsultaUpdateComponent },
       { path: 'consulta-examenes/:id', component: ConsultaExamenesComponent },
 
-      // Recetas Médicas (tus cambios)
+      // Recetas
       { path: 'recetas', component: RecetaListComponent },
       { path: 'recetas/crear', component: RecetaCreateComponent },
       { path: 'recetas/editar/:id', component: RecetaUpdateComponent },
+
+      // *** GESTIÓN DE EXÁMENES MÉDICOS ***
+      { path: 'examen', component: ExamenListComponent },                         // Ruta directa
+      { path: 'historia-clinica/examenes', component: ExamenListComponent },      // Ruta dentro de Historia Clínica
 
       // Default
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
