@@ -13,6 +13,7 @@ export interface Receta {
   consulta: number;             // el backend usa "consulta", no "id_consulta"
   fecha_receta: string;
   observaciones: string;
+
   paciente_nombre: string;      // así lo envía el serializer
   medico_nombre: string;        // así lo envía el serializer
   detalles: DetalleReceta[];    // viene read_only en el serializer

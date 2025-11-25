@@ -1,0 +1,501 @@
+<div class="container-fluid p-4" style="background-color: #f0f4f8; min-height: 100vh;">
+  <!-- Header -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <span class="fs-2 me-2">📋</span>
+          <h1 class="h4 mb-0">Recetas de la Consulta #{{ consulta?.id }}</h1>
+        </div>
+        <button class="btn btn-outline-secondary" (click)="volver()">
+          ← Volver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patient Info -->
+  <div class="card shadow-sm mb-4 bg-light" *ngIf="consulta">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Paciente:</strong> {{ consulta.paciente_nombre }}
+        </div>
+        <div class="col-md-4">
+          <strong>Médico:</strong> {{ consulta.medico_nombre }}
+        </div>
+        <div class="col-md-4">
+          <strong>Fecha consulta:</strong> {{ consulta.fecha_consulta | date:'dd/MM/yy, h:mm a' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Create New Prescription -->
+  <div class="card shadow-sm mb-4" *ngIf="!cargando">
+    <div class="card-header bg-primary text-white">
+      <h2 class="h5 mb-0">Crear nueva receta</h2>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label"><strong>Fecha receta</strong></label>
+          <input 
+            type="date" 
+            [(ngModel)]="nuevaReceta.fecha_receta" 
+            class="form-control form-control-sm"
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label"><strong>Observaciones</strong></label>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevaReceta.observaciones" 
+            placeholder="Observaciones generales..."
+            class="form-control form-control-sm"
+          />
+        </div>
+      </div>
+
+      <!-- Medications Section -->
+      <div class="mb-3">
+        <h3 class="h6 mb-2">Agregar Medicamentos</h3>
+        <div class="row g-2 mb-2">
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoDetalle.medicamento" 
+              placeholder="Medicamento"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoDetalle.dosis" 
+              placeholder="Dosis"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoDetalle.frecuencia" 
+              placeholder="Frecuencia"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoDetalle.duracion" 
+              placeholder="Duración"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="nuevoDetalle.indicaciones" 
+              placeholder="Indicaciones"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col-auto">
+            <button 
+              (click)="agregarMedicamentoTemp()" 
+              class="btn btn-success btn-sm"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        <!-- List of added medications -->
+        <div *ngIf="medicamentosTemp.length > 0; else noMedications" class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Medicamento</th>
+                <th>Dosis</th>
+                <th>Frecuencia</th>
+                <th>Duración</th>
+                <th>Indicaciones</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let med of medicamentosTemp; let i = index">
+                <td>{{ med.medicamento }}</td>
+                <td>{{ med.dosis }}</td>
+                <td>{{ med.frecuencia }}</td>
+                <td>{{ med.duracion }}</td>
+                <td>{{ med.indicaciones }}</td>
+                <td>
+                  <button 
+                    (click)="eliminarMedicamentoTemp(i)" 
+                    class="btn btn-sm btn-outline-danger"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noMedications>
+          <p class="text-muted small">No hay medicamentos en esta receta.</p>
+        </ng-template>
+      </div>
+
+      <button 
+        (click)="guardarRecetaCompleta()" 
+        class="btn btn-primary"
+      >
+        Crear Receta
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-4" *ngIf="!cargando">
+    <div class="card-header bg-secondary text-white">
+      <h2 class="h5 mb-0">Filtrar recetas</h2>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <label class="form-label"><strong>Buscar por fecha</strong></label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterDate" 
+            placeholder="YYYY-MM-DD"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <label class="form-label"><strong>Buscar por observaciones</strong></label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterObservations" 
+            placeholder="Buscar..."
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Existing Prescriptions -->
+  <div class="card shadow-sm" *ngIf="!cargando">
+    <div class="card-header bg-info text-white">
+      <h2 class="h5 mb-0">Recetas existentes</h2>
+    </div>
+    <div class="card-body">
+      <div *ngIf="filteredPrescriptions.length === 0" class="alert alert-warning">
+        No se encontraron recetas con los filtros aplicados
+      </div>
+
+      <div *ngFor="let receta of filteredPrescriptions" class="card mb-3 border-secondary">
+        <div class="card-body">
+          <!-- Prescription Header -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <p class="mb-1"><strong>ID:</strong> {{ receta.id }}</p>
+              <p class="mb-1"><strong>Fecha:</strong> {{ receta.fecha_receta }}</p>
+              <p class="mb-1"><strong>Observaciones:</strong> {{ receta.observaciones || '—' }}</p>
+            </div>
+            <div class="btn-group">
+              <button 
+                (click)="verDetalles(receta)" 
+                class="btn btn-sm btn-outline-primary"
+                title="Ver detalles"
+              >
+                👁️
+              </button>
+              <button 
+                (click)="editarReceta(receta)" 
+                class="btn btn-sm btn-outline-warning"
+                title="Editar"
+              >
+                ✏️
+              </button>
+              <button 
+                (click)="confirmarEliminar(receta, 'receta')" 
+                class="btn btn-sm btn-outline-danger"
+                title="Eliminar"
+              >
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          <!-- Medications Table -->
+          <div *ngIf="receta.detalles && receta.detalles.length > 0; else noMeds" class="table-responsive">
+            <table class="table table-sm table-striped table-bordered">
+              <thead class="table-dark">
+                <tr>
+                  <th>Medicamento</th>
+                  <th>Dosis</th>
+                  <th>Frecuencia</th>
+                  <th>Duración</th>
+                  <th>Indicaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let med of receta.detalles">
+                  <td>{{ med.medicamento }}</td>
+                  <td>{{ med.dosis }}</td>
+                  <td>{{ med.frecuencia }}</td>
+                  <td>{{ med.duracion }}</td>
+                  <td>{{ med.indicaciones }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #noMeds>
+            <p class="text-muted small">No hay medicamentos en esta receta.</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div *ngIf="recetaSeleccionada" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Detalles de Receta #{{ recetaSeleccionada.id }}</h5>
+        <button 
+          type="button" 
+          class="btn-close btn-close-white" 
+          (click)="cerrarModalDetalles()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Fecha:</strong> {{ recetaSeleccionada.fecha_receta }}</p>
+        <p><strong>Observaciones:</strong> {{ recetaSeleccionada.observaciones || 'Sin observaciones' }}</p>
+        <h6>Medicamentos ({{ detalles.length }}):</h6>
+        
+        <div *ngIf="detalles.length > 0; else noMedsView" class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Medicamento</th>
+                <th>Dosis</th>
+                <th>Frecuencia</th>
+                <th>Duración</th>
+                <th>Indicaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let med of detalles">
+                <td>{{ med.medicamento }}</td>
+                <td>{{ med.dosis }}</td>
+                <td>{{ med.frecuencia }}</td>
+                <td>{{ med.duracion }}</td>
+                <td>{{ med.indicaciones }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noMedsView>
+          <p class="text-muted">No hay medicamentos agregados</p>
+        </ng-template>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalles()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div *ngIf="modalEditarAbierto" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Editar Receta #{{ recetaEditando?.id }}</h5>
+        <button 
+          type="button" 
+          class="btn-close btn-close-white" 
+          (click)="cerrarModalEditar()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label"><strong>Fecha:</strong></label>
+          <input 
+            type="date" 
+            [(ngModel)]="editFecha" 
+            class="form-control form-control-sm"
+          />
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label"><strong>Observaciones:</strong></label>
+          <input 
+            type="text" 
+            [(ngModel)]="editObservaciones" 
+            placeholder="Observaciones..."
+            class="form-control form-control-sm"
+          />
+        </div>
+
+        <h6>Medicamentos:</h6>
+        <div class="row g-2 mb-2">
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="editNuevoMed.medicamento" 
+              placeholder="Medicamento"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="editNuevoMed.dosis" 
+              placeholder="Dosis"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="editNuevoMed.frecuencia" 
+              placeholder="Frecuencia"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="editNuevoMed.duracion" 
+              placeholder="Duración"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col">
+            <input 
+              type="text" 
+              [(ngModel)]="editNuevoMed.indicaciones" 
+              placeholder="Indicaciones"
+              class="form-control form-control-sm"
+            />
+          </div>
+          <div class="col-auto">
+            <button 
+              (click)="agregarMedEdit()" 
+              class="btn btn-success btn-sm"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="editMedicamentos.length > 0; else noMedsEdit" class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Medicamento</th>
+                <th>Dosis</th>
+                <th>Frecuencia</th>
+                <th>Duración</th>
+                <th>Indicaciones</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let med of editMedicamentos; let i = index">
+                <td>{{ med.medicamento }}</td>
+                <td>{{ med.dosis }}</td>
+                <td>{{ med.frecuencia }}</td>
+                <td>{{ med.duracion }}</td>
+                <td>{{ med.indicaciones }}</td>
+                <td>
+                  <button 
+                    (click)="quitarMedEdit(i)" 
+                    class="btn btn-sm btn-outline-danger"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noMedsEdit>
+          <p class="text-muted small">No hay medicamentos</p>
+        </ng-template>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalEditar()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="guardarCambiosReceta()">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div *ngIf="mostrarModalEliminar" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button 
+          type="button" 
+          class="btn-close btn-close-white" 
+          (click)="cancelarEliminar()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro de eliminar esta {{ tipoEliminacion }}?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelarEliminar()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="eliminar()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+  <div *ngFor="let toast of toasts" 
+       class="toast show mb-2" 
+       [class.border-success]="toast.tipo === 'success'"
+       [class.border-danger]="toast.tipo === 'error'"
+       [ngClass]="{'opacity-0': !toast.mostrar}"
+       style="transition: opacity 0.3s;">
+    <div class="toast-header" 
+         [class.bg-success]="toast.tipo === 'success'"
+         [class.bg-danger]="toast.tipo === 'error'"
+         [class.text-white]="true">
+      <strong class="me-auto">{{ toast.tipo === 'success' ? 'Éxito' : 'Error' }}</strong>
+      <button type="button" class="btn-close btn-close-white" (click)="toast.mostrar = false"></button>
+    </div>
+    <div class="toast-body">
+      {{ toast.mensaje }}
+    </div>
+  </div>
+</div>

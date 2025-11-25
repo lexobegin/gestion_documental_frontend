@@ -1,0 +1,260 @@
+<div *ngIf="loading" class="loading-container">
+  <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+  <p>Cargando datos...</p>
+</div>
+
+<div *ngIf="!loading && error" class="error-container">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <h3>Error al cargar el dashboard</h3>
+  <p>{{ error }}</p>
+</div>
+
+<div *ngIf="!loading && !error" class="dashboard-wrapper" [class.dark-mode]="isDarkMode">
+
+  <!-- BARRA SUPERIOR -->
+  <div class="top-toolbar">
+    <div class="toolbar-left">
+      <div class="date-pill">
+        <mat-icon>calendar_today</mat-icon>
+        <span>{{ currentDate }}</span>
+      </div>
+
+      <div class="welcome-text">
+        Bienvenido, Dr. {{ userName }}
+      </div>
+    </div>
+
+    <div class="toolbar-actions">
+      <button mat-button class="date-filter-btn">
+        <mat-icon>date_range</mat-icon>
+        {{ selectedDateRange }}
+      </button>
+
+      <button mat-icon-button (click)="toggleDarkMode()">
+        <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <button mat-icon-button [matBadge]="3" matBadgeColor="warn">
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="refreshDashboard()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+      <button mat-icon-button>
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL — (AQUÍ DEBE ESTAR TODO EL RESTO) -->
+  <div class="dashboard-content">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Bienvenido de vuelta, aquí está tu resumen de {{ selectedDateRange }}</p>
+      </div>
+
+      <div class="header-buttons">
+
+        <!-- Va PERFECTO -->
+        <button mat-raised-button color="primary" routerLink="/citas/crear">
+          <mat-icon>add</mat-icon>
+          Nueva Cita
+        </button>
+
+        <button mat-raised-button color="accent" routerLink="/pacientes/crear">
+          <mat-icon>person_add</mat-icon>
+          Nuevo Paciente
+        </button>
+
+        <button mat-raised-button color="warn" routerLink="/consulta-create">
+          <mat-icon>medical_services</mat-icon>
+          Nueva Consulta
+        </button>
+
+      </div>
+    </div>
+
+    
+    <!-- TARJETAS DE ESTADÍSTICAS -->
+    <div class="stats-grid">
+
+      <div class="stat-box consultas-box">
+        <div class="stat-icon-wrapper">
+          <mat-icon>medical_services</mat-icon>
+        </div>
+        <div class="stat-details">
+          <span class="stat-title">Consultas</span>
+          <span class="stat-number">
+            {{ data.resumen_mes?.total_consultas || data.resumen_general?.total_consultas || 0 }}
+          </span>
+          <span class="stat-trend positive">
+            <mat-icon>trending_up</mat-icon> +12% vs mes anterior
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-box citas-box">
+        <div class="stat-icon-wrapper">
+          <mat-icon>event_available</mat-icon>
+        </div>
+        <div class="stat-details">
+          <span class="stat-title">Citas</span>
+          <span class="stat-number">
+            {{ data.resumen_mes?.total_citas || data.resumen_general?.citas_mes || 0 }}
+          </span>
+          <span class="stat-trend positive">
+            <mat-icon>trending_up</mat-icon> +8% vs mes anterior
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-box pacientes-box">
+        <div class="stat-icon-wrapper">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="stat-details">
+          <span class="stat-title">Pacientes</span>
+          <span class="stat-number">
+            {{ data.resumen_mes?.pacientes_atendidos || data.resumen_general?.total_pacientes || 0 }}
+          </span>
+          <span class="stat-trend neutral">
+            <mat-icon>remove</mat-icon> Sin cambios
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GRÁFICAS -->
+    <div class="charts-grid">
+
+      <!-- Citas por estado -->
+      <div class="chart-box">
+        <div class="chart-header">
+          <div>
+            <h3>Citas por Estado</h3>
+            <p class="chart-subtitle">Distribución actual</p>
+          </div>
+          <button mat-icon-button>
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+        <div class="chart-body">
+          <canvas
+            *ngIf="data.graficas?.citas_por_estado"
+            baseChart
+            [data]="{
+              labels: data.graficas.citas_por_estado.labels,
+              datasets: [{
+                data: data.graficas.citas_por_estado.data,
+                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350'],
+                borderWidth: 0
+              }]
+            }"
+            [type]="'doughnut'">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Consultas últimos 7 días -->
+      <div class="chart-box" *ngIf="data.graficas?.consultas_ultimos_7_dias">
+        <div class="chart-header">
+          <div>
+            <h3>Tendencia de Consultas</h3>
+            <p class="chart-subtitle">Últimos 7 días</p>
+          </div>
+          <button mat-icon-button>
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+        <div class="chart-body">
+          <canvas
+            baseChart
+            [data]="{
+              labels: data.graficas.consultas_ultimos_7_dias.labels,
+              datasets: [{
+                label: 'Consultas',
+                data: data.graficas.consultas_ultimos_7_dias.data,
+                borderColor: '#2196F3',
+                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                fill: true,
+                tension: 0.4
+              }]
+            }"
+            [type]="'line'">
+          </canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABLA DE PRÓXIMAS CITAS -->
+    <div class="table-section" *ngIf="tipoUsuario === 'medico' && data.proximas_citas?.length > 0">
+      <div class="table-header">
+        <div>
+          <h3>Próximas Citas</h3>
+          <p>Tus próximas consultas programadas</p>
+        </div>
+        <button mat-raised-button color="primary">
+          <mat-icon>add</mat-icon>
+          Nueva Cita
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table mat-table [dataSource]="data.proximas_citas">
+
+          <ng-container matColumnDef="paciente">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="patient-info">
+                <div class="avatar">{{ row.paciente?.charAt(0) || 'P' }}</div>
+                <span>{{ row.paciente }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fecha">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let row">{{ row.fecha }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="hora">
+            <th mat-header-cell *matHeaderCellDef>Hora</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge badge-time">{{ row.hora }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="especialidad">
+            <th mat-header-cell *matHeaderCellDef>Especialidad</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge badge-specialty">{{ row.especialidad }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button color="primary">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="accent">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['paciente','fecha','hora','especialidad','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['paciente','fecha','hora','especialidad','acciones'];"></tr>
+
+        </table>
+      </div>
+    </div>
+
+  </div>

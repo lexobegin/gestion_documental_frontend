@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { AuthGuard } from './guards/auth/auth.guard';
-import { DashboardComponent } from './components/home/dashboard/dashboard.component';
+//import { DashboardComponent } from './components/home/dashboard/dashboard.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LoginComponent } from './components/auth/login/login.component';
 
 // Auto
@@ -73,6 +74,7 @@ export const routes: Routes = [
     children: [
       // Dashboard
       { path: 'dashboard', component: DashboardComponent },
+      
 
       // Citas
       { path: 'citas', component: CitaListComponent },
